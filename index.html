@@ -3,23 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>IPUNGG SHOP</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+
 :root{
   --bg:#05020f;
   --bg2:#0a0520;
   --purple:#9b30ff;
   --neon:#bf5fff;
   --neon2:#00f5ff;
+  --pink:#ff2d78;
   --card:#0f0825;
   --border:rgba(155,48,255,0.3);
   --text:#f0e6ff;
+  --sub:#8b7aaa;
 }
 
-*{margin:0;padding:0;box-sizing:border-box}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
 body{
   background:var(--bg);
@@ -28,65 +36,210 @@ body{
   overflow-x:hidden;
 }
 
-/* NAV */
+/* NAVBAR */
 .navbar{
   height:60px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   padding:0 20px;
+  border-bottom:1px solid var(--border);
+  background:#070312;
   position:sticky;
   top:0;
-  background:#070312;
-  border-bottom:1px solid var(--border);
+  z-index:100;
+}
+
+.logo-area{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
 }
 
 .logo-name{
-  font-family:'Orbitron';
+  font-family:'Orbitron',sans-serif;
   color:var(--neon);
+  font-weight:700;
 }
 
 .hamburger{
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--neon);
   width:40px;
   height:40px;
-  border-radius:10px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  background:rgba(155,48,255,0.12);
+  color:var(--neon);
+  font-size:22px;
 }
 
-/* CATEGORY */
+/* SIDE MENU */
+.side-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  z-index:998;
+  opacity:0;
+  pointer-events:none;
+  transition:0.3s;
+}
+
+.side-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.side-menu{
+  position:fixed;
+  top:0;
+  right:-320px;
+  width:280px;
+  height:100vh;
+  background:#090312;
+  border-left:1px solid var(--border);
+  z-index:999;
+  transition:0.3s;
+}
+
+.side-menu.open{
+  right:0;
+}
+
+.side-header{
+  padding:20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.side-title{
+  color:var(--neon);
+  font-family:'Orbitron',sans-serif;
+}
+
+.close-btn{
+  background:none;
+  border:none;
+  color:white;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.side-links{
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.side-link{
+  padding:14px;
+  border-radius:14px;
+  text-decoration:none;
+  color:white;
+  background:rgba(155,48,255,0.08);
+  border:1px solid rgba(155,48,255,0.15);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* BANNER */
+.banner-wrap img,
+.banner-wrap video{
+  width:100%;
+  max-height:300px;
+  object-fit:cover;
+  display:block;
+}
+
+/* SECTION */
+.section{
+  padding:20px 16px;
+}
+
+.section-title{
+  margin-bottom:14px;
+  color:var(--neon2);
+  font-size:12px;
+  letter-spacing:2px;
+}
+
+/* CATEGORY CARD */
 .cat-cards{
   display:flex;
   gap:12px;
   overflow:auto;
-  padding:10px 16px;
+  padding-bottom:8px;
 }
 
 .cat-card{
-  min-width:130px;
-  height:90px;
+  min-width:110px;
+  height:95px;
   border-radius:16px;
-  background:linear-gradient(135deg,rgba(155,48,255,.15),rgba(0,245,255,.08));
-  border:1px solid var(--border);
+  background:linear-gradient(
+    135deg,
+    rgba(155,48,255,0.12),
+    rgba(0,245,255,0.06)
+  );
+  border:1px solid rgba(155,48,255,0.2);
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  font-weight:700;
-  transition:.3s;
+  gap:8px;
+  cursor:pointer;
+  transition:0.3s;
 }
 
 .cat-card:hover{
-  transform:translateY(-5px);
-  box-shadow:0 0 20px rgba(155,48,255,.4);
+  transform:translateY(-6px);
+  box-shadow:0 0 30px rgba(155,48,255,0.4);
+}
+
+.cat-card-name{
+  font-size:12px;
+  font-weight:700;
+}
+
+/* FILTER */
+.cat-scroll{
+  display:flex;
+  gap:10px;
+  overflow:auto;
+}
+
+.cat-btn{
+  padding:8px 18px;
+  border-radius:30px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:white;
+  cursor:pointer;
+}
+
+.cat-btn.active{
+  background:var(--purple);
 }
 
 /* PRODUCTS */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  padding:16px;
+  gap:14px;
+  padding:16px 16px 100px;
 }
 
 .product-card{
@@ -94,16 +247,34 @@ body{
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
+  position:relative;
 }
 
-.prod-info{padding:10px}
+.prod-info{
+  padding:12px;
+}
+
+.prod-name{
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:8px;
+}
+
+.prod-price{
+  color:var(--neon);
+  margin-bottom:12px;
+  font-weight:700;
+}
 
 .btn-order{
   width:100%;
-  padding:10px;
-  background:linear-gradient(135deg,var(--purple),#6b00cc);
   border:none;
+  border-radius:10px;
+  padding:10px;
+  cursor:pointer;
+  background:linear-gradient(135deg,var(--purple),#6b00cc);
   color:white;
+  font-weight:700;
 }
 
 /* OVERLAY */
@@ -111,26 +282,30 @@ body{
   position:fixed;
   inset:0;
   display:none;
-  justify-content:center;
   align-items:center;
-  background:rgba(0,0,0,.8);
+  justify-content:center;
+  background:rgba(0,0,0,0.8);
+  z-index:999;
 }
 
-.overlay.show{display:flex}
+.overlay.show{
+  display:flex;
+}
 
 .overlay-box{
-  width:90%;
+  width:100%;
   max-width:400px;
   background:var(--bg2);
-  padding:20px;
-  border-radius:20px;
   border:1px solid var(--border);
+  border-radius:20px;
+  padding:20px;
 }
 
-input{
+.form-input{
   width:100%;
-  padding:10px;
-  margin-top:8px;
+  margin-top:6px;
+  margin-bottom:14px;
+  padding:12px;
   border-radius:10px;
   border:1px solid var(--border);
   background:#0d0820;
@@ -140,166 +315,152 @@ input{
 .btn-primary{
   width:100%;
   padding:12px;
-  margin-top:10px;
-  background:linear-gradient(135deg,var(--purple),var(--neon2));
   border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
   color:white;
   font-weight:700;
-  border-radius:10px;
+  cursor:pointer;
 }
 
-.qris-img{
-  width:200px;
-  display:block;
-  margin:10px auto;
-}
-
-/* TOAST */
 .toast{
   position:fixed;
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
   background:linear-gradient(135deg,var(--purple),var(--neon2));
-  padding:10px 20px;
+  color:white;
+  padding:12px 24px;
   border-radius:30px;
   display:none;
 }
-.toast.show{display:block}
+
+.toast.show{
+  display:block;
+}
+
+.qris-img{
+  width:220px;
+  display:block;
+  margin:20px auto;
+  border-radius:14px;
+}
+
 </style>
 </head>
 
 <body>
 
 <nav class="navbar">
-  <div class="logo-name">IPUNGG SHOP</div>
+  <div class="logo-area">
+    <div class="logo-icon">⚡</div>
+    <div class="logo-name" id="storeName">IPUNGG SHOP</div>
+  </div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
-<!-- CATEGORY -->
-<div class="cat-cards" id="catCards"></div>
+<div class="side-overlay" id="sideOverlay" onclick="toggleMenu()"></div>
 
-<!-- PRODUCTS -->
+<div class="side-menu" id="sideMenu">
+  <div class="side-header">
+    <div class="side-title">MENU</div>
+    <button class="close-btn" onclick="toggleMenu()">✕</button>
+  </div>
+
+  <div class="side-links">
+    <a class="side-link" id="linkWa">💬 WhatsApp Admin</a>
+    <a class="side-link" id="linkGroup">👥 Grup</a>
+    <a class="side-link" id="linkChannel">📢 Channel</a>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">✦ KATEGORI</div>
+  <div class="cat-cards" id="catCards"></div>
+</div>
+
 <div class="products-grid" id="productsGrid"></div>
 
 <!-- ORDER -->
 <div class="overlay" id="orderOverlay">
   <div class="overlay-box">
     <h3>ORDER</h3>
-    <div id="selProd"></div>
+    <div id="selProdName"></div>
 
     <input id="orderName" placeholder="Nama">
     <input id="orderDate" readonly>
 
-    <button class="btn-primary" onclick="nextPay()">LANJUT PAYMENT</button>
+    <button class="btn-primary" onclick="submitOrder()">LANJUT</button>
   </div>
 </div>
 
 <!-- PAYMENT -->
 <div class="overlay" id="paymentOverlay">
   <div class="overlay-box">
+    <h3>QRIS PAYMENT</h3>
 
-    <h3>PAYMENT QRIS</h3>
+    <img id="qrisImg" class="qris-img">
 
-    <img id="qrisImg" class="qris-img" src="URL_QRIS_KAMU">
+    <a id="downloadQris" class="btn-primary" download>DOWNLOAD QRIS</a>
 
-    <a id="downloadQris" class="btn-primary" download style="display:block;text-align:center">
-      DOWNLOAD QRIS
-    </a>
+    <input type="file" id="paymentProof">
 
-    <input type="file" id="proof">
-
-    <button class="btn-primary" onclick="sendWA()">KIRIM ADMIN</button>
-
+    <button class="btn-primary" onclick="sendPaymentProof()">KIRIM ADMIN</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script>
-let selectedProduct = null;
-let uploadedURL = "";
+<script type="module">
 
-const waAdmin = "6285198959920";
+let selectedProduct;
+let uploadedURL;
 
-function renderCat(){
-  const cats=["Game","Voucher","Premium","Tools"];
-
-  document.getElementById("catCards").innerHTML =
-  cats.map(c=>`<div class="cat-card">${c}</div>`).join("");
-}
-
-function renderProd(){
-  const p=[
-    {name:"Produk A",price:10000},
-    {name:"Produk B",price:20000}
-  ];
-
-  document.getElementById("productsGrid").innerHTML =
-  p.map(x=>`
-    <div class="product-card">
-      <div class="prod-info">
-        <div>${x.name}</div>
-        <div>Rp ${x.price}</div>
-        <button class="btn-order" onclick='openOrder(${JSON.stringify(x)})'>ORDER</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-function openOrder(p){
-  selectedProduct=p;
-  document.getElementById("selProd").innerText=p.name;
-  document.getElementById("orderDate").value=new Date().toLocaleDateString();
-  document.getElementById("orderOverlay").classList.add("show");
-}
-
-function nextPay(){
+function submitOrder(){
   document.getElementById("orderOverlay").classList.remove("show");
   document.getElementById("paymentOverlay").classList.add("show");
 }
 
-async function sendWA(){
+window.sendPaymentProof = async function(){
 
-  const file=document.getElementById("proof").files[0];
-  if(!file){return alert("Upload dulu");}
+const file=document.getElementById("paymentProof").files[0];
+if(!file) return;
 
-  const fd=new FormData();
-  fd.append("image",file);
+const fd=new FormData();
+fd.append("image",file);
 
-  const res=await fetch("https://api.imgbb.com/1/upload?key=API_KEY_KAMU",{method:"POST",body:fd});
-  const data=await res.json();
+const res=await fetch("https://api.imgbb.com/1/upload?key=API_IMGBB_KAMU",{method:"POST",body:fd});
+const data=await res.json();
 
-  uploadedURL=data.data.url;
+uploadedURL=data.data.url;
 
-  const msg=encodeURIComponent(
+const msg=encodeURIComponent(
 `🛒 ORDER BARU
-📦 Produk: ${selectedProduct.name}
-💰 Harga: Rp ${selectedProduct.price}
+📦 Produk: ${selectedProduct?.name}
+💰 Harga: Rp ${selectedProduct?.price}
 👤 Nama: ${document.getElementById("orderName").value}
 📅 Tanggal: ${document.getElementById("orderDate").value}
 
-💳 Payment: QRIS
+💳 Payment: QRIS ONLY
 📸 Bukti: ${uploadedURL}
-🔗 URL Bukti: ${uploadedURL}
-`
-  );
+🔗 URL: ${uploadedURL}`
+);
 
-  window.open(`https://wa.me/${waAdmin}?text=${msg}`,"_blank");
+window.open("https://wa.me/6285198959920?text="+msg);
+};
 
-  show("Terkirim");
-}
+window.filterCat=function(){};
 
-function show(t){
-  const x=document.getElementById("toast");
-  x.innerText=t;
-  x.classList.add("show");
-  setTimeout(()=>x.classList.remove("show"),2000);
-}
+window.toggleMenu=function(){
+document.getElementById("sideMenu").classList.toggle("open");
+document.getElementById("sideOverlay").classList.toggle("open");
+};
 
-renderCat();
-renderProd();
+window.showToast=function(t){
+alert(t);
+};
+
 </script>
 
 </body>
-</html>
+      </html>
