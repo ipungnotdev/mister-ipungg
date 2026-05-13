@@ -145,8 +145,8 @@ body{
 .prod-thumb{
   width:100%;
   aspect-ratio:1;
-  object-fit:contain;     /* ✅ FIX UTAMA: tidak kepotong */
-  background:#0a0520;     /* biar tidak kosong */
+  object-fit:contain;
+  background:#0a0520;
   padding:8px;
 }
 
@@ -278,6 +278,35 @@ body{
   50%{transform:translateY(-6px);}
   100%{transform:translateY(0px);}
 }
+
+/* =========================
+   UPLOAD BUTTON FIX
+========================= */
+.upload-btn{
+  display:block;
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:12px;
+  text-align:center;
+
+  background:linear-gradient(135deg,#9b30ff,#00f5ff);
+  color:white;
+
+  font-family:'Orbitron', sans-serif;
+  font-size:13px;
+
+  cursor:pointer;
+  border:1px solid rgba(155,48,255,0.4);
+
+  box-shadow:0 0 12px rgba(155,48,255,0.5);
+  transition:0.2s;
+}
+
+.upload-btn:hover{
+  transform:scale(1.03);
+  box-shadow:0 0 20px rgba(155,48,255,0.8);
+}
 </style>
 </head>
 
@@ -324,9 +353,15 @@ body{
 
     <h3>💳 QRIS</h3>
     <img id="qrisImg" class="qris">
+
     <a id="downloadQris" class="download" download>⬇ Download QRIS</a>
 
-    <input type="file" id="proof" class="input">
+    <!-- 🔥 FIX UPLOAD BUTTON -->
+    <label class="upload-btn">
+      📤 Upload Bukti Pembayaran
+      <input type="file" id="proof" hidden>
+    </label>
+
     <button class="btn" onclick="send()">KIRIM ADMIN 💖</button>
   </div>
 </div>
@@ -460,4 +495,4 @@ window.closeAll=()=>{
 </script>
 
 </body>
-      </html>
+  </html>
