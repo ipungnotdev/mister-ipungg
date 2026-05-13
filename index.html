@@ -240,53 +240,52 @@ body{
 }
 
 /* =========================
-   COPYRIGHT ANIMASI UNGU
+   COPYRIGHT (FIXED)
 ========================= */
 .copyright{
   text-align:center;
-  padding:20px;
-  margin-top:25px;
+  padding:30px 10px;
+  margin-top:80px; /* lebih ke bawah */
+
   font-family:'Orbitron', sans-serif;
   font-size:14px;
-  color:#c77dff;
+
+  color:#b07cff; /* ungu tua */
 
   position:relative;
 
   text-shadow:
-    0 0 5px #9b30ff,
-    0 0 10px #9b30ff,
-    0 0 20px #9b30ff;
+    0 0 6px rgba(155,48,255,0.6),
+    0 0 12px rgba(155,48,255,0.4);
 
-  animation:floating 3s ease-in-out infinite;
+  animation:floatSoft 4s ease-in-out infinite;
 }
 
-/* glow background */
+/* glow ungu tua */
 .copyright::before{
   content:"";
   position:absolute;
   left:50%;
   top:50%;
-  width:140px;
-  height:140px;
+  width:170px;
+  height:170px;
   transform:translate(-50%,-50%);
-  background:radial-gradient(circle, rgba(155,48,255,0.5), transparent 70%);
-  filter:blur(12px);
+
+  background:radial-gradient(
+    circle,
+    rgba(70,0,110,0.4),
+    transparent 70%
+  );
+
+  filter:blur(18px);
   z-index:-1;
-  animation:pulse 2s infinite;
 }
 
-/* floating */
-@keyframes floating{
+/* smooth floating (NO blink) */
+@keyframes floatSoft{
   0%{transform:translateY(0px);}
-  50%{transform:translateY(-8px);}
+  50%{transform:translateY(-6px);}
   100%{transform:translateY(0px);}
-}
-
-/* pulse glow */
-@keyframes pulse{
-  0%{opacity:0.4; transform:translate(-50%,-50%) scale(1);}
-  50%{opacity:0.9; transform:translate(-50%,-50%) scale(1.25);}
-  100%{opacity:0.4; transform:translate(-50%,-50%) scale(1);}
 }
 </style>
 </head>
