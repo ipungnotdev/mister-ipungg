@@ -21,6 +21,7 @@ body{
   background:var(--bg);
   color:white;
   font-family:'Rajdhani',sans-serif;
+  overflow-x:hidden;
 }
 
 /* NAV */
@@ -35,11 +36,15 @@ body{
   background:rgba(10,5,25,0.6);
   backdrop-filter:blur(10px);
   border-bottom:1px solid var(--border);
+  z-index:1000;
 }
 
 .logo{
   font-family:'Orbitron';
   color:var(--neon);
+  display:flex;
+  align-items:center;
+  gap:8px;
 }
 
 /* HAMBURGER */
@@ -48,16 +53,18 @@ body{
   background:none;
   border:none;
   color:var(--neon);
+  cursor:pointer;
 }
 
-/* SIDE MENU */
+/* DARK BACKGROUND FIX */
 .side-overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.6);
+  background:rgba(0,0,0,0.85); /* 🔥 lebih gelap */
   opacity:0;
   pointer-events:none;
   transition:.3s;
+  z-index:2000;
 }
 
 .side-overlay.open{
@@ -65,19 +72,34 @@ body{
   pointer-events:auto;
 }
 
+/* SIDE MENU */
 .side-menu{
   position:fixed;
   right:-300px;
   top:0;
-  width:260px;
+  width:270px;
   height:100vh;
   background:#0a0520;
   padding:20px;
   transition:.3s;
+  z-index:3000;
+  border-left:1px solid var(--border);
 }
 
 .side-menu.open{right:0}
 
+/* STORE HEADER DI MENU */
+.store-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-family:'Orbitron';
+  color:var(--neon);
+  margin-bottom:15px;
+  font-size:16px;
+}
+
+/* LINK */
 .side-link{
   display:block;
   padding:12px;
@@ -123,6 +145,7 @@ body{
   padding:12px;
 }
 
+/* CARD */
 .product-card{
   background:rgba(255,255,255,0.04);
   border:1px solid var(--border);
@@ -171,6 +194,7 @@ body{
   display:none;
   align-items:center;
   justify-content:center;
+  z-index:4000;
 }
 
 .overlay.show{display:flex}
@@ -204,17 +228,22 @@ body{
 
 <body>
 
+<!-- NAV -->
 <nav class="navbar">
-  <div class="logo" id="storeName">IPUNGG SHOP</div>
+  <div class="logo" id="storeName">🛒 IPUNGG SHOP</div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
 <!-- SIDE MENU -->
 <div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
+
 <div class="side-menu" id="menu">
-  <a class="side-link" id="wa">WhatsApp Admin</a>
-  <a class="side-link" id="group">Group</a>
-  <a class="side-link" id="channel">Channel</a>
+
+  <div class="store-head">🛍️ IPUNGG SHOP</div>
+
+  <a class="side-link" id="wa">💬 WhatsApp Admin</a>
+  <a class="side-link" id="group">👥 Group</a>
+  <a class="side-link" id="channel">📢 Channel</a>
 </div>
 
 <!-- BANNER -->
@@ -271,31 +300,25 @@ function render(){
 
   const s=store.settings||{};
 
-  document.getElementById("storeName").innerText=s.storeName||"SHOP";
+  document.getElementById("storeName").innerText="🛒 "+(s.storeName||"SHOP");
 
-  /* LINKS */
   document.getElementById("wa").href="https://wa.me/"+(s.urlAdmin||"");
   document.getElementById("group").href=s.urlGroup||"#";
   document.getElementById("channel").href=s.urlChannel||"#";
 
-  /* BANNER */
   document.getElementById("banner").innerHTML=
     s.banner?.includes(".mp4")
     ? `<video autoplay muted loop src="${s.banner}"></video>`
     : `<img src="${s.banner}">`;
 
-  /* QRIS FIX */
-  document.getElementById("qrisImg").src =
-    s.qrisUrl ||
-    "https://img2.pixhost.to/images/7838/725233706_elaina-1778564710301.jpg";
+  document.getElementById("qrisImg").src=
+    s.qrisUrl || "https://img2.pixhost.to/images/7838/725233706_elaina-1778564710301.jpg";
 
-  /* CATEGORY */
   const cats=Object.values(store.categories||{});
   document.getElementById("cats").innerHTML=
     `<div class="cat-card" onclick="filter('all')">ALL</div>`+
     cats.map(c=>`<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`).join("");
 
-  /* PRODUCTS */
   let all = Object.values(store.products||{});
 
   let p = active!="all"
@@ -367,4 +390,4 @@ window.send=async()=>{
 </script>
 
 </body>
-</html>
+  </html>
