@@ -5,74 +5,85 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IPUNGG SHOP</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
+:root{
+  --bg:#05020f;
+  --card:#0f0825;
+  --purple:#9b30ff;
+  --neon:#00f5ff;
+  --text:#fff;
+  --border:rgba(155,48,255,0.35);
+}
+
+/* BASE */
 body{
   margin:0;
-  background:#05020f;
-  color:white;
-  font-family:sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
 }
 
 /* NAV */
 .navbar{
   display:flex;
   justify-content:space-between;
-  padding:15px;
-  background:#0a0520;
+  align-items:center;
+  padding:14px;
+  background:#070312;
+  border-bottom:1px solid var(--border);
   position:sticky;
   top:0;
-  z-index:999;
+  z-index:1000;
+}
+
+.logo{
+  font-family:'Orbitron';
+  color:var(--neon);
+  text-shadow:0 0 10px var(--purple);
 }
 
 .hamburger{
   font-size:22px;
   background:none;
   border:none;
-  color:#00f5ff;
+  color:var(--neon);
 }
 
-/* MENU */
-.side-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  opacity:0;
-  pointer-events:none;
-}
-.side-overlay.open{
-  opacity:1;
-  pointer-events:auto;
+/* BANNER */
+.banner-wrap img,
+.banner-wrap video{
+  width:100%;
+  max-height:260px;
+  object-fit:cover;
+  border-bottom:2px solid var(--purple);
 }
 
-.side-menu{
-  position:fixed;
-  right:-300px;
-  top:0;
-  width:260px;
-  height:100%;
-  background:#120022;
-  transition:.3s;
-}
-.side-menu.open{right:0}
-
+/* CATEGORY */
 .cat-cards{
   display:flex;
   gap:12px;
-  overflow:auto;
-  padding:10px;
+  overflow-x:auto;
+  padding:12px;
 }
 
 .cat-card{
-  min-width:160px;
-  padding:18px;
+  min-width:170px;
+  padding:16px;
   border-radius:18px;
+
   background:linear-gradient(135deg,#2a0066,#120022);
-  border:2px solid #9b30ff;
-  font-weight:900;
+  border:2px solid var(--purple);
+
   text-align:center;
-  animation:float 2.5s infinite ease-in-out;
-  cursor:pointer;
-  transition:.2s;
+  font-weight:900;
+  letter-spacing:1px;
+
+  color:white;
+
+  transition:.25s;
+  animation:float 2.8s infinite ease-in-out;
 }
 
 @keyframes float{
@@ -82,22 +93,29 @@ body{
 
 .cat-card:hover{
   transform:scale(1.1);
-  box-shadow:0 0 25px #9b30ff;
+  box-shadow:0 0 25px var(--purple),0 0 40px #6b00ff;
+  border-color:var(--neon);
 }
 
-/* PRODUCT */
+/* PRODUCTS */
 .products{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  padding:10px;
+  gap:12px;
+  padding:12px;
 }
 
 .card{
-  background:#0f0825;
-  border:1px solid #9b30ff;
-  border-radius:12px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
   overflow:hidden;
+  transition:.25s;
+}
+
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 0 20px rgba(155,48,255,.5);
 }
 
 .card img{
@@ -106,43 +124,58 @@ body{
   object-fit:cover;
 }
 
+.card-body{
+  padding:10px;
+}
+
 .btn{
   width:100%;
   padding:10px;
-  background:#9b30ff;
+  background:linear-gradient(135deg,var(--purple),#6b00cc);
   border:none;
   color:white;
+  border-radius:10px;
 }
 
 /* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.8);
   display:none;
   align-items:center;
   justify-content:center;
+  background:rgba(0,0,0,.8);
+  z-index:999;
 }
 .overlay.show{display:flex}
 
 .box{
-  background:#120022;
+  background:#0a0520;
+  border:1px solid var(--purple);
   padding:20px;
-  border-radius:12px;
+  border-radius:16px;
   width:90%;
-}
-
-input{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
+  max-width:420px;
 }
 
 /* QRIS */
 .qris-img{
   width:200px;
   display:block;
-  margin:auto;
+  margin:10px auto;
+  border-radius:12px;
+  border:1px solid var(--purple);
+}
+
+/* INPUT */
+input{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#0b0515;
+  color:white;
 }
 
 /* TOAST */
@@ -151,7 +184,7 @@ input{
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
-  background:#9b30ff;
+  background:linear-gradient(135deg,var(--purple),var(--neon));
   padding:10px 20px;
   border-radius:20px;
   display:none;
@@ -164,37 +197,37 @@ input{
 <body>
 
 <div class="navbar">
-  <div>IPUNGG SHOP</div>
+  <div class="logo" id="storeName">IPUNGG SHOP</div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </div>
 
-<div class="side-overlay" id="ov" onclick="toggleMenu()"></div>
-<div class="side-menu" id="menu"></div>
+<div class="banner-wrap" id="banner"></div>
 
 <div class="cat-cards" id="cats"></div>
 
 <div class="products" id="products"></div>
 
 <!-- ORDER -->
-<div class="overlay" id="order">
+<div class="overlay" id="orderBox">
   <div class="box">
-    <h3>ORDER</h3>
+    <h3>🛒 ORDER</h3>
     <div id="pname"></div>
-    <input id="nama" placeholder="Nama">
-    <button class="btn" onclick="toPay()">LANJUT</button>
+    <input id="name" placeholder="Nama">
+    <button class="btn" onclick="next()">LANJUT</button>
   </div>
 </div>
 
 <!-- PAYMENT -->
-<div class="overlay" id="pay">
+<div class="overlay" id="payBox">
   <div class="box">
-    <h3>QRIS</h3>
+    <h3>💳 QRIS PAYMENT</h3>
+
     <img id="qrisImg" class="qris-img">
     <a id="qrisDl" class="btn" download>DOWNLOAD QRIS</a>
 
-    <input type="file" id="bukti">
+    <input type="file" id="proof">
 
-    <button class="btn" onclick="send()">KIRIM</button>
+    <button class="btn" onclick="send()">KIRIM ADMIN</button>
   </div>
 </div>
 
@@ -222,22 +255,33 @@ onValue(ref(db,"store"),snap=>{
 function render(){
   const s=store.settings||{};
 
+  // STORE NAME
+  document.getElementById("storeName").innerText=s.storeName||"SHOP";
+
+  // BANNER FIX
+  document.getElementById("banner").innerHTML =
+    s.banner?.includes(".mp4")
+    ? `<video autoplay muted loop src="${s.banner}"></video>`
+    : `<img src="${s.banner}">`;
+
   // QRIS FIX
   document.getElementById("qrisImg").src = s.qrisUrl || "";
   document.getElementById("qrisDl").href = s.qrisUrl || "";
 
+  // CATEGORY
   const cats=Object.values(store.categories||{});
   document.getElementById("cats").innerHTML=cats.map(c=>
     `<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`
   ).join("");
 
+  // PRODUCTS
   let p=Object.values(store.products||{});
   if(active!="all")p=p.filter(x=>x.category==active);
 
   document.getElementById("products").innerHTML=p.map(x=>
     `<div class="card">
       <img src="${x.thumbnail||''}">
-      <div style="padding:10px">
+      <div class="card-body">
         <div>${x.name}</div>
         <div>Rp ${x.price}</div>
         <button class="btn" onclick='order(${JSON.stringify(x)})'>ORDER</button>
@@ -251,17 +295,16 @@ window.filter=(c)=>{active=c;render();};
 window.order=(p)=>{
   selected=p;
   document.getElementById("pname").innerText=p.name;
-  document.getElementById("order").classList.add("show");
+  document.getElementById("orderBox").classList.add("show");
 };
 
-window.toPay=()=>{
-  document.getElementById("order").classList.remove("show");
-  document.getElementById("pay").classList.add("show");
+window.next=()=>{
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.add("show");
 };
 
 window.send=async()=>{
-  const file=document.getElementById("bukti").files[0];
-
+  const file=document.getElementById("proof").files[0];
   const fd=new FormData();
   fd.append("image",file);
 
@@ -270,31 +313,27 @@ window.send=async()=>{
   const img=j?.data?.url||"-";
 
   const msg=encodeURIComponent(
-`🛒 ORDER
+`🛒 ORDER BARU
 
 📦 ${selected.name}
 💰 Rp ${selected.price}
-📸 ${img}`
+📸 ${img}
+
+💳 QRIS: ${store.settings.qrisUrl}`
   );
 
   window.open("https://wa.me/"+store.settings.urlAdmin+"?text="+msg);
 };
 
-window.toggleMenu=()=>{
-  document.getElementById("menu").classList.toggle("open");
-  document.getElementById("ov").classList.toggle("open");
-};
-
-// FIX BACK BUTTON NO EXIT
+// BACK FIX NO EXIT
 history.pushState(null,null,location.href);
 window.addEventListener("popstate",()=>{
-  document.getElementById("menu").classList.remove("open");
-  document.getElementById("order").classList.remove("show");
-  document.getElementById("pay").classList.remove("show");
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.remove("show");
   history.pushState(null,null,location.href);
 });
 
 </script>
 
 </body>
-</html>
+  </html>
