@@ -23,6 +23,7 @@ body{
   font-family:'Rajdhani',sans-serif;
 }
 
+/* NAV */
 .navbar{
   height:60px;
   display:flex;
@@ -51,6 +52,7 @@ body{
   color:var(--neon);
 }
 
+/* MENU */
 .side-overlay{
   position:fixed;
   inset:0;
@@ -98,6 +100,7 @@ body{
   text-decoration:none;
 }
 
+/* BANNER */
 .banner-wrap img{
   width:95%;
   margin:10px auto;
@@ -107,6 +110,7 @@ body{
   object-fit:cover;
 }
 
+/* CATEGORY */
 .cat-cards{
   display:flex;
   gap:10px;
@@ -122,6 +126,7 @@ body{
   white-space:nowrap;
 }
 
+/* PRODUCTS */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -145,6 +150,7 @@ body{
 
 .prod-info{padding:10px}
 
+/* PIN */
 .pin{
   position:absolute;
   top:8px;
@@ -156,6 +162,7 @@ body{
   border-radius:999px;
 }
 
+/* BTN */
 .btn{
   width:100%;
   margin-top:10px;
@@ -166,6 +173,7 @@ body{
   color:white;
 }
 
+/* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
@@ -187,6 +195,7 @@ body{
   position:relative;
 }
 
+/* CLOSE */
 .close{
   position:absolute;
   top:10px;
@@ -199,6 +208,7 @@ body{
   color:white;
 }
 
+/* INPUT */
 .input{
   width:100%;
   padding:10px;
@@ -209,6 +219,7 @@ body{
   color:white;
 }
 
+/* QRIS */
 .qris{
   width:180px;
   display:block;
@@ -216,6 +227,7 @@ body{
   border-radius:12px;
 }
 
+/* DOWNLOAD */
 .download{
   display:block;
   text-align:center;
@@ -226,6 +238,7 @@ body{
   color:white;
   text-decoration:none;
 }
+
 </style>
 </head>
 
@@ -236,39 +249,54 @@ body{
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
+<!-- MENU -->
 <div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="side-menu" id="menu">
   <div class="side-head">🛍️ IPUNGG SHOP</div>
   <a class="side-link" id="wa">💬 WhatsApp Admin</a>
-  <a class="side-link" id="group">👥 Group Bot </a>
-  <a class="side-link" id="channel">📢 Channel Ipungg</a>
+  <a class="side-link" id="group">👥 Group Bot Comunity</a>
+  <a class="side-link" id="channel">📢 Channel Official Ipungg</a>
 </div>
 
+<!-- BANNER -->
 <div class="banner-wrap" id="banner"></div>
 
+<!-- CATEGORY -->
 <div class="cat-cards" id="cats"></div>
 
+<!-- PRODUCTS -->
 <div class="products-grid" id="products"></div>
 
+<!-- ORDER -->
 <div class="overlay" id="orderBox">
   <div class="box">
     <button class="close" onclick="closeAll()">×</button>
+
     <h3>🛒 ORDER</h3>
+
     <div id="pname"></div>
     <div id="pprice"></div>
+
     <input class="input" id="name" placeholder="Nama 💖">
+
     <button class="btn" onclick="nextPay()">LANJUT PAYMENT</button>
   </div>
 </div>
 
+<!-- PAYMENT -->
 <div class="overlay" id="payBox">
   <div class="box">
     <button class="close" onclick="closeAll()">×</button>
+
     <h3>💳 QRIS</h3>
+
     <img id="qrisImg" class="qris">
+
     <a id="downloadQris" class="download" download>⬇ Download QRIS</a>
+
     <input type="file" id="proof" class="input">
+
     <button class="btn" onclick="send()">KIRIM ADMIN 💖</button>
   </div>
 </div>
@@ -279,18 +307,14 @@ import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10
 
 const app = initializeApp({
   apiKey:"AIzaSyA9TSehgx",
-  authDomain:"ipung-store-2b96f.firebaseapp.com",
-  databaseURL:"https://ipung-store-2b96f-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"ipung-store-2b96f"
+  authDomain:"ipung-store-2b96d.firebaseapp.com",
+  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"ipung-store-2b96d"
 });
 
 const db = getDatabase(app);
 
 let store={}, selected={}, active="all";
-
-function formatRupiah(num){
-  return new Intl.NumberFormat("id-ID").format(Number(num||0));
-}
 
 onValue(ref(db,"store"),snap=>{
   store = snap.val() || {settings:{},products:{},categories:{}};
@@ -323,6 +347,7 @@ function render(){
     cats.map(c=>`<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`).join("");
 
   let all = Object.values(store.products || {});
+
   let p = active!="all" ? all.filter(x=>x.category==active) : all;
 
   const pinned = p.filter(x=>x.pinned);
@@ -337,37 +362,14 @@ function render(){
       <img class="prod-thumb" src="${x.thumbnail}">
       <div class="prod-info">
         <div>${x.name}</div>
-        <div>Rp ${formatRupiah(x.price)}</div>
+        <div>Rp ${x.price}</div>
         <button class="btn" onclick='order(${JSON.stringify(x)})'>ORDER 💖</button>
       </div>
     </div>`
   ).join("");
 }
 
-window.filter=c=>{active=c;render();};
-
-window.order=p=>{
-  selected=p;
-  document.getElementById("pname").innerText=p.name;
-  document.getElementById("pprice").innerText="Rp "+formatRupiah(p.price);
-  document.getElementById("orderBox").classList.add("show");
-};
-
-window.nextPay=()=>{
-  document.getElementById("orderBox").classList.remove("show");
-  document.getElementById("payBox").classList.add("show");
-};
-
-window.closeAll=()=>{
-  document.getElementById("orderBox").classList.remove("show");
-  document.getElementById("payBox").classList.remove("show");
-};
-
-window.toggleMenu=()=>{
-  document.getElementById("menu").classList.toggle("open");
-  document.getElementById("overlay").classList.toggle("open");
-};
-
+/* ORDER FORMAT FIX */
 window.send = async () => {
   const file = document.getElementById("proof").files[0];
 
@@ -385,7 +387,7 @@ window.send = async () => {
 
 👤 Nama : ${name}
 🛒 ${selected.name}
-💰 Rp ${formatRupiah(selected.price)}
+💰 Rp ${selected.price}
 📸 ${img}
 
 💌 Mohon diproses ya admin 😘`
@@ -395,6 +397,31 @@ window.send = async () => {
 
   closeAll();
 };
+
+window.filter=c=>{active=c;render();};
+
+window.toggleMenu=()=>{
+  document.getElementById("menu").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("open");
+};
+
+window.order=p=>{
+  selected=p;
+  document.getElementById("pname").innerText=p.name;
+  document.getElementById("pprice").innerText=p.price;
+  document.getElementById("orderBox").classList.add("show");
+};
+
+window.nextPay=()=>{
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.add("show");
+};
+
+window.closeAll=()=>{
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.remove("show");
+};
+
 </script>
 
 </body>
