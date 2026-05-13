@@ -3,23 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>IPUNGG SHOP</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 
-:root {
-  --bg: #05020f;
-  --bg2: #0a0520;
-  --purple: #9b30ff;
-  --neon: #bf5fff;
-  --neon2: #00f5ff;
-  --pink: #ff2d78;
-  --card: #0f0825;
-  --border: rgba(155,48,255,0.3);
-  --text: #f0e6ff;
-  --sub: #8b7aaa;
+:root{
+  --bg:#05020f;
+  --bg2:#0a0520;
+  --purple:#9b30ff;
+  --neon:#bf5fff;
+  --neon2:#00f5ff;
+  --pink:#ff2d78;
+  --card:#0f0825;
+  --border:rgba(155,48,255,0.3);
+  --text:#f0e6ff;
+  --sub:#8b7aaa;
 }
 
 *{
@@ -35,6 +36,7 @@ body{
   overflow-x:hidden;
 }
 
+/* NAVBAR */
 .navbar{
   height:60px;
   display:flex;
@@ -43,6 +45,26 @@ body{
   padding:0 20px;
   border-bottom:1px solid var(--border);
   background:#070312;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.logo-area{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
 }
 
 .logo-name{
@@ -51,6 +73,90 @@ body{
   font-weight:700;
 }
 
+.hamburger{
+  width:40px;
+  height:40px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  background:rgba(155,48,255,0.12);
+  color:var(--neon);
+  font-size:22px;
+}
+
+/* SIDE MENU */
+.side-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  z-index:998;
+  opacity:0;
+  pointer-events:none;
+  transition:0.3s;
+}
+
+.side-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.side-menu{
+  position:fixed;
+  top:0;
+  right:-320px;
+  width:280px;
+  height:100vh;
+  background:#090312;
+  border-left:1px solid var(--border);
+  z-index:999;
+  transition:0.3s;
+}
+
+.side-menu.open{
+  right:0;
+}
+
+.side-header{
+  padding:20px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.side-title{
+  color:var(--neon);
+  font-family:'Orbitron',sans-serif;
+}
+
+.close-btn{
+  background:none;
+  border:none;
+  color:white;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.side-links{
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.side-link{
+  padding:14px;
+  border-radius:14px;
+  text-decoration:none;
+  color:white;
+  background:rgba(155,48,255,0.08);
+  border:1px solid rgba(155,48,255,0.15);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* BANNER */
 .banner-wrap img,
 .banner-wrap video{
   width:100%;
@@ -59,6 +165,7 @@ body{
   display:block;
 }
 
+/* SECTION */
 .section{
   padding:20px 16px;
 }
@@ -70,6 +177,48 @@ body{
   letter-spacing:2px;
 }
 
+/* CATEGORY CARD */
+.cat-cards{
+  display:flex;
+  gap:12px;
+  overflow:auto;
+  padding-bottom:8px;
+}
+
+.cat-card{
+  min-width:110px;
+  height:95px;
+  border-radius:16px;
+  background:linear-gradient(
+    135deg,
+    rgba(155,48,255,0.12),
+    rgba(0,245,255,0.06)
+  );
+  border:1px solid rgba(155,48,255,0.2);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.cat-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 0 30px rgba(155,48,255,0.4);
+}
+
+.cat-card-emoji{
+  font-size:28px;
+}
+
+.cat-card-name{
+  font-size:12px;
+  font-weight:700;
+}
+
+/* FILTER */
 .cat-scroll{
   display:flex;
   gap:10px;
@@ -89,6 +238,7 @@ body{
   background:var(--purple);
 }
 
+/* PRODUCTS */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -126,7 +276,6 @@ body{
   width:100%;
   aspect-ratio:1;
   object-fit:cover;
-  display:block;
 }
 
 .prod-thumb-placeholder{
@@ -166,13 +315,7 @@ body{
   font-weight:700;
 }
 
-.empty{
-  grid-column:1/-1;
-  text-align:center;
-  padding:60px 20px;
-  color:var(--sub);
-}
-
+/* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
@@ -234,92 +377,229 @@ body{
   display:block;
 }
 
+.qris-img{
+  width:220px;
+  display:block;
+  margin:20px auto;
+  border-radius:14px;
+}
+
 </style>
 </head>
 <body>
 
+<!-- NAVBAR -->
 <nav class="navbar">
-  <div class="logo-name" id="storeName">
-    IPUNGG SHOP
+
+  <div class="logo-area">
+    <div class="logo-icon">⚡</div>
+
+    <div class="logo-name" id="storeName">
+      IPUNGG SHOP
+    </div>
   </div>
+
+  <button class="hamburger" onclick="toggleMenu()">
+    ☰
+  </button>
+
 </nav>
 
+<!-- SIDE MENU -->
+<div class="side-overlay" id="sideOverlay" onclick="toggleMenu()"></div>
+
+<div class="side-menu" id="sideMenu">
+
+  <div class="side-header">
+
+    <div class="side-title">
+      MENU
+    </div>
+
+    <button class="close-btn" onclick="toggleMenu()">
+      ✕
+    </button>
+
+  </div>
+
+  <div class="side-links">
+
+    <a class="side-link" id="linkWa" href="#" target="_blank">
+      💬 WhatsApp Admin
+    </a>
+
+    <a class="side-link" id="linkGroup" href="#" target="_blank">
+      👥 Grup
+    </a>
+
+    <a class="side-link" id="linkChannel" href="#" target="_blank">
+      📢 Channel
+    </a>
+
+  </div>
+
+</div>
+
+<!-- BANNER -->
 <div class="banner-wrap" id="bannerWrap"></div>
 
+<!-- KATEGORI -->
 <div class="section">
+
   <div class="section-title">
     ✦ KATEGORI
   </div>
 
-  <div class="cat-scroll" id="catFilter">
-    <button class="cat-btn active" onclick="filterCat('all', this)">
-      Semua
-    </button>
-  </div>
+  <div class="cat-cards" id="catCards"></div>
+
 </div>
 
+<!-- FILTER -->
+<div class="section">
+
+  <div class="cat-scroll" id="catFilter">
+
+    <button
+      class="cat-btn active"
+      onclick="filterCat('all', this)"
+    >
+      Semua
+    </button>
+
+  </div>
+
+</div>
+
+<!-- PRODUCTS -->
 <div class="products-grid" id="productsGrid">
+
   <div class="empty">
     Loading produk...
   </div>
+
 </div>
 
+<!-- ORDER -->
 <div class="overlay" id="orderOverlay">
+
   <div class="overlay-box">
 
     <h2 style="margin-bottom:16px">
       🛒 ORDER
     </h2>
 
-    <div id="selProdName" style="font-weight:700"></div>
+    <div id="selProdName"></div>
 
-    <div id="selProdPrice" style="margin-top:4px;color:var(--neon)">
-    </div>
+    <div
+      id="selProdPrice"
+      style="margin-top:4px;color:var(--neon)"
+    ></div>
 
-    <input class="form-input" id="orderName" placeholder="Nama kamu">
+    <input
+      class="form-input"
+      id="orderName"
+      placeholder="Nama"
+    >
 
-    <select class="form-input" id="orderPayment">
-      <option value="">Pilih pembayaran</option>
-      <option value="QRIS">QRIS</option>
-      <option value="Dana">Dana</option>
-      <option value="OVO">OVO</option>
-      <option value="GoPay">GoPay</option>
-    </select>
+    <input
+      class="form-input"
+      id="orderDate"
+      readonly
+    >
 
-    <button class="btn-primary" onclick="submitOrder()">
-      KIRIM ORDER
+    <input
+      class="form-input"
+      value="QRIS ONLY"
+      readonly
+    >
+
+    <button
+      class="btn-primary"
+      onclick="submitOrder()"
+    >
+      KIRIM ADMIN
     </button>
 
   </div>
+
 </div>
 
+<!-- PAYMENT -->
+<div class="overlay" id="paymentOverlay">
+
+  <div class="overlay-box">
+
+    <h2 style="margin-bottom:12px">
+      💳 PEMBAYARAN QRIS
+    </h2>
+
+    <img
+      src="https://img2.pixhost.to/images/7838/725233706_elaina-1778564710301.jpg"
+      class="qris-img"
+    >
+
+    <a
+      href="URL_QRIS_KAMU"
+      download
+      class="btn-primary"
+      style="
+        display:block;
+        text-align:center;
+        text-decoration:none;
+        margin-bottom:14px;
+      "
+    >
+      DOWNLOAD QRIS
+    </a>
+
+    <input
+      type="file"
+      class="form-input"
+      id="paymentProof"
+      accept="image/*"
+    >
+
+    <button
+      class="btn-primary"
+      onclick="sendPaymentProof()"
+    >
+      KIRIM ADMIN
+    </button>
+
+  </div>
+
+</div>
+
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
   getDatabase,
   ref,
   onValue
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
 
-  apiKey: "AIzaSyA9tSehgxD2Pgb7YPy7Pq-_bcuKLKswyos",
+  apiKey:"AIzaSyA9tSehgxD2Pgb7YPy7Pq-_bcuKLKswyos",
 
-  authDomain: "ipung-store-2b96d.firebaseapp.com",
+  authDomain:"ipung-store-2b96d.firebaseapp.com",
 
-  databaseURL: "https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-  projectId: "ipung-store-2b96d",
+  projectId:"ipung-store-2b96d",
 
-  storageBucket: "ipung-store-2b96d.firebasestorage.app",
+  storageBucket:"ipung-store-2b96d.firebasestorage.app",
 
-  messagingSenderId: "906202337063",
+  messagingSenderId:"906202337063",
 
-  appId: "1:906202337063:web:1a39b7bad99a85b23c2302"
+  appId:"1:906202337063:web:1a39b7bad99a85b23c2302"
 
 };
 
@@ -330,21 +610,21 @@ const db = getDatabase(app);
 window._storeData = {};
 window._activeCat = 'all';
 
-onValue(ref(db, "store"), (snapshot) => {
+onValue(ref(db,"store"),(snapshot)=>{
 
   const data = snapshot.val() || {};
-
-  console.log("STORE DATA:", data);
 
   window._storeData = data;
 
   applySettings(data.settings || {});
+
   renderBanner(data.settings || {});
+
   renderCategories(data.categories || {});
 
   renderProducts(
     data.products || {},
-    window._activeCat || 'all'
+    window._activeCat
   );
 
 });
@@ -353,10 +633,33 @@ function applySettings(s){
 
   if(s.storeName){
 
-    document.getElementById("storeName").textContent =
-      s.storeName;
+    document.getElementById("storeName")
+      .textContent = s.storeName;
 
     document.title = s.storeName;
+
+  }
+
+  if(s.urlAdmin){
+
+    document.getElementById("linkWa")
+      .href =
+      "https://wa.me/" +
+      s.urlAdmin.replace(/\D/g,'');
+
+  }
+
+  if(s.urlGroup){
+
+    document.getElementById("linkGroup")
+      .href = s.urlGroup;
+
+  }
+
+  if(s.urlChannel){
+
+    document.getElementById("linkChannel")
+      .href = s.urlChannel;
 
   }
 
@@ -364,7 +667,8 @@ function applySettings(s){
 
 function renderBanner(s){
 
-  const wrap = document.getElementById("bannerWrap");
+  const wrap =
+    document.getElementById("bannerWrap");
 
   const banner = s.banner || "";
 
@@ -396,7 +700,11 @@ window.renderCategories = function(cats){
   const filter =
     document.getElementById("catFilter");
 
-  const list = Object.values(cats || {});
+  const cards =
+    document.getElementById("catCards");
+
+  const list =
+    Object.values(cats || {});
 
   filter.innerHTML = `
     <button
@@ -407,7 +715,14 @@ window.renderCategories = function(cats){
     </button>
   `;
 
-  list.forEach(cat => {
+  cards.innerHTML = "";
+
+  const emojis = [
+    "🎮","💎","👑","⚡",
+    "🔥","🌙","✨","🎁"
+  ];
+
+  list.forEach((cat,i)=>{
 
     filter.innerHTML += `
       <button
@@ -418,16 +733,32 @@ window.renderCategories = function(cats){
       </button>
     `;
 
+    cards.innerHTML += `
+      <div
+        class="cat-card"
+        onclick="filterCat('${cat.name}')"
+      >
+        <div class="cat-card-emoji">
+          ${emojis[i % emojis.length]}
+        </div>
+
+        <div class="cat-card-name">
+          ${cat.name}
+        </div>
+      </div>
+    `;
+
   });
 
 };
 
-window.filterCat = function(cat, btn){
+window.filterCat = function(cat,btn){
 
   window._activeCat = cat;
 
-  document.querySelectorAll('.cat-btn')
-    .forEach(x => x.classList.remove('active'));
+  document
+    .querySelectorAll('.cat-btn')
+    .forEach(x=>x.classList.remove('active'));
 
   if(btn){
     btn.classList.add('active');
@@ -440,7 +771,7 @@ window.filterCat = function(cat, btn){
 
 };
 
-window.renderProducts = function(prods, activeCat){
+window.renderProducts = function(prods,activeCat){
 
   const grid =
     document.getElementById("productsGrid");
@@ -457,17 +788,16 @@ window.renderProducts = function(prods, activeCat){
   }
 
   list.sort(
-    (a,b) =>
-      (b.pinned === true) -
-      (a.pinned === true)
+    (a,b)=>
+    (b.pinned===true) -
+    (a.pinned===true)
   );
 
-  if(list.length === 0){
+  if(list.length===0){
 
     grid.innerHTML = `
       <div class="empty">
-        <div style="font-size:50px">📦</div>
-        <div>Belum ada produk</div>
+        Belum ada produk
       </div>
     `;
 
@@ -475,11 +805,9 @@ window.renderProducts = function(prods, activeCat){
 
   }
 
-  grid.innerHTML = list.map((p,i)=>`
+  grid.innerHTML = list.map(p=>`
 
-    <div
-      class="product-card ${p.pinned ? 'pinned' : ''}"
-    >
+    <div class="product-card ${p.pinned ? 'pinned' : ''}">
 
       ${
         p.thumbnail
@@ -487,33 +815,28 @@ window.renderProducts = function(prods, activeCat){
           <img
             class="prod-thumb"
             src="${p.thumbnail}"
-            alt="${p.name}"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
           >
         `
-        : ''
+        : `
+          <div class="prod-thumb-placeholder">
+            📦
+          </div>
+        `
       }
-
-      <div
-        class="prod-thumb-placeholder"
-        ${p.thumbnail ? 'style="display:none"' : ''}
-      >
-        📦
-      </div>
 
       <div class="prod-info">
 
         <div class="prod-name">
-          ${p.name || '-'}
+          ${p.name}
         </div>
 
         <div class="prod-price">
-          Rp ${Number(p.price || 0).toLocaleString('id-ID')}
+          Rp ${Number(p.price).toLocaleString('id-ID')}
         </div>
 
         <button
           class="btn-order"
-          data-id="${p.id}"
+          onclick='openOrder(${JSON.stringify(p)})'
         >
           🛒 ORDER
         </button>
@@ -523,25 +846,6 @@ window.renderProducts = function(prods, activeCat){
     </div>
 
   `).join('');
-
-  document.querySelectorAll('.btn-order')
-    .forEach(btn => {
-
-      btn.onclick = () => {
-
-        const id = btn.dataset.id;
-
-        const prod = list.find(
-          x => String(x.id) === String(id)
-        );
-
-        if(prod){
-          openOrder(prod);
-        }
-
-      };
-
-    });
 
 };
 
@@ -558,6 +862,10 @@ window.openOrder = function(prod){
       Number(prod.price)
       .toLocaleString('id-ID');
 
+  document.getElementById("orderDate")
+    .value =
+    new Date().toLocaleDateString("id-ID");
+
   document.getElementById("orderOverlay")
     .classList.add("show");
 
@@ -569,24 +877,62 @@ window.submitOrder = function(){
     document.getElementById("orderName")
     .value.trim();
 
-  const payment =
-    document.getElementById("orderPayment")
-    .value;
-
   if(!name){
+
     showToast("Isi nama dulu!");
+
     return;
+
   }
 
-  if(!payment){
-    showToast("Pilih pembayaran!");
+  window._orderName = name;
+
+  document.getElementById("orderOverlay")
+    .classList.remove("show");
+
+  document.getElementById("paymentOverlay")
+    .classList.add("show");
+
+};
+
+window.sendPaymentProof = async function(){
+
+  const file =
+    document.getElementById("paymentProof")
+    .files[0];
+
+  if(!file){
+
+    showToast("Upload bukti dulu!");
+
     return;
+
   }
+
+  showToast("Uploading...");
+
+  const formData = new FormData();
+
+  formData.append("image",file);
+
+  const res = await fetch(
+    "https://api.imgbb.com/1/upload?key=API_IMGBB_KAMU",
+    {
+      method:"POST",
+      body:formData
+    }
+  );
+
+  const data = await res.json();
+
+  const img =
+    data?.data?.url || "-";
 
   const prod =
     window._selectedProduct;
 
-  const wa = "6285198959920";
+  const wa =
+    "6285198959920";
 
   const msg = encodeURIComponent(
 
@@ -594,8 +940,9 @@ window.submitOrder = function(){
 
 📦 Produk: ${prod.name}
 💰 Harga: Rp ${Number(prod.price).toLocaleString('id-ID')}
-👤 Nama: ${name}
-💳 Pembayaran: ${payment}
+👤 Nama: ${window._orderName}
+💳 Payment: QRIS
+📸 Bukti: ${img}
 
 Dikirim dari IPUNGG SHOP`
 
@@ -605,6 +952,20 @@ Dikirim dari IPUNGG SHOP`
     `https://wa.me/${wa}?text=${msg}`,
     '_blank'
   );
+
+  showToast("Order dikirim!");
+
+};
+
+window.toggleMenu = function(){
+
+  document
+    .getElementById("sideMenu")
+    .classList.toggle("open");
+
+  document
+    .getElementById("sideOverlay")
+    .classList.toggle("open");
 
 };
 
@@ -618,12 +979,54 @@ window.showToast = function(msg){
   t.classList.add("show");
 
   setTimeout(()=>{
+
     t.classList.remove("show");
+
   },2500);
 
 };
 
+// BACK BUTTON HP
+history.pushState(null,null,location.href);
+
+window.addEventListener("popstate",()=>{
+
+  const menu =
+    document.getElementById("sideMenu");
+
+  const order =
+    document.getElementById("orderOverlay");
+
+  const pay =
+    document.getElementById("paymentOverlay");
+
+  if(menu.classList.contains("open")){
+
+    toggleMenu();
+
+    history.pushState(null,null,location.href);
+
+  }
+
+  if(order.classList.contains("show")){
+
+    order.classList.remove("show");
+
+    history.pushState(null,null,location.href);
+
+  }
+
+  if(pay.classList.contains("show")){
+
+    pay.classList.remove("show");
+
+    history.pushState(null,null,location.href);
+
+  }
+
+});
+
 </script>
 
 </body>
-  </html>
+      </html>
