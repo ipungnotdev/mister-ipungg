@@ -14,14 +14,13 @@
   --purple:#9b30ff;
   --cyan:#00f5ff;
   --border:rgba(155,48,255,.25);
-  --text:#f0e6ff;
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
 
 body{
   background:var(--bg);
-  color:var(--text);
+  color:white;
   font-family:'Rajdhani';
 }
 
@@ -45,8 +44,8 @@ body{
 
 .hamburger{
   width:42px;height:42px;
-  border-radius:10px;
   border:none;
+  border-radius:10px;
   background:rgba(155,48,255,.2);
   color:var(--cyan);
   font-size:20px;
@@ -74,17 +73,6 @@ body{
 }
 .side-menu.open{right:0}
 
-.side-links a{
-  display:block;
-  margin:10px;
-  padding:14px;
-  background:rgba(155,48,255,.08);
-  border:1px solid var(--border);
-  border-radius:12px;
-  color:white;
-  text-decoration:none;
-}
-
 /* BANNER */
 .banner img,.banner video{
   width:100%;
@@ -111,7 +99,7 @@ body{
   cursor:pointer;
   transition:.2s;
 }
-.cat:hover{transform:scale(1.07)}
+.cat:hover{transform:scale(1.06)}
 
 /* PRODUCTS */
 .grid{
@@ -132,29 +120,9 @@ body{
   width:100%;
   height:120px;
   object-fit:cover;
-  animation:float 3s infinite ease-in-out;
 }
 
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-3px)}
-}
-
-.card-body{padding:10px}
-
-.price{color:var(--cyan);font-weight:700}
-
-.btn{
-  width:100%;
-  margin-top:8px;
-  padding:8px;
-  border:none;
-  border-radius:10px;
-  background:linear-gradient(135deg,var(--purple),#5b00cc);
-  color:white;
-}
-
-/* OVERLAY */
+/* ORDER */
 .overlay{
   position:fixed;
   inset:0;
@@ -184,7 +152,6 @@ body{
   color:white;
 }
 
-/* QRIS */
 .qr{
   width:200px;
   display:block;
@@ -215,19 +182,10 @@ body{
 </div>
 
 <div class="side-overlay" id="ov" onclick="toggleMenu()"></div>
+<div class="side-menu" id="menu"></div>
 
-<div class="side-menu" id="menu">
-  <div class="side-links">
-    <a id="wa">💬 WhatsApp</a>
-    <a id="group">👥 Grup</a>
-    <a id="channel">📢 Channel</a>
-  </div>
-</div>
-
-<!-- BANNER -->
 <div class="banner" id="banner"></div>
 
-<!-- CATEGORY -->
 <div class="section">
   <div class="cat-wrap">
     <div class="cat" onclick="filter('all')">🔥 Semua</div>
@@ -235,20 +193,17 @@ body{
   </div>
 </div>
 
-<!-- PRODUCTS -->
 <div class="grid" id="products"></div>
 
 <!-- ORDER -->
 <div class="overlay" id="order">
   <div class="box">
     <h3>ORDER</h3>
-    <div id="pname"></div>
-    <div id="pprice" class="price"></div>
 
     <input class="input" id="name" placeholder="Nama">
     <input class="input" id="date" readonly>
 
-    <button class="btn" onclick="next()">LANJUT</button>
+    <button onclick="next()" class="input">LANJUT</button>
   </div>
 </div>
 
@@ -257,14 +212,11 @@ body{
   <div class="box">
     <h3>PAYMENT</h3>
 
-    <!-- QRIS FIX -->
     <img src="http://rahmad-elaina.my.id/file/0ff97318b1.jpg" class="qr">
-
-    <p style="text-align:center;font-size:12px">Upload bukti pembayaran</p>
 
     <input type="file" class="input" id="proof">
 
-    <button class="btn" onclick="send()">KIRIM WA</button>
+    <button onclick="send()" class="input">KIRIM WA</button>
   </div>
 </div>
 
@@ -284,14 +236,14 @@ const db = getDatabase(app);
 
 let data={}, selected={}, list=[];
 
-/* FIX DATABASE LAMA */
+/* 🔥 FIX DATABASE LAMA + BARU */
 onValue(ref(db,"store"),snap=>{
-  const raw=snap.val()||{};
+  const raw = snap.val() || {};
 
-  data={
-    settings:raw.settings||{},
-    categories:raw.categories||{},
-    products:raw.products||{}
+  data = {
+    settings: raw.settings || raw.store?.settings || {},
+    categories: raw.categories || raw.store?.categories || {},
+    products: raw.products || raw.store?.products || {}
   };
 
   render();
@@ -299,7 +251,7 @@ onValue(ref(db,"store"),snap=>{
 
 function render(){
 
-  /* BANNER */
+  /* banner */
   const b=document.getElementById("banner");
   const bn=data.settings.banner;
 
@@ -309,14 +261,14 @@ function render(){
       : `<img src="${bn}">`;
   }
 
-  /* CAT */
+  /* category */
   const c=document.getElementById("cats");
   c.innerHTML="";
   Object.values(data.categories).forEach(x=>{
-    c.innerHTML+=`<div class="cat" onclick="filter('${x.name}')">${x.name}</div>`;
+    c.innerHTML += `<div class="cat" onclick="filter('${x.name}')">${x.name}</div>`;
   });
 
-  list=Object.values(data.products);
+  list = Object.values(data.products);
   show(list);
 }
 
@@ -328,13 +280,18 @@ window.filter=(cat)=>{
 function show(arr){
   const g=document.getElementById("products");
 
-  g.innerHTML=arr.map(p=>`
+  if(!arr.length){
+    g.innerHTML="Belum ada produk";
+    return;
+  }
+
+  g.innerHTML = arr.map(p=>`
     <div class="card">
       <img src="${p.thumbnail||''}">
-      <div class="card-body">
+      <div style="padding:10px">
         <b>${p.name}</b>
-        <div class="price">Rp ${Number(p.price).toLocaleString()}</div>
-        <button class="btn" onclick='order(${JSON.stringify(p)})'>ORDER</button>
+        <div style="color:#00f5ff">Rp ${Number(p.price).toLocaleString()}</div>
+        <button onclick='order(${JSON.stringify(p)})' class="input">ORDER</button>
       </div>
     </div>
   `).join('');
@@ -343,8 +300,6 @@ function show(arr){
 window.order=(p)=>{
   selected=p;
   document.getElementById("order").classList.add("show");
-  document.getElementById("pname").innerText=p.name;
-  document.getElementById("pprice").innerText=p.price;
   document.getElementById("date").value=new Date().toLocaleDateString();
 }
 
@@ -355,7 +310,7 @@ window.next=()=>{
 
 window.send=()=>{
   const msg=encodeURIComponent(
-`🛒 ORDER BARU
+`🛒 ORDER BARU IPUNGG SHOP
 
 Nama : ${document.getElementById("name").value}
 Tanggal : ${new Date().toLocaleDateString()}
@@ -374,10 +329,9 @@ window.toggleMenu=()=>{
   document.getElementById("ov").classList.toggle("open");
 }
 
-/* BACK HP FIX */
+/* BACK FIX */
 window.addEventListener("popstate",()=>{
   document.getElementById("menu").classList.remove("open");
-  document.getElementById("ov").classList.remove("open");
   document.getElementById("order").classList.remove("show");
   document.getElementById("pay").classList.remove("show");
   history.pushState({},'');
