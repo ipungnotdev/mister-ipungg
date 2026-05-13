@@ -145,7 +145,9 @@ body{
 .prod-thumb{
   width:100%;
   aspect-ratio:1;
-  object-fit:cover;
+  object-fit:contain;     /* ✅ FIX UTAMA: tidak kepotong */
+  background:#0a0520;     /* biar tidak kosong */
+  padding:8px;
 }
 
 .prod-info{padding:10px}
@@ -266,13 +268,7 @@ body{
   width:170px;
   height:170px;
   transform:translate(-50%,-50%);
-
-  background:radial-gradient(
-    circle,
-    rgba(70,0,110,0.4),
-    transparent 70%
-  );
-
+  background:radial-gradient(circle, rgba(70,0,110,0.4), transparent 70%);
   filter:blur(18px);
   z-index:-1;
 }
@@ -391,7 +387,7 @@ function render(){
 
   let p;
   if(active === "all"){
-    p = all.filter(x => x.pinned);   // ✅ FIX UTAMA
+    p = all.filter(x => x.pinned);
   } else {
     p = all.filter(x => x.category == active);
   }
@@ -464,4 +460,4 @@ window.closeAll=()=>{
 </script>
 
 </body>
-  </html>
+      </html>
