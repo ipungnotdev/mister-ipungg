@@ -3,32 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>IPUNGG SHOP</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+
+:root{
+  --bg:#05020f;
+  --purple:#9b30ff;
+  --neon:#bf5fff;
+  --neon2:#00f5ff;
+  --card:#0f0825;
+  --border:rgba(155,48,255,0.3);
+  --text:#f0e6ff;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
 body{
-  margin:0;
-  background:#05020f;
-  color:white;
-  font-family:sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  overflow-x:hidden;
 }
 
 /* NAV */
 .navbar{
+  height:60px;
   display:flex;
   justify-content:space-between;
-  padding:15px;
-  background:#0a0520;
+  align-items:center;
+  padding:0 16px;
+  background:#070312;
+  border-bottom:1px solid var(--border);
   position:sticky;
   top:0;
-  z-index:999;
+  z-index:1000;
+}
+
+.logo-name{
+  font-family:'Orbitron';
+  color:var(--neon);
+  font-weight:900;
 }
 
 .hamburger{
+  width:40px;height:40px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(155,48,255,0.1);
+  color:white;
   font-size:22px;
-  background:none;
-  border:none;
-  color:#00f5ff;
 }
 
 /* MENU */
@@ -39,124 +66,125 @@ body{
   opacity:0;
   pointer-events:none;
 }
-.side-overlay.open{
-  opacity:1;
-  pointer-events:auto;
-}
+.side-overlay.open{opacity:1;pointer-events:auto}
 
 .side-menu{
   position:fixed;
   right:-300px;
   top:0;
-  width:260px;
+  width:280px;
   height:100%;
-  background:#120022;
+  background:#0b0618;
+  border-left:1px solid var(--border);
   transition:.3s;
 }
 .side-menu.open{right:0}
 
+.side-link{
+  display:block;
+  padding:14px;
+  margin:10px;
+  border-radius:12px;
+  background:rgba(155,48,255,0.1);
+  border:1px solid var(--border);
+  color:white;
+  text-decoration:none;
+}
+
+/* CATEGORY */
 .cat-cards{
   display:flex;
-  gap:12px;
+  gap:10px;
   overflow:auto;
   padding:10px;
 }
 
 .cat-card{
-  min-width:160px;
-  padding:18px;
-  border-radius:18px;
-  background:linear-gradient(135deg,#2a0066,#120022);
-  border:2px solid #9b30ff;
-  font-weight:900;
+  min-width:140px;
+  padding:16px;
+  border-radius:16px;
+  background:#1a0a2a;
+  border:1px solid var(--purple);
   text-align:center;
-  animation:float 2.5s infinite ease-in-out;
-  cursor:pointer;
-  transition:.2s;
-}
-
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-8px)}
-}
-
-.cat-card:hover{
-  transform:scale(1.1);
-  box-shadow:0 0 25px #9b30ff;
+  font-weight:700;
 }
 
 /* PRODUCT */
-.products{
+.products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:10px;
-  padding:10px;
+  gap:12px;
+  padding:12px;
 }
 
-.card{
-  background:#0f0825;
-  border:1px solid #9b30ff;
+.product-card{
+  background:var(--card);
+  border:1px solid var(--border);
   border-radius:12px;
   overflow:hidden;
 }
 
-.card img{
+.prod-thumb{
   width:100%;
-  height:120px;
+  aspect-ratio:1;
   object-fit:cover;
 }
 
-.btn{
+.prod-info{
+  padding:10px;
+}
+
+.prod-price{
+  color:var(--neon);
+  font-weight:700;
+}
+
+.btn-order{
   width:100%;
   padding:10px;
-  background:#9b30ff;
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
   border:none;
   color:white;
+  font-weight:800;
 }
 
 /* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.8);
   display:none;
-  align-items:center;
   justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.7);
 }
 .overlay.show{display:flex}
 
 .box{
-  background:#120022;
-  padding:20px;
-  border-radius:12px;
   width:90%;
+  max-width:380px;
+  background:#120822;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
 }
 
-input{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-}
-
-/* QRIS */
 .qris-img{
   width:200px;
+  margin:10px auto;
   display:block;
-  margin:auto;
+  border-radius:12px;
 }
 
-/* TOAST */
-.toast{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#9b30ff;
-  padding:10px 20px;
-  border-radius:20px;
-  display:none;
+.btn{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:800;
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
+  color:white;
 }
-.toast.show{display:block}
 
 </style>
 </head>
@@ -164,137 +192,140 @@ input{
 <body>
 
 <div class="navbar">
-  <div>IPUNGG SHOP</div>
+  <div class="logo-name">IPUNGG SHOP</div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </div>
 
-<div class="side-overlay" id="ov" onclick="toggleMenu()"></div>
-<div class="side-menu" id="menu"></div>
+<div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="side-menu" id="menu">
+  <a class="side-link">WA Admin</a>
+  <a class="side-link">Grup</a>
+  <a class="side-link">Channel</a>
+</div>
 
-<div class="cat-cards" id="cats"></div>
-
-<div class="products" id="products"></div>
+<div class="cat-cards" id="cat"></div>
+<div class="products-grid" id="prod"></div>
 
 <!-- ORDER -->
-<div class="overlay" id="order">
+<div class="overlay" id="orderBox">
   <div class="box">
     <h3>ORDER</h3>
     <div id="pname"></div>
-    <input id="nama" placeholder="Nama">
-    <button class="btn" onclick="toPay()">LANJUT</button>
+    <input id="nama" placeholder="Nama" class="btn" style="background:#1a0a2a">
+    <button class="btn" onclick="next()">LANJUT PAYMENT</button>
   </div>
 </div>
 
 <!-- PAYMENT -->
-<div class="overlay" id="pay">
+<div class="overlay" id="payBox">
   <div class="box">
-    <h3>QRIS</h3>
-    <img id="qrisImg" class="qris-img">
-    <a id="qrisDl" class="btn" download>DOWNLOAD QRIS</a>
 
-    <input type="file" id="bukti">
+    <h3>PAYMENT QRIS</h3>
 
-    <button class="btn" onclick="send()">KIRIM</button>
+    <!-- QRIS FIX -->
+    <img class="qris-img" src="http://rahmad-elaina.my.id/file/0ff97318b1.jpg">
+
+    <a class="btn"
+       href="http://rahmad-elaina.my.id/file/0ff97318b1.jpg"
+       download>
+      DOWNLOAD QRIS
+    </a>
+
+    <input type="file" class="btn" id="bukti">
+
+    <button class="btn" onclick="sendWA()">
+      KIRIM BUKTI
+    </button>
+
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+let selected="";
 
-const app = initializeApp({
-  apiKey:"x",
-  authDomain:"x",
-  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app"
-});
-
-const db = getDatabase(app);
-
-let store={}, selected={}, active="all";
-
-onValue(ref(db,"store"),snap=>{
-  store=snap.val()||{};
-  render();
-});
-
-function render(){
-  const s=store.settings||{};
-
-  // QRIS FIX
-  document.getElementById("qrisImg").src = s.qrisUrl || "";
-  document.getElementById("qrisDl").href = s.qrisUrl || "";
-
-  const cats=Object.values(store.categories||{});
-  document.getElementById("cats").innerHTML=cats.map(c=>
-    `<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`
-  ).join("");
-
-  let p=Object.values(store.products||{});
-  if(active!="all")p=p.filter(x=>x.category==active);
-
-  document.getElementById("products").innerHTML=p.map(x=>
-    `<div class="card">
-      <img src="${x.thumbnail||''}">
-      <div style="padding:10px">
-        <div>${x.name}</div>
-        <div>Rp ${x.price}</div>
-        <button class="btn" onclick='order(${JSON.stringify(x)})'>ORDER</button>
-      </div>
-    </div>`
-  ).join("");
+/* MENU FIX */
+function toggleMenu(){
+  document.getElementById("menu").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("open");
 }
 
-window.filter=(c)=>{active=c;render();};
-
-window.order=(p)=>{
-  selected=p;
-  document.getElementById("pname").innerText=p.name;
-  document.getElementById("order").classList.add("show");
-};
-
-window.toPay=()=>{
-  document.getElementById("order").classList.remove("show");
-  document.getElementById("pay").classList.add("show");
-};
-
-window.send=async()=>{
-  const file=document.getElementById("bukti").files[0];
-
-  const fd=new FormData();
-  fd.append("image",file);
-
-  const res=await fetch("https://api.imgbb.com/1/upload?key=a8a4d55f889fcadd95552214d55c46b3",{method:"POST",body:fd});
-  const j=await res.json();
-  const img=j?.data?.url||"-";
-
-  const msg=encodeURIComponent(
-`🛒 ORDER
-
-📦 ${selected.name}
-💰 Rp ${selected.price}
-📸 ${img}`
-  );
-
-  window.open("https://wa.me/"+store.settings.urlAdmin+"?text="+msg);
-};
-
-window.toggleMenu=()=>{
-  document.getElementById("menu").classList.toggle("open");
-  document.getElementById("ov").classList.toggle("open");
-};
-
-// FIX BACK BUTTON NO EXIT
+/* BACK BUTTON FIX (NO EXIT WEB) */
 history.pushState(null,null,location.href);
 window.addEventListener("popstate",()=>{
-  document.getElementById("menu").classList.remove("open");
-  document.getElementById("order").classList.remove("show");
-  document.getElementById("pay").classList.remove("show");
+  if(document.getElementById("menu").classList.contains("open")){
+    toggleMenu();
+    history.pushState(null,null,location.href);
+    return;
+  }
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.remove("show");
   history.pushState(null,null,location.href);
 });
+
+/* DATA FIREBASE KAMU NANTI MASUK SINI */
+let products = [];
+let cats = [];
+
+/* RENDER */
+function render(){
+
+  document.getElementById("cat").innerHTML =
+  cats.length
+  ? cats.map(c=>`<div class="cat-card">${c.name}</div>`).join("")
+  : `<div class="cat-card">Semua</div>`;
+
+  document.getElementById("prod").innerHTML =
+  products.length
+  ? products.map((p,i)=>`
+    <div class="product-card">
+      <img class="prod-thumb" src="${p.thumbnail||''}">
+      <div class="prod-info">
+        <b>${p.name}</b>
+        <div class="prod-price">Rp ${p.price}</div>
+        <button class="btn-order" onclick="order(${i})">ORDER</button>
+      </div>
+    </div>
+  `).join("")
+  : `<div style="padding:20px;color:#aaa">Belum ada produk</div>`;
+}
+
+render();
+
+/* ORDER */
+function order(i){
+  selected=products[i];
+  document.getElementById("pname").innerText=selected.name;
+  document.getElementById("orderBox").classList.add("show");
+}
+
+function next(){
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.add("show");
+}
+
+/* WA FIX FULL */
+function sendWA(){
+
+const img="UPLOAD_URL";
+
+const msg=encodeURIComponent(
+`🛒 ORDER BARU IPUNGG SHOP
+
+📦 Produk : ${selected.name}
+💰 Harga  : Rp ${selected.price}
+👤 Nama   : ${document.getElementById("nama").value}
+
+💳 QRIS ONLY
+📸 Bukti  : ${img}
+
+━━━━━━━━━━━━━━`
+);
+
+window.open("https://wa.me/6280000000000?text="+msg);
+}
 
 </script>
 
 </body>
-</html>
+  </html>
