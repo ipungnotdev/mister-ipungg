@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>IPUNGG SHOP</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,7 +25,7 @@
 body{
   background:var(--bg);
   color:var(--text);
-  font-family:'Rajdhani';
+  font-family:'Rajdhani',sans-serif;
   overflow-x:hidden;
 }
 
@@ -36,10 +37,10 @@ body{
   align-items:center;
   padding:0 16px;
   background:#070312;
+  border-bottom:1px solid var(--border);
   position:sticky;
   top:0;
   z-index:1000;
-  border-bottom:1px solid var(--border);
 }
 
 .logo-name{
@@ -57,14 +58,13 @@ body{
   font-size:22px;
 }
 
-/* SIDE MENU */
+/* MENU */
 .side-overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.6);
   opacity:0;
   pointer-events:none;
-  transition:.3s;
 }
 .side-overlay.open{opacity:1;pointer-events:auto}
 
@@ -75,8 +75,8 @@ body{
   width:280px;
   height:100%;
   background:#0b0618;
-  transition:.3s;
   border-left:1px solid var(--border);
+  transition:.3s;
 }
 .side-menu.open{right:0}
 
@@ -91,32 +91,25 @@ body{
   text-decoration:none;
 }
 
-/* CATEGORY FIX */
+/* CATEGORY */
 .cat-cards{
   display:flex;
-  gap:12px;
-  overflow-x:auto;
-  padding:10px 12px;
+  gap:10px;
+  overflow:auto;
+  padding:10px;
 }
 
 .cat-card{
   min-width:140px;
-  padding:18px;
-  border-radius:18px;
-  background:linear-gradient(135deg,#2a0a4a,#0b0618);
-  border:2px solid var(--purple);
-  box-shadow:0 0 20px rgba(155,48,255,.4);
-  transition:.3s;
+  padding:16px;
+  border-radius:16px;
+  background:#1a0a2a;
+  border:1px solid var(--purple);
   text-align:center;
-  font-weight:800;
+  font-weight:700;
 }
 
-.cat-card:hover{
-  transform:scale(1.08);
-  box-shadow:0 0 30px var(--neon);
-}
-
-/* PRODUCTS */
+/* PRODUCT */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -127,14 +120,8 @@ body{
 .product-card{
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:14px;
+  border-radius:12px;
   overflow:hidden;
-  animation:float 3s infinite ease-in-out;
-}
-
-@keyframes float{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-6px)}
 }
 
 .prod-thumb{
@@ -147,10 +134,15 @@ body{
   padding:10px;
 }
 
+.prod-price{
+  color:var(--neon);
+  font-weight:700;
+}
+
 .btn-order{
   width:100%;
   padding:10px;
-  background:linear-gradient(135deg,var(--purple),#5a00ff);
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
   border:none;
   color:white;
   font-weight:800;
@@ -172,17 +164,15 @@ body{
   max-width:380px;
   background:#120822;
   border:1px solid var(--border);
-  border-radius:18px;
-  padding:18px;
+  border-radius:16px;
+  padding:16px;
 }
 
-/* QRIS */
-.qris{
+.qris-img{
   width:200px;
-  display:block;
   margin:10px auto;
+  display:block;
   border-radius:12px;
-  border:2px solid var(--purple);
 }
 
 .btn{
@@ -192,8 +182,8 @@ body{
   border:none;
   border-radius:10px;
   font-weight:800;
-  color:white;
   background:linear-gradient(135deg,var(--purple),var(--neon2));
+  color:white;
 }
 
 </style>
@@ -201,36 +191,27 @@ body{
 
 <body>
 
-<!-- NAV -->
 <div class="navbar">
   <div class="logo-name">IPUNGG SHOP</div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </div>
 
-<!-- SIDE -->
 <div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
-
 <div class="side-menu" id="menu">
-  <a class="side-link">💬 WA Admin</a>
-  <a class="side-link">👥 Grup</a>
-  <a class="side-link">📢 Channel</a>
+  <a class="side-link">WA Admin</a>
+  <a class="side-link">Grup</a>
+  <a class="side-link">Channel</a>
 </div>
 
-<!-- CATEGORY -->
 <div class="cat-cards" id="cat"></div>
-
-<!-- PRODUCTS -->
 <div class="products-grid" id="prod"></div>
 
 <!-- ORDER -->
 <div class="overlay" id="orderBox">
   <div class="box">
-    <h3>🛒 ORDER</h3>
-
+    <h3>ORDER</h3>
     <div id="pname"></div>
-
-    <input id="nama" placeholder="Nama" class="btn" style="background:#1a0a2a;margin-top:10px">
-
+    <input id="nama" placeholder="Nama" class="btn" style="background:#1a0a2a">
     <button class="btn" onclick="next()">LANJUT PAYMENT</button>
   </div>
 </div>
@@ -239,19 +220,21 @@ body{
 <div class="overlay" id="payBox">
   <div class="box">
 
-    <h3>💳 PAYMENT QRIS</h3>
+    <h3>PAYMENT QRIS</h3>
 
     <!-- QRIS FIX -->
-    <img class="qris" src="http://rahmad-elaina.my.id/file/0ff97318b1.jpg">
+    <img class="qris-img" src="http://rahmad-elaina.my.id/file/0ff97318b1.jpg">
 
-    <a class="btn" href="http://rahmad-elaina.my.id/file/0ff97318b1.jpg" download>
-      📥 DOWNLOAD QRIS
+    <a class="btn"
+       href="http://rahmad-elaina.my.id/file/0ff97318b1.jpg"
+       download>
+      DOWNLOAD QRIS
     </a>
 
     <input type="file" class="btn" id="bukti">
 
     <button class="btn" onclick="sendWA()">
-      📤 KIRIM BUKTI
+      KIRIM BUKTI
     </button>
 
   </div>
@@ -261,12 +244,13 @@ body{
 
 let selected="";
 
+/* MENU FIX */
 function toggleMenu(){
   document.getElementById("menu").classList.toggle("open");
   document.getElementById("overlay").classList.toggle("open");
 }
 
-/* BACK BUTTON FIX */
+/* BACK BUTTON FIX (NO EXIT WEB) */
 history.pushState(null,null,location.href);
 window.addEventListener("popstate",()=>{
   if(document.getElementById("menu").classList.contains("open")){
@@ -279,32 +263,36 @@ window.addEventListener("popstate",()=>{
   history.pushState(null,null,location.href);
 });
 
-/* DEMO DATA (biar produk muncul) */
-let products=[
- {name:"Diamond 100",price:5000},
- {name:"Voucher VIP",price:10000}
-];
+/* DATA FIREBASE KAMU NANTI MASUK SINI */
+let products = [];
+let cats = [];
 
-let cats=["🔥 HOT","💎 DIAMOND","⚡ VIP"];
-
+/* RENDER */
 function render(){
+
   document.getElementById("cat").innerHTML =
-  cats.map(c=>`<div class="cat-card">${c}</div>`).join("");
+  cats.length
+  ? cats.map(c=>`<div class="cat-card">${c.name}</div>`).join("")
+  : `<div class="cat-card">Semua</div>`;
 
   document.getElementById("prod").innerHTML =
-  products.map((p,i)=>`
+  products.length
+  ? products.map((p,i)=>`
     <div class="product-card">
+      <img class="prod-thumb" src="${p.thumbnail||''}">
       <div class="prod-info">
-        <b>${p.name}</b><br>
-        Rp ${p.price}
+        <b>${p.name}</b>
+        <div class="prod-price">Rp ${p.price}</div>
         <button class="btn-order" onclick="order(${i})">ORDER</button>
       </div>
     </div>
-  `).join("");
+  `).join("")
+  : `<div style="padding:20px;color:#aaa">Belum ada produk</div>`;
 }
 
 render();
 
+/* ORDER */
 function order(i){
   selected=products[i];
   document.getElementById("pname").innerText=selected.name;
@@ -316,6 +304,7 @@ function next(){
   document.getElementById("payBox").classList.add("show");
 }
 
+/* WA FIX FULL */
 function sendWA(){
 
 const img="UPLOAD_URL";
@@ -327,9 +316,10 @@ const msg=encodeURIComponent(
 💰 Harga  : Rp ${selected.price}
 👤 Nama   : ${document.getElementById("nama").value}
 
-💳 QRIS PAYMENT
-📸 Bukti: ${img}
-━━━━━━━━━━━━`
+💳 QRIS ONLY
+📸 Bukti  : ${img}
+
+━━━━━━━━━━━━━━`
 );
 
 window.open("https://wa.me/6280000000000?text="+msg);
@@ -338,4 +328,4 @@ window.open("https://wa.me/6280000000000?text="+msg);
 </script>
 
 </body>
-      </html>
+  </html>
