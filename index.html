@@ -23,7 +23,6 @@ body{
   font-family:'Rajdhani',sans-serif;
 }
 
-/* NAV */
 .navbar{
   height:60px;
   display:flex;
@@ -40,9 +39,11 @@ body{
 .logo{
   font-family:'Orbitron';
   color:var(--neon);
+  display:flex;
+  gap:6px;
+  align-items:center;
 }
 
-/* HAMBURGER */
 .hamburger{
   font-size:24px;
   background:none;
@@ -50,7 +51,77 @@ body{
   color:var(--neon);
 }
 
-/* PRODUCTS */
+.side-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+  z-index:2000;
+}
+
+.side-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.side-menu{
+  position:fixed;
+  right:-300px;
+  top:0;
+  width:260px;
+  height:100vh;
+  background:#0a0520;
+  padding:20px;
+  transition:.3s;
+  z-index:3000;
+}
+
+.side-menu.open{right:0}
+
+.side-head{
+  display:flex;
+  gap:6px;
+  font-family:'Orbitron';
+  color:var(--neon);
+  margin-bottom:10px;
+}
+
+.side-link{
+  display:block;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+  color:white;
+  text-decoration:none;
+}
+
+.banner-wrap img{
+  width:95%;
+  margin:10px auto;
+  display:block;
+  border-radius:16px;
+  max-height:160px;
+  object-fit:cover;
+}
+
+.cat-cards{
+  display:flex;
+  gap:10px;
+  overflow:auto;
+  padding:10px;
+}
+
+.cat-card{
+  padding:10px 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -63,6 +134,7 @@ body{
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
+  position:relative;
 }
 
 .prod-thumb{
@@ -72,6 +144,17 @@ body{
 }
 
 .prod-info{padding:10px}
+
+.pin{
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:gold;
+  color:black;
+  font-size:11px;
+  padding:3px 7px;
+  border-radius:999px;
+}
 
 .btn{
   width:100%;
@@ -83,7 +166,6 @@ body{
   color:white;
 }
 
-/* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
@@ -154,108 +236,166 @@ body{
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
-<!-- PRODUCTS -->
+<div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="side-menu" id="menu">
+  <div class="side-head">🛍️ IPUNGG SHOP</div>
+  <a class="side-link" id="wa">💬 WhatsApp Admin</a>
+  <a class="side-link" id="group">👥 Group Bot </a>
+  <a class="side-link" id="channel">📢 Channel Ipungg</a>
+</div>
+
+<div class="banner-wrap" id="banner"></div>
+
+<div class="cat-cards" id="cats"></div>
+
 <div class="products-grid" id="products"></div>
 
-<!-- ORDER -->
 <div class="overlay" id="orderBox">
   <div class="box">
     <button class="close" onclick="closeAll()">×</button>
-
     <h3>🛒 ORDER</h3>
     <div id="pname"></div>
     <div id="pprice"></div>
-
     <input class="input" id="name" placeholder="Nama 💖">
     <button class="btn" onclick="nextPay()">LANJUT PAYMENT</button>
   </div>
 </div>
 
-<!-- PAYMENT -->
 <div class="overlay" id="payBox">
   <div class="box">
     <button class="close" onclick="closeAll()">×</button>
-
     <h3>💳 QRIS</h3>
     <img id="qrisImg" class="qris">
     <a id="downloadQris" class="download" download>⬇ Download QRIS</a>
-
     <input type="file" id="proof" class="input">
-    <button class="btn" onclick="send()">KIRIM WA 💖</button>
+    <button class="btn" onclick="send()">KIRIM ADMIN 💖</button>
   </div>
 </div>
 
-<script>
-let selected={};
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const qrisURL="https://img2.pixhost.to/images/7862/725686808_elaina-1778651660610.jpg";
+const app = initializeApp({
+  apiKey:"AIzaSyA9TSehgx",
+  authDomain:"ipung-store-2b96f.firebaseapp.com",
+  databaseURL:"https://ipung-store-2b96f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"ipung-store-2b96f"
+});
 
-/* FORMAT RUPIAH */
-function formatRupiah(angka){
-  return new Intl.NumberFormat("id-ID").format(angka || 0);
+const db = getDatabase(app);
+
+let store={}, selected={}, active="all";
+
+function formatRupiah(num){
+  return new Intl.NumberFormat("id-ID").format(Number(num||0));
 }
 
-/* DEMO PRODUCT */
-const products=[
-  {name:"Produk A",price:8000},
-  {name:"Produk B",price:80000}
-];
+onValue(ref(db,"store"),snap=>{
+  store = snap.val() || {settings:{},products:{},categories:{}};
+  render();
+});
 
-document.getElementById("products").innerHTML =
-products.map(p=>`
-<div class="product-card">
-  <img class="prod-thumb" src="${qrisURL}">
-  <div class="prod-info">
-    <div>${p.name}</div>
-    <div>Rp ${formatRupiah(p.price)}</div>
-    <button class="btn" onclick='order(${JSON.stringify(p)})'>ORDER</button>
-  </div>
-</div>
-`).join("");
+function render(){
 
-function order(p){
+  const s = store.settings || {};
+
+  document.getElementById("wa").href="https://wa.me/"+(s.urlAdmin||"");
+  document.getElementById("group").href=s.urlGroup||"#";
+  document.getElementById("channel").href=s.urlChannel||"#";
+
+  document.getElementById("banner").innerHTML =
+    s.banner?.includes(".mp4")
+    ? `<video autoplay muted loop src="${s.banner}"></video>`
+    : `<img src="${s.banner}">`;
+
+  const qris =
+    s.qrisUrl ||
+    "https://img2.pixhost.to/images/7838/725233706_elaina-1778564710301.jpg";
+
+  document.getElementById("qrisImg").src = qris;
+  document.getElementById("downloadQris").href = qris;
+
+  const cats = Object.values(store.categories || {});
+  document.getElementById("cats").innerHTML =
+    `<div class="cat-card" onclick="filter('all')">ALL</div>`+
+    cats.map(c=>`<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`).join("");
+
+  let all = Object.values(store.products || {});
+  let p = active!="all" ? all.filter(x=>x.category==active) : all;
+
+  const pinned = p.filter(x=>x.pinned);
+  const normal = p.filter(x=>!x.pinned);
+
+  p = [...pinned,...normal];
+
+  document.getElementById("products").innerHTML =
+  p.map(x=>
+    `<div class="product-card">
+      ${x.pinned ? `<div class="pin">PIN</div>` : ""}
+      <img class="prod-thumb" src="${x.thumbnail}">
+      <div class="prod-info">
+        <div>${x.name}</div>
+        <div>Rp ${formatRupiah(x.price)}</div>
+        <button class="btn" onclick='order(${JSON.stringify(x)})'>ORDER 💖</button>
+      </div>
+    </div>`
+  ).join("");
+}
+
+window.filter=c=>{active=c;render();};
+
+window.order=p=>{
   selected=p;
   document.getElementById("pname").innerText=p.name;
   document.getElementById("pprice").innerText="Rp "+formatRupiah(p.price);
   document.getElementById("orderBox").classList.add("show");
-}
+};
 
-function nextPay(){
+window.nextPay=()=>{
   document.getElementById("orderBox").classList.remove("show");
   document.getElementById("payBox").classList.add("show");
+};
 
-  document.getElementById("qrisImg").src=qrisURL;
-  document.getElementById("downloadQris").href=qrisURL;
-}
-
-function closeAll(){
+window.closeAll=()=>{
   document.getElementById("orderBox").classList.remove("show");
   document.getElementById("payBox").classList.remove("show");
-}
+};
 
-/* SEND WA */
-function send(){
+window.toggleMenu=()=>{
+  document.getElementById("menu").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("open");
+};
 
-  const name=document.getElementById("name").value||"-";
+window.send = async () => {
+  const file = document.getElementById("proof").files[0];
 
-  const msg=encodeURIComponent(
-`${qrisURL}
+  const fd = new FormData();
+  fd.append("image", file);
 
-🧾 ORDER IPUNGG SHOP
+  const res = await fetch("https://api.imgbb.com/1/upload?key=a8a4d55f889fcadd95552214d55c46b3",{method:"POST",body:fd});
+  const j = await res.json();
+  const img = j?.data?.url || "-";
+
+  const name = document.getElementById("name").value || "-";
+
+  const msg = encodeURIComponent(
+`*📝 FORMAT ORDER PRODUK IPUNGG*
 
 👤 Nama : ${name}
 🛒 ${selected.name}
 💰 Rp ${formatRupiah(selected.price)}
+📸 ${img}
 
-📸 Bukti Pembayaran:
-${qrisURL}
-
-💌 Mohon dicek & diproses ya admin 💖`
+💌 Mohon diproses ya admin 😘`
   );
 
-  window.open("https://wa.me/628XXXXXXXXXX?text="+msg);
-}
+  window.open("https://wa.me/"+store.settings.urlAdmin+"?text="+msg);
+
+  closeAll();
+};
 </script>
 
 </body>
-</html>
+  </html>
