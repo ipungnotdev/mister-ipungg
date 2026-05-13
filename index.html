@@ -3,31 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>IPUNGG SHOP</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-
 :root{
   --bg:#05020f;
   --bg2:#0a0520;
   --purple:#9b30ff;
   --neon:#bf5fff;
   --neon2:#00f5ff;
-  --pink:#ff2d78;
   --card:#0f0825;
   --border:rgba(155,48,255,0.3);
   --text:#f0e6ff;
-  --sub:#8b7aaa;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
+*{margin:0;padding:0;box-sizing:border-box}
 
 body{
   background:var(--bg);
@@ -36,220 +28,65 @@ body{
   overflow-x:hidden;
 }
 
-/* NAVBAR */
+/* NAV */
 .navbar{
   height:60px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   padding:0 20px;
-  border-bottom:1px solid var(--border);
-  background:#070312;
   position:sticky;
   top:0;
-  z-index:100;
-}
-
-.logo-area{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.logo-icon{
-  width:38px;
-  height:38px;
-  border-radius:12px;
-  background:linear-gradient(135deg,var(--purple),var(--neon2));
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:20px;
+  background:#070312;
+  border-bottom:1px solid var(--border);
 }
 
 .logo-name{
-  font-family:'Orbitron',sans-serif;
+  font-family:'Orbitron';
   color:var(--neon);
-  font-weight:700;
 }
 
 .hamburger{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--neon);
   width:40px;
   height:40px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  background:rgba(155,48,255,0.12);
-  color:var(--neon);
-  font-size:22px;
+  border-radius:10px;
 }
 
-/* SIDE MENU */
-.side-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.7);
-  z-index:998;
-  opacity:0;
-  pointer-events:none;
-  transition:0.3s;
-}
-
-.side-overlay.open{
-  opacity:1;
-  pointer-events:auto;
-}
-
-.side-menu{
-  position:fixed;
-  top:0;
-  right:-320px;
-  width:280px;
-  height:100vh;
-  background:#090312;
-  border-left:1px solid var(--border);
-  z-index:999;
-  transition:0.3s;
-}
-
-.side-menu.open{
-  right:0;
-}
-
-.side-header{
-  padding:20px;
-  border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.side-title{
-  color:var(--neon);
-  font-family:'Orbitron',sans-serif;
-}
-
-.close-btn{
-  background:none;
-  border:none;
-  color:white;
-  font-size:22px;
-  cursor:pointer;
-}
-
-.side-links{
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.side-link{
-  padding:14px;
-  border-radius:14px;
-  text-decoration:none;
-  color:white;
-  background:rgba(155,48,255,0.08);
-  border:1px solid rgba(155,48,255,0.15);
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-/* BANNER */
-.banner-wrap img,
-.banner-wrap video{
-  width:100%;
-  max-height:300px;
-  object-fit:cover;
-  display:block;
-}
-
-/* SECTION */
-.section{
-  padding:20px 16px;
-}
-
-.section-title{
-  margin-bottom:14px;
-  color:var(--neon2);
-  font-size:12px;
-  letter-spacing:2px;
-}
-
-/* CATEGORY CARD */
+/* CATEGORY */
 .cat-cards{
   display:flex;
   gap:12px;
   overflow:auto;
-  padding-bottom:8px;
+  padding:10px 16px;
 }
 
 .cat-card{
-  min-width:110px;
-  height:95px;
+  min-width:130px;
+  height:90px;
   border-radius:16px;
-  background:linear-gradient(
-    135deg,
-    rgba(155,48,255,0.12),
-    rgba(0,245,255,0.06)
-  );
-  border:1px solid rgba(155,48,255,0.2);
+  background:linear-gradient(135deg,rgba(155,48,255,.15),rgba(0,245,255,.08));
+  border:1px solid var(--border);
   display:flex;
-  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:8px;
-  cursor:pointer;
-  transition:0.3s;
+  font-weight:700;
+  transition:.3s;
 }
 
 .cat-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 0 30px rgba(155,48,255,0.4);
-}
-
-.cat-card-emoji{
-  font-size:28px;
-}
-
-.cat-card-name{
-  font-size:12px;
-  font-weight:700;
-}
-
-/* FILTER */
-.cat-scroll{
-  display:flex;
-  gap:10px;
-  overflow:auto;
-}
-
-.cat-btn{
-  padding:8px 18px;
-  border-radius:30px;
-  border:1px solid var(--border);
-  background:var(--card);
-  color:white;
-  cursor:pointer;
-}
-
-.cat-btn.active{
-  background:var(--purple);
+  transform:translateY(-5px);
+  box-shadow:0 0 20px rgba(155,48,255,.4);
 }
 
 /* PRODUCTS */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:14px;
-  padding:16px 16px 100px;
-}
-
-@media(min-width:700px){
-  .products-grid{
-    grid-template-columns:repeat(3,1fr);
-  }
+  gap:12px;
+  padding:16px;
 }
 
 .product-card{
@@ -257,62 +94,16 @@ body{
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
-  position:relative;
 }
 
-.product-card.pinned::after{
-  content:'📌 PIN';
-  position:absolute;
-  top:8px;
-  left:8px;
-  background:var(--pink);
-  color:white;
-  font-size:10px;
-  padding:4px 8px;
-  border-radius:20px;
-}
-
-.prod-thumb{
-  width:100%;
-  aspect-ratio:1;
-  object-fit:cover;
-}
-
-.prod-thumb-placeholder{
-  width:100%;
-  aspect-ratio:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#1a0533;
-  font-size:42px;
-}
-
-.prod-info{
-  padding:12px;
-}
-
-.prod-name{
-  font-size:14px;
-  font-weight:700;
-  margin-bottom:8px;
-}
-
-.prod-price{
-  color:var(--neon);
-  margin-bottom:12px;
-  font-weight:700;
-}
+.prod-info{padding:10px}
 
 .btn-order{
   width:100%;
-  border:none;
-  border-radius:10px;
   padding:10px;
-  cursor:pointer;
   background:linear-gradient(135deg,var(--purple),#6b00cc);
+  border:none;
   color:white;
-  font-weight:700;
 }
 
 /* OVERLAY */
@@ -320,30 +111,26 @@ body{
   position:fixed;
   inset:0;
   display:none;
-  align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,0.8);
-  z-index:999;
+  align-items:center;
+  background:rgba(0,0,0,.8);
 }
 
-.overlay.show{
-  display:flex;
-}
+.overlay.show{display:flex}
 
 .overlay-box{
-  width:100%;
+  width:90%;
   max-width:400px;
   background:var(--bg2);
-  border:1px solid var(--border);
-  border-radius:20px;
   padding:20px;
+  border-radius:20px;
+  border:1px solid var(--border);
 }
 
-.form-input{
+input{
   width:100%;
-  margin-top:6px;
-  margin-bottom:14px;
-  padding:12px;
+  padding:10px;
+  margin-top:8px;
   border-radius:10px;
   border:1px solid var(--border);
   background:#0d0820;
@@ -353,680 +140,166 @@ body{
 .btn-primary{
   width:100%;
   padding:12px;
-  border:none;
-  border-radius:10px;
+  margin-top:10px;
   background:linear-gradient(135deg,var(--purple),var(--neon2));
+  border:none;
   color:white;
   font-weight:700;
-  cursor:pointer;
+  border-radius:10px;
 }
 
+.qris-img{
+  width:200px;
+  display:block;
+  margin:10px auto;
+}
+
+/* TOAST */
 .toast{
   position:fixed;
   bottom:20px;
   left:50%;
   transform:translateX(-50%);
   background:linear-gradient(135deg,var(--purple),var(--neon2));
-  color:white;
-  padding:12px 24px;
+  padding:10px 20px;
   border-radius:30px;
   display:none;
 }
-
-.toast.show{
-  display:block;
-}
-
-.qris-img{
-  width:220px;
-  display:block;
-  margin:20px auto;
-  border-radius:14px;
-}
-
+.toast.show{display:block}
 </style>
 </head>
+
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
-
-  <div class="logo-area">
-    <div class="logo-icon">⚡</div>
-
-    <div class="logo-name" id="storeName">
-      IPUNGG SHOP
-    </div>
-  </div>
-
-  <button class="hamburger" onclick="toggleMenu()">
-    ☰
-  </button>
-
+  <div class="logo-name">IPUNGG SHOP</div>
+  <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
-<!-- SIDE MENU -->
-<div class="side-overlay" id="sideOverlay" onclick="toggleMenu()"></div>
-
-<div class="side-menu" id="sideMenu">
-
-  <div class="side-header">
-
-    <div class="side-title">
-      MENU
-    </div>
-
-    <button class="close-btn" onclick="toggleMenu()">
-      ✕
-    </button>
-
-  </div>
-
-  <div class="side-links">
-
-    <a class="side-link" id="linkWa" href="#" target="_blank">
-      💬 WhatsApp Admin
-    </a>
-
-    <a class="side-link" id="linkGroup" href="#" target="_blank">
-      👥 Grup
-    </a>
-
-    <a class="side-link" id="linkChannel" href="#" target="_blank">
-      📢 Channel
-    </a>
-
-  </div>
-
-</div>
-
-<!-- BANNER -->
-<div class="banner-wrap" id="bannerWrap"></div>
-
-<!-- KATEGORI -->
-<div class="section">
-
-  <div class="section-title">
-    ✦ KATEGORI
-  </div>
-
-  <div class="cat-cards" id="catCards"></div>
-
-</div>
-
-<!-- FILTER -->
-<div class="section">
-
-  <div class="cat-scroll" id="catFilter">
-
-    <button
-      class="cat-btn active"
-      onclick="filterCat('all', this)"
-    >
-      Semua
-    </button>
-
-  </div>
-
-</div>
+<!-- CATEGORY -->
+<div class="cat-cards" id="catCards"></div>
 
 <!-- PRODUCTS -->
-<div class="products-grid" id="productsGrid">
-
-  <div class="empty">
-    Loading produk...
-  </div>
-
-</div>
+<div class="products-grid" id="productsGrid"></div>
 
 <!-- ORDER -->
 <div class="overlay" id="orderOverlay">
-
   <div class="overlay-box">
+    <h3>ORDER</h3>
+    <div id="selProd"></div>
 
-    <h2 style="margin-bottom:16px">
-      🛒 ORDER
-    </h2>
+    <input id="orderName" placeholder="Nama">
+    <input id="orderDate" readonly>
 
-    <div id="selProdName"></div>
-
-    <div
-      id="selProdPrice"
-      style="margin-top:4px;color:var(--neon)"
-    ></div>
-
-    <input
-      class="form-input"
-      id="orderName"
-      placeholder="Nama"
-    >
-
-    <input
-      class="form-input"
-      id="orderDate"
-      readonly
-    >
-
-    <input
-      class="form-input"
-      value="QRIS ONLY"
-      readonly
-    >
-
-    <button
-      class="btn-primary"
-      onclick="submitOrder()"
-    >
-      KIRIM ADMIN
-    </button>
-
+    <button class="btn-primary" onclick="nextPay()">LANJUT PAYMENT</button>
   </div>
-
 </div>
 
 <!-- PAYMENT -->
 <div class="overlay" id="paymentOverlay">
-
   <div class="overlay-box">
 
-    <h2 style="margin-bottom:12px">
-      💳 PEMBAYARAN QRIS
-    </h2>
+    <h3>PAYMENT QRIS</h3>
 
-    <img
-      src="https://img2.pixhost.to/images/7838/725233706_elaina-1778564710301.jpg"
-      class="qris-img"
-    >
+    <img id="qrisImg" class="qris-img" src="URL_QRIS_KAMU">
 
-    <a
-      href="URL_QRIS_KAMU"
-      download
-      class="btn-primary"
-      style="
-        display:block;
-        text-align:center;
-        text-decoration:none;
-        margin-bottom:14px;
-      "
-    >
+    <a id="downloadQris" class="btn-primary" download style="display:block;text-align:center">
       DOWNLOAD QRIS
     </a>
 
-    <input
-      type="file"
-      class="form-input"
-      id="paymentProof"
-      accept="image/*"
-    >
+    <input type="file" id="proof">
 
-    <button
-      class="btn-primary"
-      onclick="sendPaymentProof()"
-    >
-      KIRIM ADMIN
-    </button>
+    <button class="btn-primary" onclick="sendWA()">KIRIM ADMIN</button>
 
   </div>
-
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script type="module">
+<script>
+let selectedProduct = null;
+let uploadedURL = "";
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+const waAdmin = "6285198959920";
 
-import {
-  getDatabase,
-  ref,
-  onValue
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+function renderCat(){
+  const cats=["Game","Voucher","Premium","Tools"];
 
-const firebaseConfig = {
-
-  apiKey:"AIzaSyA9tSehgxD2Pgb7YPy7Pq-_bcuKLKswyos",
-
-  authDomain:"ipung-store-2b96d.firebaseapp.com",
-
-  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
-
-  projectId:"ipung-store-2b96d",
-
-  storageBucket:"ipung-store-2b96d.firebasestorage.app",
-
-  messagingSenderId:"906202337063",
-
-  appId:"1:906202337063:web:1a39b7bad99a85b23c2302"
-
-};
-
-const app = initializeApp(firebaseConfig);
-
-const db = getDatabase(app);
-
-window._storeData = {};
-window._activeCat = 'all';
-
-onValue(ref(db,"store"),(snapshot)=>{
-
-  const data = snapshot.val() || {};
-
-  window._storeData = data;
-
-  applySettings(data.settings || {});
-
-  renderBanner(data.settings || {});
-
-  renderCategories(data.categories || {});
-
-  renderProducts(
-    data.products || {},
-    window._activeCat
-  );
-
-});
-
-function applySettings(s){
-
-  if(s.storeName){
-
-    document.getElementById("storeName")
-      .textContent = s.storeName;
-
-    document.title = s.storeName;
-
-  }
-
-  if(s.urlAdmin){
-
-    document.getElementById("linkWa")
-      .href =
-      "https://wa.me/" +
-      s.urlAdmin.replace(/\D/g,'');
-
-  }
-
-  if(s.urlGroup){
-
-    document.getElementById("linkGroup")
-      .href = s.urlGroup;
-
-  }
-
-  if(s.urlChannel){
-
-    document.getElementById("linkChannel")
-      .href = s.urlChannel;
-
-  }
-
+  document.getElementById("catCards").innerHTML =
+  cats.map(c=>`<div class="cat-card">${c}</div>`).join("");
 }
 
-function renderBanner(s){
-
-  const wrap =
-    document.getElementById("bannerWrap");
-
-  const banner = s.banner || "";
-
-  if(!banner){
-    wrap.innerHTML = "";
-    return;
-  }
-
-  if(banner.includes(".mp4")){
-
-    wrap.innerHTML = `
-      <video autoplay muted loop playsinline>
-        <source src="${banner}" type="video/mp4">
-      </video>
-    `;
-
-  } else {
-
-    wrap.innerHTML = `
-      <img src="${banner}">
-    `;
-
-  }
-
-}
-
-window.renderCategories = function(cats){
-
-  const filter =
-    document.getElementById("catFilter");
-
-  const cards =
-    document.getElementById("catCards");
-
-  const list =
-    Object.values(cats || {});
-
-  filter.innerHTML = `
-    <button
-      class="cat-btn active"
-      onclick="filterCat('all', this)"
-    >
-      Semua
-    </button>
-  `;
-
-  cards.innerHTML = "";
-
-  const emojis = [
-    "🎮","💎","👑","⚡",
-    "🔥","🌙","✨","🎁"
+function renderProd(){
+  const p=[
+    {name:"Produk A",price:10000},
+    {name:"Produk B",price:20000}
   ];
 
-  list.forEach((cat,i)=>{
-
-    filter.innerHTML += `
-      <button
-        class="cat-btn"
-        onclick="filterCat('${cat.name}', this)"
-      >
-        ${cat.name}
-      </button>
-    `;
-
-    cards.innerHTML += `
-      <div
-        class="cat-card"
-        onclick="filterCat('${cat.name}')"
-      >
-        <div class="cat-card-emoji">
-          ${emojis[i % emojis.length]}
-        </div>
-
-        <div class="cat-card-name">
-          ${cat.name}
-        </div>
-      </div>
-    `;
-
-  });
-
-};
-
-window.filterCat = function(cat,btn){
-
-  window._activeCat = cat;
-
-  document
-    .querySelectorAll('.cat-btn')
-    .forEach(x=>x.classList.remove('active'));
-
-  if(btn){
-    btn.classList.add('active');
-  }
-
-  renderProducts(
-    window._storeData.products || {},
-    cat
-  );
-
-};
-
-window.renderProducts = function(prods,activeCat){
-
-  const grid =
-    document.getElementById("productsGrid");
-
-  let list =
-    Object.values(prods || {});
-
-  if(activeCat && activeCat !== 'all'){
-
-    list = list.filter(
-      p => p.category === activeCat
-    );
-
-  }
-
-  list.sort(
-    (a,b)=>
-    (b.pinned===true) -
-    (a.pinned===true)
-  );
-
-  if(list.length===0){
-
-    grid.innerHTML = `
-      <div class="empty">
-        Belum ada produk
-      </div>
-    `;
-
-    return;
-
-  }
-
-  grid.innerHTML = list.map(p=>`
-
-    <div class="product-card ${p.pinned ? 'pinned' : ''}">
-
-      ${
-        p.thumbnail
-        ? `
-          <img
-            class="prod-thumb"
-            src="${p.thumbnail}"
-          >
-        `
-        : `
-          <div class="prod-thumb-placeholder">
-            📦
-          </div>
-        `
-      }
-
+  document.getElementById("productsGrid").innerHTML =
+  p.map(x=>`
+    <div class="product-card">
       <div class="prod-info">
-
-        <div class="prod-name">
-          ${p.name}
-        </div>
-
-        <div class="prod-price">
-          Rp ${Number(p.price).toLocaleString('id-ID')}
-        </div>
-
-        <button
-          class="btn-order"
-          onclick='openOrder(${JSON.stringify(p)})'
-        >
-          🛒 ORDER
-        </button>
-
+        <div>${x.name}</div>
+        <div>Rp ${x.price}</div>
+        <button class="btn-order" onclick='openOrder(${JSON.stringify(x)})'>ORDER</button>
       </div>
-
     </div>
+  `).join("");
+}
 
-  `).join('');
+function openOrder(p){
+  selectedProduct=p;
+  document.getElementById("selProd").innerText=p.name;
+  document.getElementById("orderDate").value=new Date().toLocaleDateString();
+  document.getElementById("orderOverlay").classList.add("show");
+}
 
-};
+function nextPay(){
+  document.getElementById("orderOverlay").classList.remove("show");
+  document.getElementById("paymentOverlay").classList.add("show");
+}
 
-window.openOrder = function(prod){
+async function sendWA(){
 
-  window._selectedProduct = prod;
+  const file=document.getElementById("proof").files[0];
+  if(!file){return alert("Upload dulu");}
 
-  document.getElementById("selProdName")
-    .textContent = prod.name;
+  const fd=new FormData();
+  fd.append("image",file);
 
-  document.getElementById("selProdPrice")
-    .textContent =
-      "Rp " +
-      Number(prod.price)
-      .toLocaleString('id-ID');
+  const res=await fetch("https://api.imgbb.com/1/upload?key=API_KEY_KAMU",{method:"POST",body:fd});
+  const data=await res.json();
 
-  document.getElementById("orderDate")
-    .value =
-    new Date().toLocaleDateString("id-ID");
+  uploadedURL=data.data.url;
 
-  document.getElementById("orderOverlay")
-    .classList.add("show");
-
-};
-
-window.submitOrder = function(){
-
-  const name =
-    document.getElementById("orderName")
-    .value.trim();
-
-  if(!name){
-
-    showToast("Isi nama dulu!");
-
-    return;
-
-  }
-
-  window._orderName = name;
-
-  document.getElementById("orderOverlay")
-    .classList.remove("show");
-
-  document.getElementById("paymentOverlay")
-    .classList.add("show");
-
-};
-
-window.sendPaymentProof = async function(){
-
-  const file =
-    document.getElementById("paymentProof")
-    .files[0];
-
-  if(!file){
-
-    showToast("Upload bukti dulu!");
-
-    return;
-
-  }
-
-  showToast("Uploading...");
-
-  const formData = new FormData();
-
-  formData.append("image",file);
-
-  const res = await fetch(
-    "https://api.imgbb.com/1/upload?key=API_IMGBB_KAMU",
-    {
-      method:"POST",
-      body:formData
-    }
-  );
-
-  const data = await res.json();
-
-  const img =
-    data?.data?.url || "-";
-
-  const prod =
-    window._selectedProduct;
-
-  const wa =
-    "6285198959920";
-
-  const msg = encodeURIComponent(
-
+  const msg=encodeURIComponent(
 `🛒 ORDER BARU
+📦 Produk: ${selectedProduct.name}
+💰 Harga: Rp ${selectedProduct.price}
+👤 Nama: ${document.getElementById("orderName").value}
+📅 Tanggal: ${document.getElementById("orderDate").value}
 
-📦 Produk: ${prod.name}
-💰 Harga: Rp ${Number(prod.price).toLocaleString('id-ID')}
-👤 Nama: ${window._orderName}
 💳 Payment: QRIS
-📸 Bukti: ${img}
-
-Dikirim dari IPUNGG SHOP`
-
+📸 Bukti: ${uploadedURL}
+🔗 URL Bukti: ${uploadedURL}
+`
   );
 
-  window.open(
-    `https://wa.me/${wa}?text=${msg}`,
-    '_blank'
-  );
+  window.open(`https://wa.me/${waAdmin}?text=${msg}`,"_blank");
 
-  showToast("Order dikirim!");
+  show("Terkirim");
+}
 
-};
+function show(t){
+  const x=document.getElementById("toast");
+  x.innerText=t;
+  x.classList.add("show");
+  setTimeout(()=>x.classList.remove("show"),2000);
+}
 
-window.toggleMenu = function(){
-
-  document
-    .getElementById("sideMenu")
-    .classList.toggle("open");
-
-  document
-    .getElementById("sideOverlay")
-    .classList.toggle("open");
-
-};
-
-window.showToast = function(msg){
-
-  const t =
-    document.getElementById("toast");
-
-  t.textContent = msg;
-
-  t.classList.add("show");
-
-  setTimeout(()=>{
-
-    t.classList.remove("show");
-
-  },2500);
-
-};
-
-// BACK BUTTON HP
-history.pushState(null,null,location.href);
-
-window.addEventListener("popstate",()=>{
-
-  const menu =
-    document.getElementById("sideMenu");
-
-  const order =
-    document.getElementById("orderOverlay");
-
-  const pay =
-    document.getElementById("paymentOverlay");
-
-  if(menu.classList.contains("open")){
-
-    toggleMenu();
-
-    history.pushState(null,null,location.href);
-
-  }
-
-  if(order.classList.contains("show")){
-
-    order.classList.remove("show");
-
-    history.pushState(null,null,location.href);
-
-  }
-
-  if(pay.classList.contains("show")){
-
-    pay.classList.remove("show");
-
-    history.pushState(null,null,location.href);
-
-  }
-
-});
-
+renderCat();
+renderProd();
 </script>
 
 </body>
-      </html>
+</html>
