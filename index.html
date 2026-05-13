@@ -238,7 +238,6 @@ body{
   color:white;
   text-decoration:none;
 }
-
 </style>
 </head>
 
@@ -249,7 +248,6 @@ body{
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
-<!-- MENU -->
 <div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="side-menu" id="menu">
@@ -259,44 +257,32 @@ body{
   <a class="side-link" id="channel">📢 Channel Official Ipungg</a>
 </div>
 
-<!-- BANNER -->
 <div class="banner-wrap" id="banner"></div>
-
-<!-- CATEGORY -->
 <div class="cat-cards" id="cats"></div>
-
-<!-- PRODUCTS -->
 <div class="products-grid" id="products"></div>
 
-<!-- ORDER -->
 <div class="overlay" id="orderBox">
   <div class="box">
     <button class="close" onclick="closeAll()">×</button>
 
     <h3>🛒 ORDER</h3>
-
     <div id="pname"></div>
     <div id="pprice"></div>
 
     <input class="input" id="name" placeholder="Nama 💖">
-
     <button class="btn" onclick="nextPay()">LANJUT PAYMENT</button>
   </div>
 </div>
 
-<!-- PAYMENT -->
 <div class="overlay" id="payBox">
   <div class="box">
     <button class="close" onclick="closeAll()">×</button>
 
     <h3>💳 QRIS</h3>
-
     <img id="qrisImg" class="qris">
-
     <a id="downloadQris" class="download" download>⬇ Download QRIS</a>
 
     <input type="file" id="proof" class="input">
-
     <button class="btn" onclick="send()">KIRIM ADMIN 💖</button>
   </div>
 </div>
@@ -315,6 +301,13 @@ const app = initializeApp({
 const db = getDatabase(app);
 
 let store={}, selected={}, active="all";
+
+const rupiah = (num) =>
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(num);
 
 onValue(ref(db,"store"),snap=>{
   store = snap.val() || {settings:{},products:{},categories:{}};
@@ -347,7 +340,6 @@ function render(){
     cats.map(c=>`<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`).join("");
 
   let all = Object.values(store.products || {});
-
   let p = active!="all" ? all.filter(x=>x.category==active) : all;
 
   const pinned = p.filter(x=>x.pinned);
@@ -362,14 +354,13 @@ function render(){
       <img class="prod-thumb" src="${x.thumbnail}">
       <div class="prod-info">
         <div>${x.name}</div>
-        <div>Rp ${x.price}</div>
+        <div>${rupiah(x.price)}</div>
         <button class="btn" onclick='order(${JSON.stringify(x)})'>ORDER 💖</button>
       </div>
     </div>`
   ).join("");
 }
 
-/* ORDER FORMAT FIX */
 window.send = async () => {
   const file = document.getElementById("proof").files[0];
 
@@ -387,7 +378,7 @@ window.send = async () => {
 
 👤 Nama : ${name}
 🛒 ${selected.name}
-💰 Rp ${selected.price}
+💰 ${rupiah(selected.price)}
 📸 ${img}
 
 💌 Mohon diproses ya admin 😘`
@@ -408,7 +399,7 @@ window.toggleMenu=()=>{
 window.order=p=>{
   selected=p;
   document.getElementById("pname").innerText=p.name;
-  document.getElementById("pprice").innerText=p.price;
+  document.getElementById("pprice").innerText=rupiah(p.price);
   document.getElementById("orderBox").classList.add("show");
 };
 
@@ -421,8 +412,7 @@ window.closeAll=()=>{
   document.getElementById("orderBox").classList.remove("show");
   document.getElementById("payBox").classList.remove("show");
 };
-
 </script>
 
 </body>
-  </html>
+      </html>
