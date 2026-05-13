@@ -238,6 +238,56 @@ body{
   color:white;
   text-decoration:none;
 }
+
+/* =========================
+   COPYRIGHT ANIMASI UNGU
+========================= */
+.copyright{
+  text-align:center;
+  padding:20px;
+  margin-top:25px;
+  font-family:'Orbitron', sans-serif;
+  font-size:14px;
+  color:#c77dff;
+
+  position:relative;
+
+  text-shadow:
+    0 0 5px #9b30ff,
+    0 0 10px #9b30ff,
+    0 0 20px #9b30ff;
+
+  animation:floating 3s ease-in-out infinite;
+}
+
+/* glow background */
+.copyright::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:140px;
+  height:140px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(155,48,255,0.5), transparent 70%);
+  filter:blur(12px);
+  z-index:-1;
+  animation:pulse 2s infinite;
+}
+
+/* floating */
+@keyframes floating{
+  0%{transform:translateY(0px);}
+  50%{transform:translateY(-8px);}
+  100%{transform:translateY(0px);}
+}
+
+/* pulse glow */
+@keyframes pulse{
+  0%{opacity:0.4; transform:translate(-50%,-50%) scale(1);}
+  50%{opacity:0.9; transform:translate(-50%,-50%) scale(1.25);}
+  100%{opacity:0.4; transform:translate(-50%,-50%) scale(1);}
+}
 </style>
 </head>
 
@@ -260,6 +310,11 @@ body{
 <div class="banner-wrap" id="banner"></div>
 <div class="cat-cards" id="cats"></div>
 <div class="products-grid" id="products"></div>
+
+<!-- COPYRIGHT -->
+<div class="copyright">
+  © IPUNGG X MEZUKI
+</div>
 
 <div class="overlay" id="orderBox">
   <div class="box">
@@ -302,11 +357,11 @@ const db = getDatabase(app);
 
 let store={}, selected={}, active="all";
 
-const rupiah = (num) =>
-  new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
+const rupiah = (num)=>
+  new Intl.NumberFormat('id-ID',{
+    style:'currency',
+    currency:'IDR',
+    minimumFractionDigits:0
   }).format(num);
 
 onValue(ref(db,"store"),snap=>{
@@ -415,4 +470,4 @@ window.closeAll=()=>{
 </script>
 
 </body>
-      </html>
+  </html>
