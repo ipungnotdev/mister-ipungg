@@ -239,18 +239,15 @@ body{
   text-decoration:none;
 }
 
-/* =========================
-   COPYRIGHT (FIXED)
-========================= */
+/* COPYRIGHT */
 .copyright{
   text-align:center;
   padding:30px 10px;
-  margin-top:80px; /* lebih ke bawah */
+  margin-top:80px;
 
   font-family:'Orbitron', sans-serif;
   font-size:14px;
-
-  color:#b07cff; /* ungu tua */
+  color:#b07cff;
 
   position:relative;
 
@@ -261,7 +258,6 @@ body{
   animation:floatSoft 4s ease-in-out infinite;
 }
 
-/* glow ungu tua */
 .copyright::before{
   content:"";
   position:absolute;
@@ -281,7 +277,6 @@ body{
   z-index:-1;
 }
 
-/* smooth floating (NO blink) */
 @keyframes floatSoft{
   0%{transform:translateY(0px);}
   50%{transform:translateY(-6px);}
@@ -310,7 +305,6 @@ body{
 <div class="cat-cards" id="cats"></div>
 <div class="products-grid" id="products"></div>
 
-<!-- COPYRIGHT -->
 <div class="copyright">
   © IPUNGG X MEZUKI
 </div>
@@ -394,12 +388,13 @@ function render(){
     cats.map(c=>`<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`).join("");
 
   let all = Object.values(store.products || {});
-  let p = active!="all" ? all.filter(x=>x.category==active) : all;
 
-  const pinned = p.filter(x=>x.pinned);
-  const normal = p.filter(x=>!x.pinned);
-
-  p = [...pinned,...normal];
+  let p;
+  if(active === "all"){
+    p = all.filter(x => x.pinned);   // ✅ FIX UTAMA
+  } else {
+    p = all.filter(x => x.category == active);
+  }
 
   document.getElementById("products").innerHTML =
   p.map(x=>
