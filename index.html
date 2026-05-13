@@ -10,7 +10,6 @@
 <style>
 :root{
   --bg:#05020f;
-  --bg2:#0a0520;
   --purple:#9b30ff;
   --neon:#bf5fff;
   --neon2:#00f5ff;
@@ -57,10 +56,9 @@ body{
   color:white;
   font-size:22px;
   cursor:pointer;
-  z-index:10000;
 }
 
-/* SIDE MENU FIX */
+/* SIDE */
 .side-overlay{
   position:fixed;
   inset:0;
@@ -95,14 +93,13 @@ body{
 }
 
 /* BANNER */
-.banner-wrap img,
-.banner-wrap video{
+.banner-wrap img{
   width:100%;
-  max-height:250px;
+  max-height:240px;
   object-fit:cover;
 }
 
-/* CATEGORY TEXT CARD */
+/* CATEGORY */
 .cat-cards{
   display:flex;
   gap:12px;
@@ -113,16 +110,15 @@ body{
 .cat-card{
   min-width:150px;
   height:110px;
-  background:linear-gradient(135deg,rgba(155,48,255,.18),rgba(0,245,255,.06));
-  border:1px solid rgba(155,48,255,.3);
-  border-radius:18px;
   display:flex;
   align-items:center;
   justify-content:center;
+  background:linear-gradient(135deg,rgba(155,48,255,.2),rgba(0,245,255,.05));
+  border:1px solid rgba(155,48,255,.3);
+  border-radius:18px;
   font-weight:800;
   cursor:pointer;
-  transition:.25s;
-  font-size:14px;
+  transition:.3s;
 }
 
 .cat-card:hover{
@@ -130,7 +126,7 @@ body{
   box-shadow:0 0 25px rgba(155,48,255,.5);
 }
 
-/* PRODUCTS */
+/* PRODUCTS ANIMATED */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -139,10 +135,23 @@ body{
 }
 
 .product-card{
-  background:var(--card);
+  background:linear-gradient(145deg,#120822,#0b0515);
   border:1px solid var(--border);
-  border-radius:14px;
+  border-radius:16px;
   overflow:hidden;
+  animation:float 4s ease-in-out infinite;
+  transition:.3s;
+}
+
+.product-card:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 25px rgba(155,48,255,.6);
+}
+
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-4px);}
+  100%{transform:translateY(0);}
 }
 
 .prod-thumb{
@@ -164,7 +173,7 @@ body{
   cursor:pointer;
 }
 
-/* OVERLAY FIX CLICK */
+/* OVERLAY */
 .overlay{
   position:fixed;
   inset:0;
@@ -179,15 +188,9 @@ body{
 .overlay-box{
   width:90%;
   max-width:400px;
-  background:var(--bg2);
+  background:#0a0520;
   padding:20px;
   border-radius:16px;
-}
-
-.qris-img{
-  width:200px;
-  margin:15px auto;
-  display:block;
 }
 
 .form-input{
@@ -200,6 +203,13 @@ body{
   color:white;
 }
 
+/* QRIS */
+.qris-img{
+  width:200px;
+  margin:10px auto;
+  display:block;
+}
+
 .btn-primary{
   width:100%;
   padding:12px;
@@ -208,22 +218,8 @@ body{
   background:linear-gradient(135deg,var(--purple),var(--neon2));
   color:white;
   font-weight:700;
+  cursor:pointer;
 }
-
-/* TOAST */
-.toast{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:linear-gradient(135deg,var(--purple),var(--neon2));
-  padding:12px 20px;
-  border-radius:30px;
-  color:white;
-  display:none;
-  z-index:10001;
-}
-.toast.show{display:block;}
 </style>
 </head>
 
@@ -259,27 +255,26 @@ body{
     <div id="selProdPrice"></div>
 
     <input class="form-input" id="orderName" placeholder="Nama">
-    <input class="form-input" id="orderDate" readonly>
-    <input class="form-input" value="QRIS ONLY" readonly>
-
-    <button class="btn-primary" onclick="submitOrder()">KIRIM ADMIN</button>
+    <button class="btn-primary" onclick="submitOrder()">LANJUT PAYMENT</button>
   </div>
 </div>
 
 <!-- PAYMENT -->
 <div class="overlay" id="paymentOverlay">
   <div class="overlay-box">
+
     <h3>PAYMENT QRIS</h3>
 
-    <img src="URL_QRIS_KAMU" class="qris-img">
+    <img src="http://rahmad-elaina.my.id/file/0ff97318b1.jpg" class="qris-img">
 
     <input type="file" id="paymentProof" class="form-input">
 
-    <button class="btn-primary" onclick="sendPaymentProof()">KIRIM ADMIN</button>
+    <button class="btn-primary" onclick="sendPaymentProof()">
+      KIRIM BUKTI
+    </button>
+
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -288,8 +283,7 @@ import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10
 const app = initializeApp({
   apiKey:"AIzaSyA9tSehgxD2Pgb7YPy7Pq-_bcuKLKswyos",
   authDomain:"ipung-store-2b96d.firebaseapp.com",
-  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"ipung-store-2b96d"
+  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app"
 });
 
 const db = getDatabase(app);
@@ -298,27 +292,17 @@ window._data = {};
 
 onValue(ref(db,"store"),(snap)=>{
   const d = snap.val()||{};
-  window._data = d;
+  window._data=d;
 
-  document.getElementById("storeName").textContent = d.settings?.storeName || "IPUNGG SHOP";
+  document.getElementById("storeName").textContent=d.settings?.storeName||"IPUNGG SHOP";
 
   renderCats(d.categories||{});
   renderProds(d.products||{});
-  renderBanner(d.settings?.banner||"");
-
-  document.getElementById("linkWa").href="https://wa.me/"+(d.settings?.urlAdmin||"");
-  document.getElementById("linkGroup").href=d.settings?.urlGroup||"#";
-  document.getElementById("linkChannel").href=d.settings?.urlChannel||"#";
 });
 
-function renderBanner(b){
-  const el=document.getElementById("bannerWrap");
-  el.innerHTML=b?`<img src="${b}">`:"";
-}
-
 function renderCats(cats){
-  const el=document.getElementById("catCards");
-  el.innerHTML=Object.values(cats).map(c=>
+  document.getElementById("catCards").innerHTML =
+  Object.values(cats).map(c=>
     `<div class="cat-card" onclick="filterCat('${c.name}')">${c.name}</div>`
   ).join('');
 }
@@ -327,10 +311,10 @@ window.filterCat=function(cat){
   renderProds(window._data.products,cat);
 };
 
-function renderProds(p,c="all"){
+function renderProds(p,cat="all"){
   const el=document.getElementById("productsGrid");
   let arr=Object.values(p||{});
-  if(c!=="all")arr=arr.filter(x=>x.category===c);
+  if(cat!=="all")arr=arr.filter(x=>x.category===cat);
 
   el.innerHTML=arr.map(x=>`
     <div class="product-card">
@@ -352,15 +336,14 @@ window.openOrder=function(p){
 };
 
 window.submitOrder=function(){
-  const name=document.getElementById("orderName").value;
-  window._name=name;
+  window._name=document.getElementById("orderName").value;
   document.getElementById("orderOverlay").classList.remove("show");
   document.getElementById("paymentOverlay").classList.add("show");
 };
 
 window.sendPaymentProof=async function(){
-  const file=document.getElementById("paymentProof").files[0];
 
+  const file=document.getElementById("paymentProof").files[0];
   const fd=new FormData();
   fd.append("image",file);
 
@@ -370,15 +353,12 @@ window.sendPaymentProof=async function(){
   const img=json.data.url;
 
   const msg=encodeURIComponent(
-`🛒 ORDER BARU IPUNGG SHOP
+`🛒 ORDER BARU
 
-📦 Produk  : ${window._p.name}
-💰 Harga   : Rp ${Number(window._p.price).toLocaleString('id-ID')}
-👤 Nama    : ${window._name}
-
-💳 Payment : QRIS ONLY
-📸 Bukti:
-${img}`
+📦 Produk: ${window._p.name}
+💰 Harga: Rp ${window._p.price}
+👤 Nama: ${window._name}
+📸 Bukti: ${img}`
   );
 
   window.open("https://wa.me/"+window._data.settings.urlAdmin+"?text="+msg);
@@ -388,14 +368,7 @@ window.toggleMenu=function(){
   document.getElementById("sideMenu").classList.toggle("open");
   document.getElementById("sideOverlay").classList.toggle("open");
 };
-
-window.showToast=function(t){
-  const el=document.getElementById("toast");
-  el.textContent=t;
-  el.classList.add("show");
-  setTimeout(()=>el.classList.remove("show"),2000);
-};
 </script>
 
 </body>
-  </html>
+      </html>
