@@ -14,13 +14,14 @@
   --purple:#9b30ff;
   --cyan:#00f5ff;
   --border:rgba(155,48,255,.25);
+  --text:#f0e6ff;
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
 
 body{
   background:var(--bg);
-  color:white;
+  color:var(--text);
   font-family:'Rajdhani';
 }
 
@@ -39,7 +40,10 @@ body{
 
 .logo{
   font-family:'Orbitron';
-  color:var(--cyan);
+  font-size:18px;
+  background:linear-gradient(90deg,#9b30ff,#00f5ff);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 
 .hamburger{
@@ -58,6 +62,7 @@ body{
   background:rgba(0,0,0,.6);
   opacity:0;
   pointer-events:none;
+  z-index:998;
 }
 .side-overlay.open{opacity:1;pointer-events:auto}
 
@@ -70,6 +75,7 @@ body{
   background:#0b0618;
   border-left:1px solid var(--border);
   transition:.3s;
+  z-index:999;
 }
 .side-menu.open{right:0}
 
@@ -90,16 +96,20 @@ body{
 }
 
 .cat{
-  min-width:120px;
+  min-width:130px;
   padding:14px;
   border-radius:14px;
   background:linear-gradient(135deg,#1a0933,#0b0618);
-  border:1px solid var(--border);
+  border:1px solid rgba(155,48,255,.3);
   text-align:center;
   cursor:pointer;
-  transition:.2s;
+  transition:.25s;
+  font-weight:600;
 }
-.cat:hover{transform:scale(1.06)}
+.cat:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 18px rgba(155,48,255,.25);
+}
 
 /* PRODUCTS */
 .grid{
@@ -110,16 +120,28 @@ body{
 }
 
 .card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
+  background:linear-gradient(145deg,#120822,#0b0618);
+  border:1px solid rgba(155,48,255,.25);
+  border-radius:16px;
   overflow:hidden;
+  box-shadow:0 0 18px rgba(155,48,255,.08);
+  transition:.25s;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 0 25px rgba(0,245,255,.15);
 }
 
 .card img{
   width:100%;
-  height:120px;
+  height:130px;
   object-fit:cover;
+  transition:.3s;
+}
+
+.card:hover img{
+  transform:scale(1.05);
 }
 
 /* ORDER */
@@ -153,10 +175,11 @@ body{
 }
 
 .qr{
-  width:200px;
+  width:180px;
   display:block;
-  margin:10px auto;
-  border-radius:12px;
+  margin:12px auto;
+  border-radius:14px;
+  border:1px solid rgba(155,48,255,.3);
 }
 
 /* TOAST */
@@ -177,7 +200,7 @@ body{
 <body>
 
 <div class="navbar">
-  <div class="logo">⚡ IPUNGG SHOP</div>
+  <div class="logo">IPUNGG SHOP</div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </div>
 
@@ -203,7 +226,7 @@ body{
     <input class="input" id="name" placeholder="Nama">
     <input class="input" id="date" readonly>
 
-    <button onclick="next()" class="input">LANJUT</button>
+    <button class="input" onclick="next()">LANJUT</button>
   </div>
 </div>
 
@@ -216,7 +239,7 @@ body{
 
     <input type="file" class="input" id="proof">
 
-    <button onclick="send()" class="input">KIRIM WA</button>
+    <button class="input" onclick="send()">KIRIM WA</button>
   </div>
 </div>
 
@@ -236,8 +259,8 @@ const db = getDatabase(app);
 
 let data={}, selected={}, list=[];
 
-/* 🔥 FIX DATABASE LAMA + BARU */
-onValue(ref(db,"store"),snap=>{
+/* 🔥 TIDAK UBAH STRUKTUR (AMAN) */
+onValue(ref(db,"/"),snap=>{
   const raw = snap.val() || {};
 
   data = {
@@ -251,7 +274,6 @@ onValue(ref(db,"store"),snap=>{
 
 function render(){
 
-  /* banner */
   const b=document.getElementById("banner");
   const bn=data.settings.banner;
 
@@ -261,7 +283,6 @@ function render(){
       : `<img src="${bn}">`;
   }
 
-  /* category */
   const c=document.getElementById("cats");
   c.innerHTML="";
   Object.values(data.categories).forEach(x=>{
@@ -280,18 +301,13 @@ window.filter=(cat)=>{
 function show(arr){
   const g=document.getElementById("products");
 
-  if(!arr.length){
-    g.innerHTML="Belum ada produk";
-    return;
-  }
-
   g.innerHTML = arr.map(p=>`
     <div class="card">
       <img src="${p.thumbnail||''}">
       <div style="padding:10px">
         <b>${p.name}</b>
         <div style="color:#00f5ff">Rp ${Number(p.price).toLocaleString()}</div>
-        <button onclick='order(${JSON.stringify(p)})' class="input">ORDER</button>
+        <button class="input" onclick='order(${JSON.stringify(p)})'>ORDER</button>
       </div>
     </div>
   `).join('');
@@ -323,22 +339,11 @@ Harga : ${selected.price}`
   window.open("https://wa.me/6285198959920?text="+msg);
 }
 
-/* MENU FIX */
 window.toggleMenu=()=>{
   document.getElementById("menu").classList.toggle("open");
   document.getElementById("ov").classList.toggle("open");
 }
-
-/* BACK FIX */
-window.addEventListener("popstate",()=>{
-  document.getElementById("menu").classList.remove("open");
-  document.getElementById("order").classList.remove("show");
-  document.getElementById("pay").classList.remove("show");
-  history.pushState({},'');
-});
-
-history.pushState({},'');
 </script>
 
 </body>
-  </html>
+</html>
