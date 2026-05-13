@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>IPUNGG SHOP</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,7 +10,6 @@
 <style>
 :root{
   --bg:#05020f;
-  --bg2:#0a0520;
   --purple:#9b30ff;
   --neon:#bf5fff;
   --neon2:#00f5ff;
@@ -21,14 +19,8 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;overflow-x:hidden;}
 
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Rajdhani',sans-serif;
-}
-
-/* NAV */
 .navbar{
   height:60px;
   display:flex;
@@ -37,6 +29,9 @@ body{
   padding:0 20px;
   background:#070312;
   border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:100;
 }
 
 .logo-name{
@@ -46,117 +41,95 @@ body{
 }
 
 .hamburger{
-  background:rgba(155,48,255,0.15);
-  border:none;
+  width:40px;height:40px;
+  border:none;border-radius:10px;
+  background:rgba(155,48,255,0.2);
   color:white;
-  font-size:20px;
-  padding:8px 12px;
-  border-radius:10px;
 }
 
-/* CATEGORY */
-.section{padding:15px;}
-
-.section-title{
-  color:var(--neon2);
-  font-size:12px;
-  margin-bottom:10px;
+/* banner */
+.banner-wrap img,.banner-wrap video{
+  width:100%;
+  max-height:280px;
+  object-fit:cover;
 }
 
-.cat-cards{
-  display:flex;
-  gap:10px;
-  overflow:auto;
-}
-
-.cat-card{
-  min-width:120px;
-  padding:15px;
-  background:var(--card);
+/* category */
+.section{padding:14px}
+.cat-scroll{display:flex;gap:10px;overflow:auto}
+.cat-btn{
+  padding:8px 14px;
+  border-radius:20px;
   border:1px solid var(--border);
-  border-radius:12px;
-  text-align:center;
-  cursor:pointer;
+  background:var(--card);
+  color:white;
 }
+.cat-btn.active{background:var(--purple)}
 
-/* PRODUCT */
+/* products */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:12px;
-  padding:15px;
+  padding:14px;
 }
 
 .product-card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:12px;
-  overflow:hidden;
 }
 
-.prod-thumb{
-  width:100%;
-  aspect-ratio:1;
-  object-fit:cover;
-}
-
-.prod-info{
-  padding:10px;
-}
-
-.prod-name{
-  font-weight:700;
-}
-
-.prod-price{
-  color:var(--neon);
-  margin:5px 0;
-}
+.prod-thumb{width:100%;aspect-ratio:1;object-fit:cover}
+.prod-thumb-placeholder{height:130px;display:flex;align-items:center;justify-content:center}
+.prod-info{padding:10px}
+.prod-name{font-weight:700}
+.prod-price{color:var(--neon);margin:5px 0}
 
 .btn-order{
   width:100%;
   padding:8px;
-  background:linear-gradient(135deg,var(--purple),var(--neon2));
   border:none;
+  border-radius:8px;
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
   color:white;
   font-weight:700;
 }
 
-/* OVERLAY */
+/* overlay */
 .overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,0.8);
   display:none;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
 }
-
-.overlay.show{display:flex;}
-
+.overlay.show{display:flex}
 .overlay-box{
+  background:#0a0520;
+  padding:18px;
+  border-radius:14px;
   width:90%;
-  max-width:400px;
-  background:var(--bg2);
-  padding:20px;
-  border-radius:15px;
+  max-width:380px;
 }
 
 .form-input{
   width:100%;
-  margin:8px 0;
   padding:10px;
+  margin-top:8px;
   border-radius:8px;
   border:1px solid var(--border);
-  background:#0b0515;
+  background:#0d0820;
   color:white;
 }
 
 .btn-primary{
   width:100%;
   padding:10px;
+  margin-top:10px;
   border:none;
-  border-radius:8px;
+  border-radius:10px;
   background:linear-gradient(135deg,var(--purple),var(--neon2));
   color:white;
   font-weight:700;
@@ -164,60 +137,69 @@ body{
 
 .qris-img{
   width:200px;
-  display:block;
   margin:10px auto;
+  display:block;
+  border-radius:12px;
 }
+
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
+  padding:10px 20px;
+  border-radius:20px;
+  display:none;
+}
+.toast.show{display:block}
 </style>
 </head>
 
 <body>
 
-<nav class="navbar">
+<div class="navbar">
   <div class="logo-name" id="storeName">IPUNGG SHOP</div>
-  <button class="hamburger" onclick="toggleMenu()">☰</button>
-</nav>
-
-<!-- CATEGORY -->
-<div class="section">
-  <div class="section-title">KATEGORI</div>
-  <div class="cat-cards" id="catCards"></div>
+  <button class="hamburger" onclick="toggleOrder()">☰</button>
 </div>
 
-<!-- PRODUCTS -->
+<div class="banner-wrap" id="bannerWrap"></div>
+
+<div class="section">
+  <div class="cat-scroll" id="catFilter"></div>
+</div>
+
 <div class="products-grid" id="productsGrid"></div>
 
 <!-- ORDER -->
 <div class="overlay" id="orderOverlay">
   <div class="overlay-box">
-    <h3>ORDER</h3>
+    <h3>🛒 ORDER</h3>
 
-    <div id="selProdName"></div>
-    <div id="selProdPrice"></div>
+    <div id="selProd"></div>
 
     <input class="form-input" id="orderName" placeholder="Nama">
     <input class="form-input" id="orderDate" readonly>
-    <input class="form-input" value="QRIS ONLY" readonly>
 
-    <button class="btn-primary" onclick="submitOrder()">LANJUT BAYAR</button>
+    <button class="btn-primary" onclick="goPay()">LANJUT PEMBAYARAN</button>
   </div>
 </div>
 
 <!-- PAYMENT -->
 <div class="overlay" id="paymentOverlay">
   <div class="overlay-box">
+    <h3>💳 QRIS</h3>
 
-    <h3>QRIS PAYMENT</h3>
+    <img id="qrisImg" class="qris-img">
+    <a id="qrisDownload" class="btn-primary" download style="display:block;text-align:center">DOWNLOAD QRIS</a>
 
-    <img src="http://rahmad-elaina.my.id/file/0ff97318b1.jpg" class="qris-img">
+    <input type="file" class="form-input" id="proof">
 
-    <input type="file" id="paymentProof" class="form-input">
-
-    <button class="btn-primary" onclick="sendPaymentProof()">
-      KIRIM KE ADMIN
-    </button>
-
+    <button class="btn-primary" onclick="sendWA()">KIRIM ADMIN</button>
   </div>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -227,111 +209,94 @@ const app = initializeApp({
   apiKey:"AIzaSyA9tSehgxD2Pgb7YPy7Pq-_bcuKLKswyos",
   authDomain:"ipung-store-2b96d.firebaseapp.com",
   databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"ipung-store-2b96d"
 });
 
 const db = getDatabase(app);
 
-window._activeCat = "all";
+let store={}, active="all", selected=null, nama="";
 
-onValue(ref(db,"store"), (snap)=>{
+const QRIS = "http://rahmad-elaina.my.id/file/0ff97318b1.jpg";
+const IMGBB = "a8a4d55f889fcadd95552214d55c46b3";
 
-  const data = snap.val() || {};
-
-  document.getElementById("storeName").innerText =
-    data.settings?.storeName || "IPUNGG SHOP";
-
-  renderCats(data.categories || {});
-  renderProducts(data.products || {});
+onValue(ref(db,"store"),snap=>{
+  store = snap.val()||{};
+  render();
 });
 
-function renderCats(cats){
-  const wrap = document.getElementById("catCards");
-  wrap.innerHTML = "";
+function render(){
+  document.getElementById("storeName").innerText = store.settings?.storeName||"IPUNGG SHOP";
 
-  Object.values(cats).forEach(c=>{
-    wrap.innerHTML += `
-      <div class="cat-card" onclick="filterCat('${c.name}')">
-        ${c.name}
+  document.getElementById("bannerWrap").innerHTML =
+    store.settings?.banner?.includes(".mp4")
+    ? `<video autoplay muted loop><source src="${store.settings.banner}"></video>`
+    : `<img src="${store.settings?.banner}">`;
+
+  const cats = Object.values(store.categories||{});
+  document.getElementById("catFilter").innerHTML =
+    `<button class="cat-btn active" onclick="setCat('all')">Semua</button>` +
+    cats.map(c=>`<button class="cat-btn" onclick="setCat('${c.name}')">${c.name}</button>`).join("");
+
+  let prods = Object.values(store.products||{});
+  if(active!="all") prods = prods.filter(p=>(p.category||"").trim()==active.trim());
+
+  document.getElementById("productsGrid").innerHTML =
+    prods.map(p=>`
+      <div class="product-card">
+        ${p.thumbnail?`<img class="prod-thumb" src="${p.thumbnail}">`:`<div class="prod-thumb-placeholder">📦</div>`}
+        <div class="prod-info">
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-price">Rp ${Number(p.price).toLocaleString()}</div>
+          <button class="btn-order" onclick='openOrder(${JSON.stringify(p)})'>ORDER</button>
+        </div>
       </div>
-    `;
-  });
+    `).join("");
 }
 
-window.filterCat = function(cat){
-  window._activeCat = cat;
-};
+window.setCat=(c)=>{active=c;render();};
 
-function renderProducts(prods){
-  const wrap = document.getElementById("productsGrid");
-
-  let list = Object.values(prods);
-
-  if(window._activeCat !== "all"){
-    list = list.filter(p => p.category === window._activeCat);
-  }
-
-  wrap.innerHTML = list.map(p=>`
-    <div class="product-card">
-      <img class="prod-thumb" src="${p.thumbnail || ''}">
-      <div class="prod-info">
-        <div class="prod-name">${p.name}</div>
-        <div class="prod-price">Rp ${Number(p.price).toLocaleString('id-ID')}</div>
-        <button class="btn-order" onclick='openOrder(${JSON.stringify(p)})'>ORDER</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-window.openOrder = function(p){
-  window._selectedProduct = p;
-
-  document.getElementById("selProdName").innerText = p.name;
-  document.getElementById("selProdPrice").innerText = "Rp "+p.price;
-  document.getElementById("orderDate").value = new Date().toLocaleDateString();
-
+window.openOrder=(p)=>{
+  selected=p;
+  document.getElementById("selProd").innerText=p.name;
+  document.getElementById("orderDate").value=new Date().toLocaleDateString("id-ID");
   document.getElementById("orderOverlay").classList.add("show");
 };
 
-window.submitOrder = function(){
+window.goPay=()=>{
+  nama=document.getElementById("orderName").value;
+
   document.getElementById("orderOverlay").classList.remove("show");
   document.getElementById("paymentOverlay").classList.add("show");
+
+  document.getElementById("qrisImg").src = QRIS;
+  document.getElementById("qrisDownload").href = QRIS;
 };
 
-window.sendPaymentProof = async function(){
+window.sendWA=async()=>{
+  const file=document.getElementById("proof").files[0];
+  if(!file) return alert("upload bukti dulu");
 
-  const file = document.getElementById("paymentProof").files[0];
-  if(!file) return alert("Upload bukti dulu!");
+  const fd=new FormData();
+  fd.append("image",file);
 
-  const form = new FormData();
-  form.append("image", file);
+  const r=await fetch("https://api.imgbb.com/1/upload?key="+IMGBB,{method:"POST",body:fd});
+  const j=await r.json();
 
-  const res = await fetch("https://api.imgbb.com/1/upload?key=API_IMGBB_KAMU",{
-    method:"POST",
-    body:form
-  });
-
-  const data = await res.json();
-  const img = data?.data?.url || "-";
-
-  const p = window._selectedProduct;
+  const img=j.data.url;
 
   const msg = encodeURIComponent(
-`🛒 ORDER BARU
+`🛒 ORDER BARU IPUNGG SHOP
 
-📦 Produk: ${p.name}
-💰 Harga: Rp ${p.price}
-👤 Nama: ${window._orderName || '-'}
+📦 Produk : ${selected.name}
+💰 Harga  : Rp ${selected.price}
+👤 Nama   : ${nama}
 
-📸 Bukti:
-${img}
-
-QRIS PAYMENT`
+💳 QRIS ONLY
+📸 Bukti : ${img}
+`
   );
 
-  window.open("https://wa.me/6285198959920?text="+msg);
+  window.open("https://wa.me/628xxxxxxx?text="+msg,"_blank");
 };
-
 </script>
 
 </body>
