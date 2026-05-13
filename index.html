@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IPUNGG SHOP</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -41,8 +41,8 @@ body{
   font-family:'Orbitron';
   color:var(--neon);
   display:flex;
-  gap:6px;
   align-items:center;
+  gap:6px;
 }
 
 /* HAMBURGER */
@@ -53,6 +53,127 @@ body{
   color:var(--neon);
 }
 
+/* MENU */
+.side-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+  z-index:2000;
+}
+
+.side-overlay.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.side-menu{
+  position:fixed;
+  right:-300px;
+  top:0;
+  width:260px;
+  height:100vh;
+  background:#0a0520;
+  padding:20px;
+  transition:.3s;
+  z-index:3000;
+}
+
+.side-menu.open{right:0}
+
+.side-head{
+  display:flex;
+  gap:8px;
+  margin-bottom:15px;
+  font-family:'Orbitron';
+  color:var(--neon);
+}
+
+.side-link{
+  display:block;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.05);
+  color:white;
+  text-decoration:none;
+}
+
+/* BANNER */
+.banner-wrap img{
+  width:95%;
+  margin:10px auto;
+  display:block;
+  border-radius:16px;
+  max-height:160px;
+  object-fit:cover;
+}
+
+/* CATEGORY */
+.cat-cards{
+  display:flex;
+  gap:10px;
+  overflow:auto;
+  padding:10px;
+}
+
+.cat-card{
+  padding:10px 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* PRODUCT */
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:12px;
+}
+
+.product-card{
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  position:relative;
+}
+
+.prod-thumb{
+  width:100%;
+  aspect-ratio:1;
+  object-fit:cover;
+}
+
+.prod-info{padding:10px}
+
+/* PIN */
+.pin{
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:gold;
+  color:black;
+  font-size:11px;
+  padding:3px 7px;
+  border-radius:999px;
+}
+
+/* BTN */
+.btn{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,var(--purple),var(--neon));
+  color:white;
+}
+
 /* OVERLAY */
 .overlay{
   position:fixed;
@@ -61,7 +182,7 @@ body{
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:4000;
+  z-index:5000;
 }
 
 .overlay.show{display:flex}
@@ -75,18 +196,17 @@ body{
   position:relative;
 }
 
-/* CLOSE BUTTON */
-.close-btn{
+/* CLOSE */
+.close{
   position:absolute;
   top:10px;
   right:10px;
-  background:red;
-  border:none;
-  color:white;
-  width:28px;
-  height:28px;
+  width:30px;
+  height:30px;
   border-radius:50%;
-  cursor:pointer;
+  border:none;
+  background:red;
+  color:white;
 }
 
 /* INPUT */
@@ -100,37 +220,24 @@ body{
   color:white;
 }
 
-/* BUTTON */
-.btn{
-  width:100%;
-  margin-top:10px;
-  padding:10px;
-  border:none;
-  border-radius:10px;
-  background:linear-gradient(135deg,var(--purple),var(--neon));
-  color:white;
-  cursor:pointer;
-}
-
 /* QRIS */
 .qris{
   width:180px;
-  margin:10px auto;
   display:block;
+  margin:10px auto;
   border-radius:12px;
 }
 
-/* DOWNLOAD BTN */
+/* DOWNLOAD */
 .download{
   display:block;
   text-align:center;
   margin-top:10px;
   padding:10px;
   border-radius:10px;
-  background:rgba(255,255,255,0.08);
+  border:1px solid var(--border);
   color:white;
   text-decoration:none;
-  border:1px solid var(--border);
 }
 
 </style>
@@ -143,35 +250,50 @@ body{
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
+<!-- MENU -->
+<div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="side-menu" id="menu">
+  <div class="side-head">🛍️ IPUNGG SHOP</div>
+  <a class="side-link" id="wa">💬 WA</a>
+  <a class="side-link" id="group">👥 Group</a>
+  <a class="side-link" id="channel">📢 Channel</a>
+</div>
+
+<!-- BANNER -->
+<div class="banner-wrap" id="banner"></div>
+
+<!-- CAT -->
+<div class="cat-cards" id="cats"></div>
+
+<!-- PRODUCT -->
+<div class="products-grid" id="products"></div>
+
 <!-- ORDER -->
 <div class="overlay" id="orderBox">
   <div class="box">
-    <button class="close-btn" onclick="closeAll()">×</button>
-
+    <button class="close" onclick="closeAll()">×</button>
     <h3>🛒 ORDER</h3>
     <div id="pname"></div>
     <div id="pprice"></div>
-
     <input class="input" id="name" placeholder="Nama 💖">
-    <button class="btn" onclick="nextPay()">LANJUT PAYMENT</button>
+    <button class="btn" onclick="nextPay()">LANJUT</button>
   </div>
 </div>
 
-<!-- PAYMENT -->
+<!-- PAY -->
 <div class="overlay" id="payBox">
   <div class="box">
-    <button class="close-btn" onclick="closeAll()">×</button>
-
-    <h3>💳 QRIS PAYMENT</h3>
+    <button class="close" onclick="closeAll()">×</button>
+    <h3>💳 QRIS</h3>
 
     <img id="qrisImg" class="qris">
 
-    <!-- DOWNLOAD QRIS -->
     <a id="downloadQris" class="download" download>⬇ Download QRIS</a>
 
     <input type="file" id="proof" class="input">
 
-    <button class="btn" onclick="send()">KIRIM ADMIN 💖</button>
+    <button class="btn" onclick="send()">KIRIM 💖</button>
   </div>
 </div>
 
@@ -188,31 +310,73 @@ const app = initializeApp({
 
 const db = getDatabase(app);
 
-let store={}, selected={};
+let store={}, selected={}, active="all";
 
 onValue(ref(db,"store"),snap=>{
-  store=snap.val()||{};
+  store = snap.val() || {settings:{},products:{},categories:{}};
   render();
 });
 
 function render(){
-  const s=store.settings||{};
+
+  const s = store.settings || {};
+
+  document.getElementById("wa").href="https://wa.me/"+(s.urlAdmin||"");
+  document.getElementById("group").href=s.urlGroup||"#";
+  document.getElementById("channel").href=s.urlChannel||"#";
+
+  document.getElementById("banner").innerHTML =
+    s.banner?.includes(".mp4")
+    ? `<video autoplay muted loop src="${s.banner}"></video>`
+    : `<img src="${s.banner}">`;
 
   const qris =
     s.qrisUrl ||
     "https://img2.pixhost.to/images/7838/725233706_elaina-1778564710301.jpg";
 
   document.getElementById("qrisImg").src = qris;
-
-  /* DOWNLOAD QRIS */
   document.getElementById("downloadQris").href = qris;
+
+  const cats = Object.values(store.categories || {});
+  document.getElementById("cats").innerHTML =
+    `<div class="cat-card" onclick="filter('all')">ALL</div>`+
+    cats.map(c=>`<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`).join("");
+
+  let all = Object.values(store.products || {});
+
+  let p = active!="all" ? all.filter(x=>x.category==active) : all;
+
+  const pinned = p.filter(x=>x.pinned);
+  const normal = p.filter(x=>!x.pinned);
+
+  p = [...pinned,...normal];
+
+  document.getElementById("products").innerHTML =
+  p.map(x=>
+    `<div class="product-card">
+      ${x.pinned ? `<div class="pin">PIN</div>` : ""}
+      <img class="prod-thumb" src="${x.thumbnail}">
+      <div class="prod-info">
+        <div>${x.name}</div>
+        <div>Rp ${x.price}</div>
+        <button class="btn" onclick='order(${JSON.stringify(x)})'>ORDER 💖</button>
+      </div>
+    </div>`
+  ).join("");
 }
 
-/* ORDER */
-window.order=(p)=>{
+/* SAFE GLOBAL */
+window.filter=c=>{active=c;render();};
+
+window.toggleMenu=()=>{
+  document.getElementById("menu").classList.toggle("open");
+  document.getElementById("overlay").classList.toggle("open");
+};
+
+window.order=p=>{
   selected=p;
   document.getElementById("pname").innerText=p.name;
-  document.getElementById("pprice").innerText="Rp "+p.price;
+  document.getElementById("pprice").innerText=p.price;
   document.getElementById("orderBox").classList.add("show");
 };
 
@@ -221,7 +385,6 @@ window.nextPay=()=>{
   document.getElementById("payBox").classList.add("show");
 };
 
-/* CLOSE ALL */
 window.closeAll=()=>{
   document.getElementById("orderBox").classList.remove("show");
   document.getElementById("payBox").classList.remove("show");
@@ -238,14 +401,11 @@ window.send=async()=>{
   const img=j?.data?.url||"";
 
   const msg=encodeURIComponent(
-`💖 ORDER MASUK 💖
+`💖 ORDER
 
 🛒 ${selected.name}
 💰 Rp ${selected.price}
-
-📸 ${img}
-
-💌 Mohon diproses ya sayang 😘`
+📸 ${img}`
   );
 
   window.open("https://wa.me/"+store.settings.urlAdmin+"?text="+msg);
