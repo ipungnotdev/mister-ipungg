@@ -40,90 +40,14 @@ body{
 .logo{
   font-family:'Orbitron';
   color:var(--neon);
-  display:flex;
-  gap:6px;
-  align-items:center;
 }
 
+/* HAMBURGER */
 .hamburger{
   font-size:24px;
   background:none;
   border:none;
   color:var(--neon);
-}
-
-/* MENU */
-.side-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.85);
-  opacity:0;
-  pointer-events:none;
-  transition:.3s;
-  z-index:2000;
-}
-
-.side-overlay.open{
-  opacity:1;
-  pointer-events:auto;
-}
-
-.side-menu{
-  position:fixed;
-  right:-300px;
-  top:0;
-  width:260px;
-  height:100vh;
-  background:#0a0520;
-  padding:20px;
-  transition:.3s;
-  z-index:3000;
-}
-
-.side-menu.open{right:0}
-
-.side-head{
-  display:flex;
-  gap:6px;
-  font-family:'Orbitron';
-  color:var(--neon);
-  margin-bottom:10px;
-}
-
-.side-link{
-  display:block;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.05);
-  color:white;
-  text-decoration:none;
-}
-
-/* BANNER */
-.banner-wrap img{
-  width:95%;
-  margin:10px auto;
-  display:block;
-  border-radius:16px;
-  max-height:160px;
-  object-fit:cover;
-}
-
-/* CATEGORY */
-.cat-cards{
-  display:flex;
-  gap:10px;
-  overflow:auto;
-  padding:10px;
-}
-
-.cat-card{
-  padding:10px 16px;
-  border-radius:999px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid var(--border);
-  white-space:nowrap;
 }
 
 /* PRODUCTS */
@@ -139,7 +63,6 @@ body{
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
-  position:relative;
 }
 
 .prod-thumb{
@@ -150,19 +73,6 @@ body{
 
 .prod-info{padding:10px}
 
-/* PIN */
-.pin{
-  position:absolute;
-  top:8px;
-  left:8px;
-  background:gold;
-  color:black;
-  font-size:11px;
-  padding:3px 7px;
-  border-radius:999px;
-}
-
-/* BTN */
 .btn{
   width:100%;
   margin-top:10px;
@@ -195,7 +105,6 @@ body{
   position:relative;
 }
 
-/* CLOSE */
 .close{
   position:absolute;
   top:10px;
@@ -208,7 +117,6 @@ body{
   color:white;
 }
 
-/* INPUT */
 .input{
   width:100%;
   padding:10px;
@@ -219,7 +127,6 @@ body{
   color:white;
 }
 
-/* QRIS */
 .qris{
   width:180px;
   display:block;
@@ -227,7 +134,6 @@ body{
   border-radius:12px;
 }
 
-/* DOWNLOAD */
 .download{
   display:block;
   text-align:center;
@@ -238,7 +144,6 @@ body{
   color:white;
   text-decoration:none;
 }
-
 </style>
 </head>
 
@@ -249,22 +154,6 @@ body{
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </nav>
 
-<!-- MENU -->
-<div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
-
-<div class="side-menu" id="menu">
-  <div class="side-head">🛍️ IPUNGG SHOP</div>
-  <a class="side-link" id="wa">💬 WhatsApp</a>
-  <a class="side-link" id="group">👥 Group</a>
-  <a class="side-link" id="channel">📢 Channel</a>
-</div>
-
-<!-- BANNER -->
-<div class="banner-wrap" id="banner"></div>
-
-<!-- CATEGORY -->
-<div class="cat-cards" id="cats"></div>
-
 <!-- PRODUCTS -->
 <div class="products-grid" id="products"></div>
 
@@ -274,12 +163,10 @@ body{
     <button class="close" onclick="closeAll()">×</button>
 
     <h3>🛒 ORDER</h3>
-
     <div id="pname"></div>
     <div id="pprice"></div>
 
     <input class="input" id="name" placeholder="Nama 💖">
-
     <button class="btn" onclick="nextPay()">LANJUT PAYMENT</button>
   </div>
 </div>
@@ -290,139 +177,85 @@ body{
     <button class="close" onclick="closeAll()">×</button>
 
     <h3>💳 QRIS</h3>
-
     <img id="qrisImg" class="qris">
-
     <a id="downloadQris" class="download" download>⬇ Download QRIS</a>
 
     <input type="file" id="proof" class="input">
-
-    <button class="btn" onclick="send()">KIRIM ADMIN 💖</button>
+    <button class="btn" onclick="send()">KIRIM WA 💖</button>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+<script>
+let selected={};
 
-const app = initializeApp({
-  apiKey:"AIzaSyA9TSehgx",
-  authDomain:"ipung-store-2b96d.firebaseapp.com",
-  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:"ipung-store-2b96d"
-});
+const qrisURL="https://img2.pixhost.to/images/7862/725686808_elaina-1778651660610.jpg";
 
-const db = getDatabase(app);
-
-let store={}, selected={}, active="all";
-
-onValue(ref(db,"store"),snap=>{
-  store = snap.val() || {settings:{},products:{},categories:{}};
-  render();
-});
-
-function render(){
-
-  const s = store.settings || {};
-
-  document.getElementById("wa").href="https://wa.me/"+(s.urlAdmin||"");
-  document.getElementById("group").href=s.urlGroup||"#";
-  document.getElementById("channel").href=s.urlChannel||"#";
-
-  document.getElementById("banner").innerHTML =
-    s.banner?.includes(".mp4")
-    ? `<video autoplay muted loop src="${s.banner}"></video>`
-    : `<img src="${s.banner}">`;
-
-  const qris =
-    s.qrisUrl ||
-    "https://img2.pixhost.to/images/7838/725233706_elaina-1778564710301.jpg";
-
-  document.getElementById("qrisImg").src = qris;
-  document.getElementById("downloadQris").href = qris;
-
-  const cats = Object.values(store.categories || {});
-  document.getElementById("cats").innerHTML =
-    `<div class="cat-card" onclick="filter('all')">ALL</div>`+
-    cats.map(c=>`<div class="cat-card" onclick="filter('${c.name}')">${c.name}</div>`).join("");
-
-  let all = Object.values(store.products || {});
-
-  let p = active!="all" ? all.filter(x=>x.category==active) : all;
-
-  const pinned = p.filter(x=>x.pinned);
-  const normal = p.filter(x=>!x.pinned);
-
-  p = [...pinned,...normal];
-
-  document.getElementById("products").innerHTML =
-  p.map(x=>
-    `<div class="product-card">
-      ${x.pinned ? `<div class="pin">PIN</div>` : ""}
-      <img class="prod-thumb" src="${x.thumbnail}">
-      <div class="prod-info">
-        <div>${x.name}</div>
-        <div>Rp ${x.price}</div>
-        <button class="btn" onclick='order(${JSON.stringify(x)})'>ORDER 💖</button>
-      </div>
-    </div>`
-  ).join("");
+/* FORMAT RUPIAH */
+function formatRupiah(angka){
+  return new Intl.NumberFormat("id-ID").format(angka || 0);
 }
 
-/* ORDER FORMAT FIX */
-window.send = async () => {
-  const file = document.getElementById("proof").files[0];
+/* DEMO PRODUCT */
+const products=[
+  {name:"Produk A",price:8000},
+  {name:"Produk B",price:80000}
+];
 
-  const fd = new FormData();
-  fd.append("image", file);
+document.getElementById("products").innerHTML =
+products.map(p=>`
+<div class="product-card">
+  <img class="prod-thumb" src="${qrisURL}">
+  <div class="prod-info">
+    <div>${p.name}</div>
+    <div>Rp ${formatRupiah(p.price)}</div>
+    <button class="btn" onclick='order(${JSON.stringify(p)})'>ORDER</button>
+  </div>
+</div>
+`).join("");
 
-  const res = await fetch("https://api.imgbb.com/1/upload?key=a8a4d55f889fcadd95552214d55c46b3",{method:"POST",body:fd});
-  const j = await res.json();
-  const img = j?.data?.url || "-";
+function order(p){
+  selected=p;
+  document.getElementById("pname").innerText=p.name;
+  document.getElementById("pprice").innerText="Rp "+formatRupiah(p.price);
+  document.getElementById("orderBox").classList.add("show");
+}
 
-  const name = document.getElementById("name").value || "-";
+function nextPay(){
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.add("show");
 
-  const msg = encodeURIComponent(
-`*FORMAT ORDER PRODUK IPUNGG*
+  document.getElementById("qrisImg").src=qrisURL;
+  document.getElementById("downloadQris").href=qrisURL;
+}
+
+function closeAll(){
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.remove("show");
+}
+
+/* SEND WA */
+function send(){
+
+  const name=document.getElementById("name").value||"-";
+
+  const msg=encodeURIComponent(
+`${qrisURL}
+
+🧾 ORDER IPUNGG SHOP
 
 👤 Nama : ${name}
 🛒 ${selected.name}
-💰 Rp ${selected.price}
-📸 ${img}
+💰 Rp ${formatRupiah(selected.price)}
 
-💌 Mohon diproses ya admin 😘`
+📸 Bukti Pembayaran:
+${qrisURL}
+
+💌 Mohon dicek & diproses ya admin 💖`
   );
 
-  window.open("https://wa.me/"+store.settings.urlAdmin+"?text="+msg);
-
-  closeAll();
-};
-
-window.filter=c=>{active=c;render();};
-
-window.toggleMenu=()=>{
-  document.getElementById("menu").classList.toggle("open");
-  document.getElementById("overlay").classList.toggle("open");
-};
-
-window.order=p=>{
-  selected=p;
-  document.getElementById("pname").innerText=p.name;
-  document.getElementById("pprice").innerText=p.price;
-  document.getElementById("orderBox").classList.add("show");
-};
-
-window.nextPay=()=>{
-  document.getElementById("orderBox").classList.remove("show");
-  document.getElementById("payBox").classList.add("show");
-};
-
-window.closeAll=()=>{
-  document.getElementById("orderBox").classList.remove("show");
-  document.getElementById("payBox").classList.remove("show");
-};
-
+  window.open("https://wa.me/628XXXXXXXXXX?text="+msg);
+}
 </script>
 
 </body>
-      </html>
+</html>
