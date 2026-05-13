@@ -29,7 +29,7 @@ body{
 
 /* NAV */
 .navbar{
-  height:60px;
+  height:62px;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -43,8 +43,12 @@ body{
 
 .logo{
   font-family:Orbitron;
-  color:var(--neon);
-  font-weight:800;
+  font-size:18px;
+  font-weight:900;
+  background:linear-gradient(90deg,#bf5fff,#00f5ff,#ff2d78);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  letter-spacing:1px;
 }
 
 .hamburger{
@@ -56,7 +60,7 @@ body{
   font-size:20px;
 }
 
-/* SIDE MENU */
+/* SIDE */
 .side-overlay{
   position:fixed;inset:0;
   background:rgba(0,0,0,.6);
@@ -70,6 +74,7 @@ body{
   width:280px;height:100%;
   background:#090312;
   transition:.3s;
+  border-left:1px solid var(--border);
 }
 .side-menu.open{right:0}
 
@@ -83,36 +88,45 @@ body{
 /* CATEGORY */
 .cat-scroll{
   display:flex;
-  overflow:auto;
-  gap:10px;
-  padding:10px;
+  gap:14px;
+  padding:14px;
+  overflow-x:auto;
 }
 
 .cat-btn{
-  padding:10px 16px;
-  border-radius:20px;
+  padding:10px 18px;
+  border-radius:999px;
   border:1px solid var(--border);
-  background:var(--card);
-  color:white;
+  background:rgba(15,8,37,.8);
+  color:#f0e6ff;
   white-space:nowrap;
+  transition:.2s;
 }
+
 .cat-btn.active{
-  background:var(--purple);
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
+  transform:scale(1.05);
 }
 
 /* PRODUCT */
 .products{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  padding:12px;
+  gap:14px;
+  padding:14px;
 }
 
 .product{
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:12px;
+  border-radius:14px;
   overflow:hidden;
+  transition:.2s;
+}
+
+.product:hover{
+  transform:translateY(-3px);
+  box-shadow:0 0 20px rgba(155,48,255,.25);
 }
 
 .product img{
@@ -125,7 +139,7 @@ body{
   padding:10px;
 }
 
-button{
+.product button{
   width:100%;
   padding:8px;
   border:none;
@@ -146,11 +160,11 @@ button{
 .overlay.show{display:flex}
 
 .box{
-  width:90%;
-  max-width:360px;
+  width:92%;
+  max-width:380px;
   background:var(--card);
   padding:16px;
-  border-radius:14px;
+  border-radius:16px;
   border:1px solid var(--border);
 }
 
@@ -168,7 +182,17 @@ input{
   width:180px;
   display:block;
   margin:10px auto;
+  border-radius:12px;
+}
+
+.btn{
+  width:100%;
+  padding:10px;
+  border:none;
   border-radius:10px;
+  background:linear-gradient(135deg,var(--purple),var(--neon2));
+  color:white;
+  font-weight:700;
 }
 
 .toast{
@@ -187,7 +211,6 @@ input{
 
 <body>
 
-<!-- NAV -->
 <div class="navbar">
   <div class="logo" id="storeName">IPUNGG SHOP</div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
@@ -196,13 +219,10 @@ input{
 <div class="side-overlay" id="overlay" onclick="toggleMenu()"></div>
 <div class="side-menu" id="menu"></div>
 
-<!-- BANNER -->
 <div class="banner-wrap" id="banner"></div>
 
-<!-- CATEGORY -->
 <div class="cat-scroll" id="cat"></div>
 
-<!-- PRODUCT -->
 <div class="products" id="products"></div>
 
 <!-- ORDER -->
@@ -212,7 +232,7 @@ input{
     <div id="pname"></div>
     <div id="pprice"></div>
     <input id="nama" placeholder="Nama">
-    <button onclick="toPay()">LANJUT</button>
+    <button class="btn" onclick="toPay()">LANJUT</button>
   </div>
 </div>
 
@@ -223,13 +243,13 @@ input{
 
     <img class="qris" src="http://rahmad-elaina.my.id/file/0ff97318b1.jpg">
 
-    <a href="http://rahmad-elaina.my.id/file/0ff97318b1.jpg" download>
+    <a class="btn" href="http://rahmad-elaina.my.id/file/0ff97318b1.jpg" download>
       DOWNLOAD
     </a>
 
     <input type="file" id="proof">
 
-    <button onclick="send()">KIRIM BUKTI</button>
+    <button class="btn" onclick="send()">KIRIM BUKTI</button>
   </div>
 </div>
 
@@ -247,42 +267,41 @@ const app = initializeApp({
 
 const db = getDatabase(app);
 
-let data={},selected={},namaUser="";
+let store={},selected={},namaUser="";
 
 onValue(ref(db,"store"),snap=>{
-  data=snap.val()||{};
+  store=snap.val()||{};
   render();
 });
 
 function render(){
 
   document.getElementById("storeName").innerText=
-  data.settings?.storeName||"IPUNGG SHOP";
+  store.settings?.storeName||"IPUNGG SHOP";
 
   const b=document.getElementById("banner");
-  const bn=data.settings?.banner;
+  const bn=store.settings?.banner;
 
   b.innerHTML=bn?.includes("mp4")
   ?`<video autoplay muted loop src="${bn}"></video>`
   :`<img src="${bn}">`;
 
-  const cats=Object.values(data.categories||{});
+  const cats=Object.values(store.categories||{});
   document.getElementById("cat").innerHTML=
   `<button class="cat-btn active">ALL</button>`+
   cats.map(c=>`<button class="cat-btn">${c.name}</button>`).join("");
 
-  const prods=Object.values(data.products||{});
+  const prods=Object.values(store.products||{});
   document.getElementById("products").innerHTML=
   prods.map(p=>`
-    <div class="product">
-      <img src="${p.thumbnail}">
-      <div class="product-info">
-        <b>${p.name}</b>
-        <div>Rp ${Number(p.price).toLocaleString()}</div>
-        <button onclick='openOrder(${JSON.stringify(p)})'>ORDER</button>
-      </div>
+  <div class="product">
+    <img src="${p.thumbnail||''}">
+    <div class="product-info">
+      <b>${p.name}</b>
+      <div>Rp ${Number(p.price).toLocaleString()}</div>
+      <button onclick='openOrder(${JSON.stringify(p)})'>ORDER</button>
     </div>
-  `).join("");
+  </div>`).join("");
 }
 
 window.openOrder=(p)=>{
@@ -327,15 +346,19 @@ window.toggleMenu=()=>{
   document.getElementById("overlay").classList.toggle("open");
 };
 
-/* FIX BACK BUTTON ANTI EXIT */
-history.pushState(null,null,location.href);
-window.addEventListener("popstate",()=>{
-  ["menu","orderBox","payBox"].forEach(id=>{
-    document.getElementById(id)?.classList.remove("open","show");
-  });
-  history.pushState(null,null,location.href);
-});
+/* 🔥 ANTI EXIT BACK BUTTON FIX TOTAL */
+history.pushState({page:1},"",location.href);
+history.pushState({page:2},"",location.href);
+
+window.onpopstate=()=>{
+  history.pushState({page:2},"",location.href);
+
+  document.getElementById("menu").classList.remove("open");
+  document.getElementById("overlay").classList.remove("open");
+  document.getElementById("orderBox").classList.remove("show");
+  document.getElementById("payBox").classList.remove("show");
+};
 </script>
 
 </body>
-                                   </html>
+      </html>
