@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">OTP Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--surface3:#20202e;
+  --border:#2a2a3e;--accent:#7c5cfc;--accent2:#c95cf5;
+  --green:#22d07a;--red:#f04a4a;--yellow:#f0a54a;
+  --text:#e8e8f0;--muted:#7878a0;--glow:rgba(124,92,252,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");opacity:.5;}
+.bg-glow{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(124,92,252,0.1) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* MODAL OVERLAY */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px 36px;width:100%;max-width:420px;position:relative;animation:popIn .25s ease;}
+@keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;width:32px;height:32px;cursor:pointer;color:var(--muted);font-size:16px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{color:var(--text);}
+.modal-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.auth-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:24px;}
+.auth-tab{flex:1;padding:8px;text-align:center;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+
+/* FORM */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border .2s;width:100%;}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,252,.1);}
+.form-input::placeholder{color:var(--muted);}
+.form-error{font-size:12px;color:var(--red);margin-top:4px;}
+
+/* BTN */
+.btn{padding:12px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(124,92,252,.3);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(124,92,252,.45);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm{flex:1;padding:10px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;font-weight:500;}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent);}
+.btn-sm.danger{color:var(--red);}
+.btn-sm.danger:hover{background:rgba(240,74,74,.08);}
+.btn-full{width:100%;}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:62px;}
+.logo-wrap{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 0 18px var(--glow);}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;background:linear-gradient(135deg,#fff,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.user-chip{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;cursor:pointer;transition:all .2s;}
+.user-chip:hover{border-color:var(--accent);}
+.user-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.user-balance{font-weight:700;color:var(--green);font-family:'Syne',sans-serif;}
+.btn-login-header{padding:7px 16px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:20px;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-login-header:hover{transform:scale(1.04);}
+
+/* USER DROPDOWN */
+.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px;min-width:220px;z-index:200;animation:fadeDown .2s ease;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.dropdown-header{padding:12px 14px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.dropdown-name{font-weight:700;font-size:14px;}
+.dropdown-email{font-size:11px;color:var(--muted);margin-top:2px;}
+.dropdown-item{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--muted);transition:all .2s;}
+.dropdown-item:hover{background:var(--surface2);color:var(--text);}
+.dropdown-item.red:hover{color:var(--red);}
+.user-wrap{position:relative;}
+
+/* HERO */
+.hero{max-width:1100px;margin:0 auto;padding:52px 20px 36px;text-align:center;position:relative;z-index:1;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.28);border-radius:20px;padding:5px 14px;font-size:12px;color:#c4b5fd;margin-bottom:18px;font-weight:500;letter-spacing:.4px;}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.1;margin-bottom:14px;background:linear-gradient(135deg,#fff 30%,#c4b5fd 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{color:var(--muted);font-size:15px;max-width:480px;margin:0 auto 28px;line-height:1.65;}
+.balance-bar{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 20px;font-size:14px;color:var(--muted);margin-bottom:36px;}
+.balance-bar span{color:var(--green);font-weight:700;font-family:'Syne',sans-serif;}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:0 20px 60px;position:relative;z-index:1;}
+
+/* TABS */
+.top-tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:6px;margin-bottom:28px;}
+.top-tab{flex:1;padding:10px;text-align:center;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;}
+.top-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 12px rgba(124,92,252,.35);}
+
+/* STEPS */
+.steps{display:flex;gap:0;margin-bottom:28px;background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.step{flex:1;padding:14px 16px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .2s;border-right:1px solid var(--border);}
+.step:last-child{border-right:none;}
+.step.active{background:rgba(124,92,252,.1);}
+.step.done{background:rgba(34,208,122,.06);}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.step.active .step-num{background:var(--accent);color:#fff;border-color:var(--accent);}
+.step.done .step-num{background:var(--green);color:#fff;border-color:var(--green);}
+.step-label{font-size:12px;font-weight:500;color:var(--muted);}
+.step.active .step-label{color:var(--text);}
+.step.done .step-label{color:var(--green);}
+
+/* PANELS */
+.panel{display:none;animation:fadeUp .3s ease;}
+.panel.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.9px;margin-bottom:14px;}
+.search-box{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 15px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:18px;transition:border .2s;}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--muted);}
+
+/* APPS GRID */
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;}
+.app-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:all .2s;text-align:center;}
+.app-card:hover{border-color:var(--accent);transform:translateY(-2px);background:var(--surface2);}
+.app-card.selected{border-color:var(--accent);background:rgba(124,92,252,.1);box-shadow:0 0 14px var(--glow);}
+.app-card img{width:38px;height:38px;border-radius:9px;object-fit:cover;}
+.app-card span{font-size:11px;color:var(--muted);font-weight:500;}
+.app-card.selected span{color:var(--accent);}
+
+/* COUNTRY GRID */
+.countries-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:9px;}
+.country-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px 11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:9px;}
+.country-card:hover{border-color:var(--accent);background:var(--surface2);}
+.country-card.selected{border-color:var(--accent);background:rgba(124,92,252,.1);}
+.country-card img{width:26px;height:18px;border-radius:3px;object-fit:cover;}
+.country-info{flex:1;min-width:0;}
+.country-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.country-price{font-size:11px;font-weight:700;color:var(--accent);margin-top:1px;font-family:'Syne',sans-serif;}
+.country-stock{font-size:10px;color:var(--muted);}
+
+/* ORDER CARD */
+.order-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.order-header{background:linear-gradient(135deg,rgba(124,92,252,.14),rgba(201,92,245,.08));border-bottom:1px solid var(--border);padding:24px;display:flex;align-items:center;gap:14px;}
+.order-app-icon{width:48px;height:48px;border-radius:13px;object-fit:cover;}
+.order-body{padding:24px;}
+.price-display{display:flex;align-items:baseline;gap:8px;margin-bottom:20px;}
+.price-big{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;color:var(--accent);}
+.op-grid{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px;}
+.op-btn{display:flex;align-items:center;gap:7px;padding:7px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s;color:var(--text);}
+.op-btn:hover{border-color:var(--accent);}
+.op-btn.selected{border-color:var(--accent);background:rgba(124,92,252,.1);color:var(--accent);}
+.op-btn img{width:20px;height:20px;border-radius:50%;object-fit:cover;}
+
+/* OTP RESULT */
+.otp-result{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:28px;text-align:center;}
+.phone-display{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:1px;margin:14px 0;background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:14px 20px;display:inline-block;}
+.otp-code-box{background:linear-gradient(135deg,rgba(124,92,252,.13),rgba(201,92,245,.08));border:2px solid var(--accent);border-radius:14px;padding:20px;margin:18px 0;}
+.otp-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.otp-code{font-family:'Syne',sans-serif;font-size:44px;font-weight:800;color:var(--accent);letter-spacing:8px;}
+.otp-msg{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.55;}
+.timer-bar{background:var(--surface2);border-radius:6px;height:6px;overflow:hidden;margin:14px 0;}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));transition:width 1s linear;border-radius:6px;}
+.timer-text{font-size:12px;color:var(--muted);}
+.timer-count{font-family:'Syne',sans-serif;color:var(--green);font-weight:700;}
+.action-row{display:flex;gap:8px;margin-top:14px;}
+
+/* STATUS */
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;font-size:12px;font-weight:600;}
+.status-badge.waiting{background:rgba(255,180,0,.1);color:#ffb400;border:1px solid rgba(255,180,0,.22);}
+.status-badge.received{background:rgba(34,208,122,.1);color:var(--green);border:1px solid rgba(34,208,122,.22);}
+.status-badge.canceled{background:rgba(240,74,74,.1);color:var(--red);border:1px solid rgba(240,74,74,.22);}
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* DEPOSIT */
+.deposit-wrap{max-width:520px;margin:0 auto;}
+.amount-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.amount-btn{padding:12px 8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;text-align:center;cursor:pointer;transition:all .2s;font-size:13px;font-weight:600;font-family:'Syne',sans-serif;}
+.amount-btn:hover{border-color:var(--accent);}
+.amount-btn.selected{border-color:var(--accent);background:rgba(124,92,252,.1);color:var(--accent);}
+.qris-box{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;margin-top:16px;}
+.qris-box img{width:200px;height:200px;border-radius:10px;background:#fff;padding:4px;}
+.qris-info{margin-top:14px;font-size:13px;color:var(--muted);line-height:1.8;}
+.qris-amount{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--green);margin:8px 0;}
+.deposit-status-wrap{margin-top:16px;}
+
+/* HISTORY */
+.history-table{width:100%;border-collapse:collapse;}
+.history-table th{padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600;}
+.history-table td{padding:11px 12px;font-size:13px;border-bottom:1px solid rgba(42,42,62,.5);}
+.history-table tr:hover td{background:rgba(124,92,252,.03);}
+.badge{display:inline-flex;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;}
+.badge-green{background:rgba(34,208,122,.1);color:var(--green);}
+.badge-yellow{background:rgba(240,165,74,.1);color:var(--yellow);}
+.badge-red{background:rgba(240,74,74,.1);color:var(--red);}
+.badge-blue{background:rgba(124,92,252,.1);color:var(--accent);}
+
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px;gap:14px;color:var(--muted);}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* BACK BTN */
+.btn-back{display:inline-flex;align-items:center;gap:5px;background:none;border:1px solid var(--border);border-radius:9px;padding:7px 14px;color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s;margin-bottom:16px;}
+.btn-back:hover{border-color:var(--accent);color:var(--text);}
+
+/* EMPTY */
+.empty{text-align:center;padding:44px;color:var(--muted);}
+.empty-icon{font-size:44px;margin-bottom:10px;}
+
+/* AUDIO */
+.audio-toggle{position:fixed;bottom:22px;left:22px;z-index:99;background:var(--surface2);border:1px solid var(--border);border-radius:50%;width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .2s;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+.audio-toggle:hover{border-color:var(--accent);transform:scale(1.08);}
+.audio-toggle.playing{border-color:var(--accent);background:rgba(124,92,252,.14);}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:22px;right:22px;z-index:9999;display:flex;flex-direction:column;gap:7px;}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:12px 16px;font-size:13px;min-width:250px;animation:slideIn .3s ease;box-shadow:0 6px 28px rgba(0,0,0,.4);display:flex;align-items:center;gap:9px;}
+.toast.success{border-left:3px solid var(--green);}
+.toast.error{border-left:3px solid var(--red);}
+.toast.info{border-left:3px solid var(--accent);}
+@keyframes slideIn{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* GUEST LANDING */
+.guest-landing{max-width:1100px;margin:0 auto;padding:0 20px 60px;position:relative;z-index:1;}
+.guest-hero{text-align:center;padding:52px 20px 44px;}
+.guest-hero .hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.28);border-radius:20px;padding:5px 14px;font-size:12px;color:#c4b5fd;margin-bottom:18px;font-weight:500;}
+.guest-hero h1{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.1;margin-bottom:14px;background:linear-gradient(135deg,#fff 30%,#c4b5fd 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.guest-hero p{color:var(--muted);font-size:15px;max-width:480px;margin:0 auto 12px;line-height:1.65;}
+.features-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:48px;}
+.feature-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--muted);}
+.feature-chip span{color:var(--text);font-weight:600;}
+.auth-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:800px;margin:0 auto;}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;animation:fadeUp .35s ease;}
+.auth-card.highlight{border-color:rgba(124,92,252,.4);background:linear-gradient(135deg,rgba(124,92,252,.06),rgba(201,92,245,.04));}
+.auth-card-icon{font-size:32px;margin-bottom:14px;}
+.auth-card-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;}
+.auth-card-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.55;}
+.divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted);font-size:12px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+@media(max-width:600px){.auth-cards{grid-template-columns:1fr;}}
+
+
+@media(max-width:580px){
+  .steps{display:none;}
+  .apps-grid{grid-template-columns:repeat(3,1fr);}
+  .countries-grid{grid-template-columns:repeat(2,1fr);}
+  .otp-code{font-size:32px;letter-spacing:5px;}
+  .phone-display{font-size:18px;}
+  .amount-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<audio id="bgMusic" loop><source src="https://cdn.pixabay.com/audio/2022/11/17/audio_febc508520.mp3" type="audio/mp3"></audio>
+<audio id="otpSound" preload="auto"><source src="https://cdn.pixabay.com/audio/2023/03/28/audio_a9dff50bd0.mp3" type="audio/mp3"></audio>
+<div class="audio-toggle" id="audioBtn" onclick="toggleAudio()" title="Toggle Music">🎵</div>
+<div class="toast-container" id="toasts"></div>
+
+<!-- ===== GUEST LANDING (sebelum login) ===== -->
+<div id="guestLanding">
+  <!-- hero tetap tampil -->
+  <div class="guest-hero">
+    <div class="hero-tag">⚡ Nomor Virtual · 100+ Negara · 1700+ Aplikasi</div>
+    <h1 id="heroTitleGuest">Beli Nomor OTP<br>Murah & Instan</h1>
+    <p id="heroSubGuest">Nomor virtual untuk verifikasi WA, Telegram, dan 1700+ aplikasi lainnya</p>
+    <div class="features-row">
+      <div class="feature-chip">📱 <span>1700+</span> Aplikasi</div>
+      <div class="feature-chip">🌍 <span>100+</span> Negara</div>
+      <div class="feature-chip">⚡ OTP <span>Instan</span></div>
+      <div class="feature-chip">💰 Harga <span>Terjangkau</span></div>
+    </div>
+  </div>
+
+  <!-- 2 CARD: LOGIN & DAFTAR -->
+  <div class="guest-landing">
+    <div class="auth-cards">
+
+      <!-- CARD LOGIN -->
+      <div class="auth-card highlight">
+        <div class="auth-card-icon">🔑</div>
+        <div class="auth-card-title">Masuk</div>
+        <div class="auth-card-sub">Sudah punya akun? Masuk dan mulai beli nomor OTP sekarang.</div>
+        <div class="form-group">
+          <label class="form-label">Username / Email</label>
+          <input class="form-input" id="loginUser" placeholder="username atau email@kamu.com" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div class="form-error" id="loginErr" style="margin-bottom:8px;"></div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()" id="btnLogin">🚀 Masuk Sekarang</button>
+      </div>
+
+      <!-- CARD DAFTAR -->
+      <div class="auth-card">
+        <div class="auth-card-icon">✨</div>
+        <div class="auth-card-title">Daftar Gratis</div>
+        <div class="auth-card-sub">Belum punya akun? Daftar sekarang, gratis dan langsung bisa dipakai.</div>
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" id="regUsername" placeholder="username unik kamu" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="regEmail" placeholder="email@kamu.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" type="password" id="regPass" placeholder="Min. 6 karakter" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+        </div>
+        <div class="form-error" id="regErr" style="margin-bottom:8px;"></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()" id="btnReg" style="background:linear-gradient(135deg,#22d07a,#15a857);">✨ Daftar Sekarang</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== DEPOSIT MODAL ===== -->
+<div class="modal-overlay hidden" id="depositModal">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="modal-close" onclick="closeDeposit()">✕</button>
+    <div class="modal-title">💳 Deposit Saldo</div>
+    <div class="modal-sub">Pilih nominal atau masukkan jumlah manual</div>
+    <div class="amount-grid" id="amountGrid">
+      <div class="amount-btn" onclick="pickAmount(10000)">Rp10.000</div>
+      <div class="amount-btn" onclick="pickAmount(25000)">Rp25.000</div>
+      <div class="amount-btn" onclick="pickAmount(50000)">Rp50.000</div>
+      <div class="amount-btn" onclick="pickAmount(100000)">Rp100.000</div>
+      <div class="amount-btn" onclick="pickAmount(250000)">Rp250.000</div>
+      <div class="amount-btn" onclick="pickAmount(500000)">Rp500.000</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nominal Lain (Rupiah)</label>
+      <input class="form-input" type="number" id="depositAmount" placeholder="Masukkan nominal..." min="5000" step="1000" oninput="clearAmountSelection()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Metode Pembayaran</label>
+      <select class="form-input" id="depositMethod">
+        <option value="qris">QRIS (Semua E-Wallet)</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="createDeposit()" id="btnDeposit">💰 Buat Pembayaran</button>
+    <div id="qrisResult"></div>
+  </div>
+</div>
+
+<!-- ===== PROFILE MODAL ===== -->
+<div class="modal-overlay hidden" id="profileModal">
+  <div class="modal-box" style="max-width:460px;">
+    <button class="modal-close" onclick="document.getElementById('profileModal').classList.add('hidden')">✕</button>
+    <div class="modal-title">👤 Profil Saya</div>
+    <div class="modal-sub" id="profileUsername">-</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;" id="profileStats">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">SALDO</div>
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green);" id="profBalance">-</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">TOTAL DEPOSIT</div>
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--accent);" id="profTotalDeposit">-</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">TOTAL BELI</div>
+        <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--yellow);" id="profTotalOrder">-</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:11px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">DAFTAR</div>
+        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;" id="profJoined">-</div>
+      </div>
+    </div>
+    <!-- CHANGE PASSWORD -->
+    <div style="border-top:1px solid var(--border);padding-top:18px;">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px;">🔒 Ganti Password</div>
+      <div class="form-group">
+        <label class="form-label">Password Baru</label>
+        <input class="form-input" type="password" id="newPass" placeholder="Min. 6 karakter">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Konfirmasi Password</label>
+        <input class="form-input" type="password" id="confirmPass" placeholder="Ulangi password">
+      </div>
+      <div class="form-error" id="changePassErr"></div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="changePassword()">🔑 Ganti Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="header-inner">
+    <a class="logo-wrap" href="#">
+      <div class="logo-icon" id="logoIcon">🔐</div>
+      <span class="logo-text" id="storeName">OTP Store</span>
+    </a>
+    <div class="header-right">
+      <div id="headerGuest">
+        <button class="btn-login-header" onclick="document.getElementById('guestLanding').scrollIntoView({behavior:'smooth'})">Masuk / Daftar</button>
+      </div>
+      <div id="headerUser" style="display:none;">
+        <div class="user-wrap" id="userWrap">
+          <div class="user-chip" onclick="toggleUserDropdown()">
+            <div class="user-avatar" id="userAvatarHeader">U</div>
+            <span id="userNameHeader">User</span>
+            <span class="user-balance" id="userBalanceHeader">Rp0</span>
+          </div>
+          <div class="user-dropdown" id="userDropdown" style="display:none;">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="ddName">-</div>
+              <div class="dropdown-email" id="ddEmail">-</div>
+            </div>
+            <div class="dropdown-item" onclick="openProfile()">👤 Profil & Riwayat</div>
+            <div class="dropdown-item" onclick="openDepositModal()">💳 Deposit Saldo</div>
+            <div class="dropdown-item red" onclick="doLogout()">🚪 Keluar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT (after login) -->
+
+<div class="main" id="mainContent" style="display:none;">
+  <!-- TABS -->
+  <div class="top-tabs">
+    <div class="top-tab active" onclick="switchMainTab('buy')">🛒 Beli Nomor</div>
+    <div class="top-tab" onclick="switchMainTab('deposit')">💳 Deposit</div>
+    <div class="top-tab" onclick="switchMainTab('history')">📋 Riwayat</div>
+  </div>
+
+  <!-- BUY TAB -->
+  <div id="tabBuy">
+    <div class="steps">
+      <div class="step active" id="step1"><div class="step-num">1</div><div class="step-label">Aplikasi</div></div>
+      <div class="step" id="step2"><div class="step-num">2</div><div class="step-label">Negara</div></div>
+      <div class="step" id="step3"><div class="step-num">3</div><div class="step-label">Beli</div></div>
+      <div class="step" id="step4"><div class="step-num">4</div><div class="step-label">OTP</div></div>
+    </div>
+    <div class="panel active" id="panel1">
+      <div class="section-title">📱 Pilih Aplikasi</div>
+      <input class="search-box" type="text" id="searchApp" placeholder="Cari: WhatsApp, Telegram, Instagram..." oninput="filterApps()">
+      <div id="appsGrid" class="apps-grid"><div class="loading"><div class="spinner"></div><span>Memuat...</span></div></div>
+    </div>
+    <div class="panel" id="panel2">
+      <button class="btn-back" onclick="goToPanel(1)">← Kembali</button>
+      <div class="section-title" id="countryTitle">🌍 Pilih Negara</div>
+      <input class="search-box" type="text" id="searchCountry" placeholder="Cari negara..." oninput="filterCountries()">
+      <div id="countriesGrid" class="countries-grid"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+    <div class="panel" id="panel3">
+      <button class="btn-back" onclick="goToPanel(2)">← Kembali</button>
+      <div id="orderCard"></div>
+    </div>
+    <div class="panel" id="panel4">
+      <div id="otpPanel"></div>
+    </div>
+  </div>
+
+  <!-- DEPOSIT TAB -->
+  <div id="tabDeposit" style="display:none;">
+    <div class="deposit-wrap">
+      <div class="card-section">
+        <div class="section-title">💳 Deposit via QRIS</div>
+        <div class="amount-grid">
+          <div class="amount-btn" onclick="pickAmountMain(10000)">Rp10.000</div>
+          <div class="amount-btn" onclick="pickAmountMain(25000)">Rp25.000</div>
+          <div class="amount-btn" onclick="pickAmountMain(50000)">Rp50.000</div>
+          <div class="amount-btn" onclick="pickAmountMain(100000)">Rp100.000</div>
+          <div class="amount-btn" onclick="pickAmountMain(250000)">Rp250.000</div>
+          <div class="amount-btn" onclick="pickAmountMain(500000)">Rp500.000</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nominal Lain</label>
+          <input class="form-input" type="number" id="depositAmountMain" placeholder="Masukkan nominal..." min="5000">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="createDepositMain()">💰 Buat QRIS Sekarang</button>
+        <div id="qrisResultMain" style="margin-top:16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="tabHistory" style="display:none;">
+    <div class="section-title">📋 Riwayat Transaksi</div>
+    <div id="historyContent"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+
+<script>
+
+// ========== FIREBASE ==========
+const firebaseConfig = {
+  apiKey:"AIzaSyA9tSehgxD2Pgb7YPy7Pq-_bcuKLKswyos",
+  authDomain:"ipung-store-2b96d.firebaseapp.com",
+  databaseURL:"https://ipung-store-2b96d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"ipung-store-2b96d",
+  storageBucket:"ipung-store-2b96d.firebasestorage.app",
+  appId:"1:906202337063:web:1a39b7bad99a85b23c2302"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ========== STATE ==========
+let config = {apiKey:'',margin:1000,storeName:'OTP Store',audioEnabled:false,storeIcon:'🔐'};
+let currentUser = null; // { uid, username, email, balance, totalDeposit, totalOrders, joinedAt }
+let selectedService=null, selectedCountry=null, selectedOperator=null, currentOrder=null;
+let allApps=[], allCountries=[];
+let timerInterval=null, checkInterval=null, audioPlaying=false;
+let selectedDepositAmount=0;
+
+// ========== FIREBASE UTILS ==========
+function sanitizeEmail(e){ return e.replace(/\./g,'_').replace(/@/g,'__at__'); }
+function desanitizeEmail(e){ return e.replace(/__at__/g,'@').replace(/_/g,'.'); }
+function uid(){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+
+// ========== LOAD STORE CONFIG ==========
+db.ref('config').on('value', snap=>{
+  const d=snap.val()||{};
+  config={...config,...d};
+  document.getElementById('storeName').textContent=config.storeName||'OTP Store';
+  document.getElementById('page-title').textContent=config.storeName||'OTP Store';
+  document.getElementById('logoIcon').textContent=config.storeIcon||'🔐';
+  if(config.heroTitle){
+    const el=document.getElementById('heroTitleGuest');
+    if(el) el.innerHTML=(config.heroTitle||'').replace(/\n/g,'<br>');
+  }
+  if(config.heroSubtitle){
+    const el=document.getElementById('heroSubGuest');
+    if(el) el.textContent=config.heroSubtitle||'';
+  }
+});
+
+// ========== SESSION MANAGEMENT ==========
+const SESSION_KEY='otp_user_session';
+function saveSession(u){ sessionStorage.setItem(SESSION_KEY,JSON.stringify(u)); }
+function loadSession(){ try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');}catch{return null;} }
+function clearSession(){ sessionStorage.removeItem(SESSION_KEY); }
+
+window.addEventListener('load',()=>{
+  const s=loadSession();
+  if(s){ currentUser=s; onLoggedIn(); }
+  else { onLoggedOut(); }
+  loadApps();
+});
+
+// ========== AUTH ==========
+
+async function doLogin(){
+  const input=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const errEl=document.getElementById('loginErr');
+  errEl.textContent='';
+  if(!input||!pass){errEl.textContent='Lengkapi semua field';return;}
+  document.getElementById('btnLogin').disabled=true;
+  document.getElementById('btnLogin').textContent='Memproses...';
+
+  try {
+    // find by username or email
+    const snap = await db.ref('users').once('value');
+    const users = snap.val()||{};
+    let found = null;
+    for(const uid in users){
+      const u = users[uid];
+      if(u.username===input || u.email===input){
+        found={...u, uid};
+        break;
+      }
+    }
+    if(!found){ throw new Error('Username / email tidak ditemukan'); }
+    // simple hash check (stored as plain for simplicity, use bcrypt in production)
+    if(found.password !== btoa(pass)){ throw new Error('Password salah'); }
+    delete found.password;
+    currentUser = found;
+    saveSession(currentUser);
+    onLoggedIn();
+    showToast('Selamat datang, '+currentUser.username+'! 👋','success');
+  } catch(e){
+    errEl.textContent='❌ '+e.message;
+  }
+  document.getElementById('btnLogin').disabled=false;
+  document.getElementById('btnLogin').textContent='🚀 Masuk';
+}
+
+async function doRegister(){
+  const username=document.getElementById('regUsername').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const pass=document.getElementById('regPass').value;
+  const errEl=document.getElementById('regErr');
+  errEl.textContent='';
+  if(!username||!email||!pass){errEl.textContent='Lengkapi semua field';return;}
+  if(pass.length<6){errEl.textContent='Password minimal 6 karakter';return;}
+  if(!/^[a-zA-Z0-9_]+$/.test(username)){errEl.textContent='Username hanya boleh huruf, angka, _';return;}
+  document.getElementById('btnReg').disabled=true;
+  document.getElementById('btnReg').textContent='Mendaftarkan...';
+  try {
+    // check username unique
+    const snapU = await db.ref('users').orderByChild('username').equalTo(username).once('value');
+    if(snapU.exists()) throw new Error('Username sudah dipakai');
+    const snapE = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+    if(snapE.exists()) throw new Error('Email sudah terdaftar');
+    const newUid = uid();
+    const userData={
+      uid:newUid, username, email,
+      password: btoa(pass),
+      balance:0, totalDeposit:0, totalOrders:0,
+      joinedAt: new Date().toISOString()
+    };
+    await db.ref('users/'+newUid).set(userData);
+    delete userData.password;
+    currentUser=userData;
+    saveSession(currentUser);
+    onLoggedIn();
+    showToast('Akun berhasil dibuat! 🎉','success');
+  } catch(e){
+    errEl.textContent='❌ '+e.message;
+  }
+  document.getElementById('btnReg').disabled=false;
+  document.getElementById('btnReg').textContent='✨ Daftar Sekarang';
+}
+
+function doLogout(){
+  clearSession();
+  currentUser=null;
+  onLoggedOut();
+  closeUserDropdown();
+  showToast('Berhasil keluar','info');
+}
+
+async function changePassword(){
+  const np=document.getElementById('newPass').value;
+  const cp=document.getElementById('confirmPass').value;
+  const err=document.getElementById('changePassErr');
+  err.textContent='';
+  if(np.length<6){err.textContent='Min. 6 karakter';return;}
+  if(np!==cp){err.textContent='Password tidak sama';return;}
+  try{
+    await db.ref('users/'+currentUser.uid+'/password').set(btoa(np));
+    showToast('Password berhasil diubah ✅','success');
+    document.getElementById('newPass').value='';
+    document.getElementById('confirmPass').value='';
+  }catch(e){err.textContent='Gagal: '+e.message;}
+}
+
+// ========== UI STATE ==========
+function onLoggedIn(){
+  document.getElementById('headerGuest').style.display='none';
+  document.getElementById('headerUser').style.display='block';
+  document.getElementById('guestLanding').style.display='none';
+  document.getElementById('mainContent').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  refreshUserUI();
+  // listen balance realtime
+  db.ref('users/'+currentUser.uid+'/balance').on('value', snap=>{
+    const b=snap.val()||0;
+    currentUser.balance=b;
+    saveSession(currentUser);
+    refreshBalanceUI(b);
+  });
+}
+
+function onLoggedOut(){
+  document.getElementById('headerGuest').style.display='block';
+  document.getElementById('headerUser').style.display='none';
+  document.getElementById('guestLanding').style.display='block';
+  document.getElementById('mainContent').style.display='none';
+}
+
+function refreshUserUI(){
+  const u=currentUser;
+  const av=(u.username||'U')[0].toUpperCase();
+  document.getElementById('userAvatarHeader').textContent=av;
+  document.getElementById('userNameHeader').textContent=u.username;
+  refreshBalanceUI(u.balance||0);
+  document.getElementById('ddName').textContent=u.username;
+  document.getElementById('ddEmail').textContent=u.email;
+}
+
+function refreshBalanceUI(b){
+  const fmt='Rp'+b.toLocaleString('id');
+  document.getElementById('userBalanceHeader').textContent=fmt;
+}
+
+function toggleUserDropdown(){
+  const d=document.getElementById('userDropdown');
+  d.style.display=d.style.display==='none'?'block':'none';
+}
+function closeUserDropdown(){ document.getElementById('userDropdown').style.display='none'; }
+document.addEventListener('click',e=>{
+  if(!document.getElementById('userWrap').contains(e.target)) closeUserDropdown();
+});
+
+function openProfile(){
+  closeUserDropdown();
+  // refresh data
+  db.ref('users/'+currentUser.uid).once('value',snap=>{
+    const u=snap.val()||{};
+    document.getElementById('profileUsername').textContent='@'+u.username+' · '+u.email;
+    document.getElementById('profBalance').textContent='Rp'+(u.balance||0).toLocaleString('id');
+    document.getElementById('profTotalDeposit').textContent='Rp'+(u.totalDeposit||0).toLocaleString('id');
+    document.getElementById('profTotalOrder').textContent=(u.totalOrders||0)+' order';
+    document.getElementById('profJoined').textContent=u.joinedAt?new Date(u.joinedAt).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):'?';
+  });
+  document.getElementById('profileModal').classList.remove('hidden');
+}
+
+// ========== MAIN TABS ==========
+function switchMainTab(tab){
+  document.querySelectorAll('.top-tab').forEach((t,i)=>{
+    t.classList.toggle('active',['buy','deposit','history'][i]===tab);
+  });
+  document.getElementById('tabBuy').style.display=tab==='buy'?'block':'none';
+  document.getElementById('tabDeposit').style.display=tab==='deposit'?'block':'none';
+  document.getElementById('tabHistory').style.display=tab==='history'?'block':'none';
+  if(tab==='history') loadHistory();
+}
+
+// ========== LOAD HISTORY ==========
+async function loadHistory(){
+  const el=document.getElementById('historyContent');
+  el.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  const snap=await db.ref('transactions/'+currentUser.uid).limitToLast(30).once('value');
+  const data=snap.val()||{};
+  const txs=Object.values(data).reverse();
+  if(!txs.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><p>Belum ada transaksi</p></div>';return;}
+  el.innerHTML=`<div style="overflow-x:auto;"><table class="history-table">
+    <thead><tr><th>Tanggal</th><th>Tipe</th><th>Detail</th><th>Jumlah</th><th>Status</th></tr></thead>
+    <tbody>${txs.map(t=>`
+      <tr>
+        <td style="color:var(--muted);font-size:12px;">${new Date(t.createdAt).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
+        <td><span class="badge ${t.type==='deposit'?'badge-green':'badge-blue'}">${t.type==='deposit'?'DEPOSIT':'BELI'}</span></td>
+        <td style="font-size:12px;">${t.detail||'-'}</td>
+        <td style="font-family:'Syne',sans-serif;font-weight:700;color:${t.type==='deposit'?'var(--green)':'var(--accent)'};">${t.type==='deposit'?'+':'−'}Rp${(t.amount||0).toLocaleString('id')}</td>
+        <td><span class="badge ${t.status==='success'||t.status==='completed'?'badge-green':t.status==='pending'?'badge-yellow':'badge-red'}">${t.status||'?'}</span></td>
+      </tr>
+    `).join('')}</tbody>
+  </table></div>`;
+}
+
+// ========== DEPOSIT ==========
+function openDepositModal(){
+  closeUserDropdown();
+  document.getElementById('depositModal').classList.remove('hidden');
+  document.getElementById('qrisResult').innerHTML='';
+  document.getElementById('depositAmount').value='';
+  document.querySelectorAll('#depositModal .amount-btn').forEach(b=>b.classList.remove('selected'));
+  selectedDepositAmount=0;
+}
+function closeDeposit(){ document.getElementById('depositModal').classList.add('hidden'); }
+
+function pickAmount(v){
+  selectedDepositAmount=v;
+  document.getElementById('depositAmount').value='';
+  document.querySelectorAll('#depositModal .amount-btn').forEach(b=>b.classList.toggle('selected',parseInt(b.textContent.replace(/\D/g,''))===v));
+}
+function pickAmountMain(v){
+  selectedDepositAmount=v;
+  document.getElementById('depositAmountMain').value='';
+  document.querySelectorAll('#tabDeposit .amount-btn').forEach(b=>b.classList.toggle('selected',parseInt(b.textContent.replace(/\D/g,''))===v));
+}
+function clearAmountSelection(){ selectedDepositAmount=0; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('selected')); }
+
+async function createDeposit(){ await _createDeposit('modal'); }
+async function createDepositMain(){ await _createDeposit('main'); }
+
+async function _createDeposit(ctx){
+  const inputEl=ctx==='modal'?document.getElementById('depositAmount'):document.getElementById('depositAmountMain');
+  const amount=selectedDepositAmount||parseInt(inputEl.value)||0;
+  if(amount<5000){showToast('Minimal deposit Rp5.000','error');return;}
+  const resultEl=ctx==='modal'?document.getElementById('qrisResult'):document.getElementById('qrisResultMain');
+  const btnId=ctx==='modal'?'btnDeposit':null;
+  if(btnId){document.getElementById(btnId).disabled=true;document.getElementById(btnId).textContent='Memproses...';}
+  resultEl.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try{
+    const apiKey=config.apiKey;
+    if(!apiKey){throw new Error('API Key belum dikonfigurasi admin');}
+    const d=await rumahotpGet('/v1/deposit/create?amount='+amount+'&payment_id=qris');
+    if(!d||!d.success) throw new Error(d&&d.message?d.message:'Gagal membuat deposit');
+    const dep=d.data;
+    // Save to firebase pending
+    const txId=dep.id||uid();
+    const txData={
+      id:txId, type:'deposit', amount:dep.currency?dep.currency.diterima:amount,
+      grossAmount: dep.amount||amount,
+      status:'pending', detail:'Deposit via QRIS',
+      qrImage:dep.qr_image||'', createdAt:new Date().toISOString()
+    };
+    await db.ref('transactions/'+currentUser.uid+'/'+txId).set(txData);
+    // Show QR
+    resultEl.innerHTML=`
+      <div class="qris-box">
+        <img src="${dep.qr_image||''}" alt="QRIS" onerror="this.style.background='#333';this.alt='QR Error'">
+        <div class="qris-amount">Rp${(dep.amount||amount).toLocaleString('id')}</div>
+        <div class="qris-info">
+          Scan QRIS di atas dengan GoPay, OVO, DANA, atau aplikasi banking apapun.<br>
+          ID: <strong>${txId}</strong><br>
+          <span style="color:var(--yellow);">⏳ Berlaku 20 menit</span>
+        </div>
+        <div class="deposit-status-wrap" id="depStatus_${txId}">
+          <div class="status-badge waiting" style="margin-top:10px;display:inline-flex;"><span class="pulse"></span> Menunggu Pembayaran...</div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;">
+          <button class="btn-sm" onclick="checkDepositStatus('${txId}','${dep.id||txId}','depStatus_${txId}')">🔄 Cek Status</button>
+        </div>
+      </div>
+    `;
+    startDepositPolling(txId, dep.id||txId, 'depStatus_'+txId);
+    showToast('QRIS berhasil dibuat!','success');
+  }catch(e){
+    resultEl.innerHTML=`<div style="color:var(--red);font-size:13px;padding:12px;">❌ ${e.message}</div>`;
+    showToast('Error: '+e.message,'error');
+  }
+  if(btnId){document.getElementById(btnId).disabled=false;document.getElementById(btnId).textContent='💰 Buat Pembayaran';}
+}
+
+let depPolling=null;
+function startDepositPolling(txId, depApiId, statusElId){
+  if(depPolling) clearInterval(depPolling);
+  let count=0;
+  depPolling=setInterval(async()=>{
+    count++;
+    if(count>60){clearInterval(depPolling);return;}
+    await checkDepositStatus(txId, depApiId, statusElId);
+  },8000);
+}
+
+async function checkDepositStatus(txId, depApiId, statusElId){
+  try{
+    const d=await rumahotpGet('/v1/deposit/get_status?deposit_id='+depApiId);
+    if(!d||!d.success) return;
+    const status=d.data.status;
+    const el=document.getElementById(statusElId);
+    if(status==='success'){
+      clearInterval(depPolling);
+      // Credit balance
+      const diterima=d.data.amount||0;
+      const newBal=(currentUser.balance||0)+diterima;
+      const newTotalDep=(currentUser.totalDeposit||0)+diterima;
+      await db.ref('users/'+currentUser.uid).update({balance:newBal, totalDeposit:newTotalDep});
+      await db.ref('transactions/'+currentUser.uid+'/'+txId+'/status').set('success');
+      currentUser.balance=newBal; currentUser.totalDeposit=newTotalDep;
+      saveSession(currentUser);
+      if(el) el.innerHTML='<div class="status-badge received" style="margin-top:10px;display:inline-flex;">✓ Pembayaran Berhasil! +Rp'+diterima.toLocaleString('id')+'</div>';
+      showToast('Deposit Rp'+diterima.toLocaleString('id')+' berhasil! 💰','success');
+    } else if(status==='cancel'||status==='failed'){
+      clearInterval(depPolling);
+      if(el) el.innerHTML='<div class="status-badge canceled" style="margin-top:10px;display:inline-flex;">✗ Pembayaran Dibatalkan</div>';
+    }
+  }catch(e){}
+}
+
+// ========== API ==========
+async function rumahotpGet(endpoint){
+  const url='https://www.rumahotp.io/api'+endpoint;
+  const opts={headers:{'x-apikey':config.apiKey,'Accept':'application/json'}};
+  try{
+    const r=await fetch(url,opts);
+    return r.json();
+  }catch{
+    try{
+      const r2=await fetch('https://corsproxy.io/?'+encodeURIComponent(url));
+      return r2.json();
+    }catch{return null;}
+  }
+}
+
+// ========== LOAD APPS ==========
+async function loadApps(){
+  try{
+    const d=await rumahotpGet('/v2/services');
+    if(d&&d.success&&d.data){allApps=d.data;renderApps(allApps);return;}
+  }catch{}
+  allApps=[
+    {service_code:13,service_name:'WhatsApp',service_img:'https://assets.cindigital.id/apps/wa.png'},
+    {service_code:4,service_name:'Telegram',service_img:'https://assets.cindigital.id/apps/tg.png'},
+    {service_code:7,service_name:'Facebook',service_img:'https://assets.cindigital.id/apps/fb.png'},
+    {service_code:2,service_name:'Instagram',service_img:'https://assets.cindigital.id/apps/ig.png'},
+    {service_code:18,service_name:'TikTok',service_img:'https://assets.cindigital.id/apps/tiktok.png'},
+    {service_code:1,service_name:'Google',service_img:'https://assets.cindigital.id/apps/google.png'},
+    {service_code:5,service_name:'Twitter',service_img:'https://assets.cindigital.id/apps/twitter.png'},
+    {service_code:9,service_name:'Shopee',service_img:'https://assets.cindigital.id/apps/shopee.png'},
+    {service_code:10,service_name:'Grab',service_img:'https://assets.cindigital.id/apps/grab.png'},
+    {service_code:14,service_name:'Gojek',service_img:'https://assets.cindigital.id/apps/gojek.png'},
+    {service_code:20,service_name:'Lazada',service_img:'https://assets.cindigital.id/apps/lazada.png'},
+    {service_code:22,service_name:'Tokopedia',service_img:'https://assets.cindigital.id/apps/tokopedia.png'},
+  ];
+  renderApps(allApps);
+}
+
+function renderApps(apps){
+  const g=document.getElementById('appsGrid');
+  if(!apps.length){g.innerHTML='<div class="empty"><div class="empty-icon">📱</div><p>Tidak ada aplikasi</p></div>';return;}
+  g.innerHTML=apps.map(a=>`
+    <div class="app-card" onclick="selectApp(${a.service_code},'${a.service_name.replace(/'/g,"\\'")}','${a.service_img}')">
+      <img src="${a.service_img}" alt="${a.service_name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><rect width=%2240%22 height=%2240%22 rx=%229%22 fill=%22%237c5cfc%22/><text y=%2226%22 x=%2220%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2218%22>📱</text></svg>'">
+      <span>${a.service_name}</span>
+    </div>`).join('');
+}
+
+function filterApps(){
+  const q=document.getElementById('searchApp').value.toLowerCase();
+  renderApps(allApps.filter(a=>a.service_name.toLowerCase().includes(q)));
+}
+
+async function selectApp(code,name,img){
+  selectedService={code,name,img};
+  document.getElementById('countryTitle').textContent='🌍 Pilih Negara — '+name;
+  goToPanel(2);
+  document.getElementById('countriesGrid').innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try{
+    const d=await rumahotpGet('/v2/countries?service_id='+code);
+    if(d&&d.success&&d.data&&d.data.length){allCountries=d.data;renderCountries(allCountries);return;}
+  }catch{}
+  allCountries=[
+    {number_id:340437,name:'Indonesia',img:'https://assets.cindigital.id/flags/id.png',prefix:'+62',stock_total:103,pricelist:[{provider_id:'3837',stock:103,price:1100}]},
+    {number_id:340438,name:'Malaysia',img:'https://assets.cindigital.id/flags/my.png',prefix:'+60',stock_total:50,pricelist:[{provider_id:'3838',stock:50,price:1500}]},
+    {number_id:340439,name:'Vietnam',img:'https://assets.cindigital.id/flags/vn.png',prefix:'+84',stock_total:80,pricelist:[{provider_id:'3839',stock:80,price:900}]},
+    {number_id:340440,name:'Thailand',img:'https://assets.cindigital.id/flags/th.png',prefix:'+66',stock_total:60,pricelist:[{provider_id:'3840',stock:60,price:1200}]},
+    {number_id:340441,name:'India',img:'https://assets.cindigital.id/flags/in.png',prefix:'+91',stock_total:90,pricelist:[{provider_id:'3841',stock:90,price:800}]},
+  ];
+  renderCountries(allCountries);
+}
+
+function renderCountries(countries){
+  const g=document.getElementById('countriesGrid');
+  const margin=config.margin||1000;
+  if(!countries.length){g.innerHTML='<div class="empty"><div class="empty-icon">🌍</div><p>Tidak ada stok</p></div>';return;}
+  g.innerHTML=countries.map(c=>{
+    const base=c.pricelist&&c.pricelist[0]?c.pricelist[0].price:0;
+    return `<div class="country-card" onclick="selectCountry(${JSON.stringify(c).replace(/"/g,'&quot;')})">
+      <img src="${c.img}" alt="${c.name}" onerror="this.style.display='none'">
+      <div class="country-info">
+        <div class="country-name">${c.name}</div>
+        <div class="country-price">Rp${(base+margin).toLocaleString('id')}</div>
+        <div class="country-stock">Stok: ${c.stock_total}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterCountries(){
+  const q=document.getElementById('searchCountry').value.toLowerCase();
+  renderCountries(allCountries.filter(c=>c.name.toLowerCase().includes(q)));
+}
+
+async function selectCountry(country){
+  selectedCountry=country;
+  goToPanel(3);
+  renderOrderCard();
+  try{
+    const prov=country.pricelist&&country.pricelist[0]?country.pricelist[0].provider_id:'';
+    const d=await rumahotpGet('/v2/operators?country='+encodeURIComponent(country.name)+'&provider_id='+prov);
+    if(d&&d.success&&d.data){renderOperators(d.data);return;}
+  }catch{}
+  renderOperators([{id:1,name:'any',image:'https://assets.cindigital.id/carriers/indonesia/any.ico'}]);
+}
+
+function renderOrderCard(){
+  const margin=config.margin||1000;
+  const base=selectedCountry.pricelist&&selectedCountry.pricelist[0]?selectedCountry.pricelist[0].price:0;
+  const final=base+margin;
+  const insufficient=(currentUser.balance||0)<final;
+  document.getElementById('orderCard').innerHTML=`
+    <div class="order-card">
+      <div class="order-header">
+        <img class="order-app-icon" src="${selectedService.img}" alt="${selectedService.name}" onerror="this.style.background='var(--accent)'">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;">${selectedService.name}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:3px;">📍 ${selectedCountry.name} ${selectedCountry.prefix}</div>
+        </div>
+      </div>
+      <div class="order-body">
+        <div class="price-display">
+          <span class="price-big">Rp${final.toLocaleString('id')}</span>
+          <span style="font-size:13px;color:var(--muted);">per nomor</span>
+        </div>
+        ${insufficient?`<div class="insufficient-warn">⚠️ Saldo tidak cukup (Rp${(currentUser.balance||0).toLocaleString('id')}). <span style="cursor:pointer;font-weight:700;text-decoration:underline;" onclick="switchMainTab('deposit')">Deposit sekarang →</span></div>`:''}
+        <div class="section-title" style="margin-bottom:10px;">Operator</div>
+        <div class="op-grid" id="opGrid"><div class="spinner" style="width:22px;height:22px;border-width:2px;"></div></div>
+        <button class="btn btn-primary btn-full" id="btnBuy" onclick="createOrder()" ${insufficient?'disabled':''}>
+          ${insufficient?'💳 Saldo Tidak Cukup':'🛒 Beli Nomor Sekarang'}
+        </button>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px;">
+          Saldo kamu: <strong style="color:var(--green);">Rp${(currentUser.balance||0).toLocaleString('id')}</strong> · Stok: ${selectedCountry.stock_total}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderOperators(ops){
+  const g=document.getElementById('opGrid');
+  selectedOperator=ops[0]||null;
+  g.innerHTML=ops.map((op,i)=>`
+    <div class="op-btn ${i===0?'selected':''}" onclick="pickOperator(this,${op.id},'${op.name}','${op.image}')">
+      <img src="${op.image}" alt="${op.name}" onerror="this.style.display='none'" width="20" height="20" style="border-radius:50%">
+      ${op.name}
+    </div>`).join('');
+  const btn=document.getElementById('btnBuy');
+  if(btn&&(currentUser.balance||0)>=(config.margin||1000)){btn.disabled=false;}
+}
+
+function pickOperator(el,id,name,img){
+  document.querySelectorAll('.op-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOperator={id,name,image:img};
+}
+
+async function createOrder(){
+  if(!config.apiKey){showToast('API Key belum dikonfigurasi','error');return;}
+  const margin=config.margin||1000;
+  const base=selectedCountry.pricelist&&selectedCountry.pricelist[0]?selectedCountry.pricelist[0].price:0;
+  const final=base+margin;
+  if((currentUser.balance||0)<final){showToast('Saldo tidak cukup!','error');return;}
+  const btn=document.getElementById('btnBuy');
+  btn.disabled=true;btn.innerHTML='<div class="spinner" style="width:18px;height:18px;border-width:2px;border-color:#fff3;border-top-color:#fff"></div> Memproses...';
+  try{
+    const prov=selectedCountry.pricelist&&selectedCountry.pricelist[0]?selectedCountry.pricelist[0].provider_id:'';
+    const opId=selectedOperator?selectedOperator.id:1;
+    const d=await rumahotpGet('/v2/orders?number_id='+selectedCountry.number_id+'&provider_id='+prov+'&operator_id='+opId);
+    if(!d||!d.success) throw new Error(d&&d.message?d.message:'Gagal membuat order');
+    currentOrder=d.data;
+    // Deduct balance
+    const newBal=(currentUser.balance||0)-final;
+    const newTotal=(currentUser.totalOrders||0)+1;
+    await db.ref('users/'+currentUser.uid).update({balance:newBal,totalOrders:newTotal});
+    // Save transaction
+    const txId=currentOrder.order_id||uid();
+    await db.ref('transactions/'+currentUser.uid+'/'+txId).set({
+      id:txId,type:'order',amount:final,status:'pending',
+      detail:selectedService.name+' · '+selectedCountry.name+' · '+currentOrder.phone_number,
+      createdAt:new Date().toISOString()
+    });
+    currentUser.balance=newBal;currentUser.totalOrders=newTotal;
+    saveSession(currentUser);
+    goToPanel(4);
+    renderOTPWaiting();
+    startOTPCheck();
+    playOtpNotif();
+  }catch(e){
+    showToast('Error: '+e.message,'error');
+    btn.disabled=false;btn.innerHTML='🛒 Beli Nomor Sekarang';
+  }
+}
+
+// ========== OTP FLOW ==========
+function renderOTPWaiting(){
+  const expired=currentOrder.expired_at||Date.now()+1200000;
+  const totalSec=Math.max(0,Math.floor((expired-Date.now())/1000));
+  document.getElementById('otpPanel').innerHTML=`
+    <div class="otp-result">
+      <span class="status-badge waiting"><span class="pulse"></span> Menunggu OTP...</span>
+      <div class="phone-display">${currentOrder.phone_number}</div>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:14px;">${currentOrder.service} · ${currentOrder.country}</div>
+      <div class="otp-code-box" id="otpCodeBox">
+        <div class="otp-label">Masukkan nomor di ${currentOrder.service}, tunggu SMS masuk</div>
+        <div style="font-size:36px;margin-top:8px;color:var(--muted);">⏳</div>
+      </div>
+      <div class="timer-text">Sisa waktu: <span class="timer-count" id="timerCount">${formatTime(totalSec)}</span></div>
+      <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+      <div class="action-row">
+        <button class="btn-sm" onclick="resendOTP()">🔄 Kirim Ulang</button>
+        <button class="btn-sm danger" onclick="cancelOrder()">✖ Batal</button>
+        <button class="btn-sm" onclick="resetAll()">🏠 Beranda</button>
+      </div>
+    </div>`;
+  startTimer(totalSec);
+}
+
+function startOTPCheck(){
+  checkInterval=setInterval(async()=>{
+    try{
+      const d=await rumahotpGet('/v1/orders/get_status?order_id='+currentOrder.order_id);
+      if(!d||!d.success) return;
+      const s=d.data.status;
+      if(s==='received'||s==='completed'){
+        clearIntervals();
+        showOTPReceived(d.data);
+        // Update tx status
+        await db.ref('transactions/'+currentUser.uid+'/'+currentOrder.order_id+'/status').set('completed');
+        playOtpNotif();
+      } else if(s==='canceled'||s==='expired'){
+        clearIntervals();
+        showOTPCanceled();
+        await db.ref('transactions/'+currentUser.uid+'/'+currentOrder.order_id+'/status').set('canceled');
+      }
+    }catch{}
+  },4000);
+}
+
+function showOTPReceived(data){
+  document.getElementById('otpPanel').innerHTML=`
+    <div class="otp-result">
+      <span class="status-badge received">✓ OTP Diterima!</span>
+      <div class="phone-display">${data.phone_number}</div>
+      <div class="otp-code-box">
+        <div class="otp-label">Kode OTP ${data.service}</div>
+        <div class="otp-code">${data.otp_code||'------'}</div>
+        <div class="otp-msg">${data.otp_msg||''}</div>
+      </div>
+      <div class="action-row">
+        <button class="btn-sm" onclick="copyOTP('${data.otp_code}')">📋 Salin Kode</button>
+        <button class="btn-sm" onclick="resetAll()">🛒 Beli Lagi</button>
+      </div>
+    </div>`;
+  showToast('OTP berhasil diterima! 🎉','success');
+}
+
+function showOTPCanceled(){
+  document.getElementById('otpPanel').innerHTML=`
+    <div class="otp-result">
+      <span class="status-badge canceled">✗ Dibatalkan</span>
+      <div style="margin:20px 0;color:var(--muted);">Pesanan dibatalkan atau kadaluarsa.</div>
+      <button class="btn btn-secondary" onclick="resetAll()">🏠 Kembali</button>
+    </div>`;
+}
+
+async function resendOTP(){
+  try{await rumahotpGet('/v1/orders/set_status?order_id='+currentOrder.order_id+'&status=resend');showToast('Permintaan OTP dikirim ulang','info');}
+  catch{showToast('Gagal mengirim ulang','error');}
+}
+
+async function cancelOrder(){
+  clearIntervals();
+  try{await rumahotpGet('/v1/orders/set_status?order_id='+currentOrder.order_id+'&status=cancel');}catch{}
+  showOTPCanceled();
+  showToast('Pesanan dibatalkan','info');
+}
+
+function startTimer(total){
+  let rem=total;
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{
+    rem--;
+    const c=document.getElementById('timerCount');
+    const f=document.getElementById('timerFill');
+    if(c) c.textContent=formatTime(rem);
+    if(f) f.style.width=Math.max(0,rem/total*100)+'%';
+    if(rem<=0) clearIntervals();
+  },1000);
+}
+
+function formatTime(s){const m=Math.floor(s/60);return m+':'+(s%60).toString().padStart(2,'0');}
+function clearIntervals(){if(timerInterval)clearInterval(timerInterval);if(checkInterval)clearInterval(checkInterval);}
+function copyOTP(c){navigator.clipboard.writeText(c).then(()=>showToast('Kode OTP disalin!','success'));}
+
+function resetAll(){
+  clearIntervals();currentOrder=null;selectedService=null;selectedCountry=null;selectedOperator=null;
+  goToPanel(1);switchMainTab('buy');
+}
+
+function goToPanel(n){
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('panel'+i).classList.toggle('active',i===n);
+    const s=document.getElementById('step'+i);
+    if(s){s.classList.remove('active','done');if(i<n)s.classList.add('done');else if(i===n)s.classList.add('active');}
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ========== AUDIO ==========
+function tryPlayAudio(){
+  const a=document.getElementById('bgMusic');a.volume=0.22;
+  a.play().then(()=>{audioPlaying=true;document.getElementById('audioBtn').classList.add('playing');}).catch(()=>{});
+}
+function toggleAudio(){
+  const a=document.getElementById('bgMusic');
+  if(audioPlaying){a.pause();audioPlaying=false;document.getElementById('audioBtn').classList.remove('playing');document.getElementById('audioBtn').textContent='🔇';}
+  else{a.volume=0.22;a.play().catch(()=>{});audioPlaying=true;document.getElementById('audioBtn').classList.add('playing');document.getElementById('audioBtn').textContent='🎵';}
+}
+function playOtpNotif(){const s=document.getElementById('otpSound');s.volume=0.5;s.currentTime=0;s.play().catch(()=>{});}
+document.addEventListener('click',function once(){if(config.audioEnabled&&!audioPlaying)tryPlayAudio();document.removeEventListener('click',once);},{once:true});
+
+// ========== TOAST ==========
+function showToast(msg,type='info'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=`<span>${type==='success'?'✅':type==='error'?'❌':'ℹ️'}</span><span>${msg}</span>`;
+  c.appendChild(t);setTimeout(()=>t.remove(),4000);
+}
+
+// ========== CEGAH TOMBOL BACK HP KELUAR WEB ==========
+history.pushState(null, '', location.href);
+window.addEventListener('popstate', () => {
+  history.pushState(null, '', location.href);
+});
+</script>
+</body>
+</html>
