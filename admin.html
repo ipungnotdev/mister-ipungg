@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--bg:#0D001A;--bg2:#120020;--card:#1E0035;--card2:#2A004A;--pu:#7C3AED;--pl:#A855F7;--pg:#C084FC;--ac:#E879F9;--tx:#F3E8FF;--mt:#A78BCA;--bd:#3B0764;--ok:#22C55E;--er:#EF4444;--wn:#F59E0B;--r:13px;--sw:248px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--pu);border-radius:3px}
+/* LOGIN */
+#L{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(124,58,237,.14) 0%,transparent 70%)}
+.lc{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:38px 30px;width:100%;max-width:360px;text-align:center}
+.lic{width:62px;height:62px;background:linear-gradient(135deg,var(--pu),var(--ac));border-radius:17px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;margin:0 auto 18px;box-shadow:0 8px 28px rgba(124,58,237,.4)}
+.lc h2{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:700;margin-bottom:5px}
+.lc p{color:var(--mt);font-size:.88rem;margin-bottom:24px}
+.liw{position:relative;margin-bottom:14px}
+.liw i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--mt)}
+.liw input{width:100%;padding:13px 13px 13px 40px;background:var(--bg2);border:1px solid var(--bd);border-radius:11px;color:var(--tx);font-size:.92rem;font-family:'Inter',sans-serif;outline:none;transition:border-color .2s}
+.liw input:focus{border-color:var(--pu)}
+.lbtn{width:100%;padding:13px;background:linear-gradient(135deg,var(--pu),var(--ac));border:none;border-radius:11px;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;font-family:'Syne',sans-serif;transition:opacity .2s}
+.lbtn:hover{opacity:.9}
+#lerr{color:var(--er);font-size:.83rem;margin-top:10px;display:none}
+/* LAYOUT */
+#A{display:none}
+.al{display:flex;min-height:100vh}
+.asd{width:var(--sw);background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:fixed;top:0;left:-270px;height:100vh;z-index:100;transition:left .3s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+.asd.on{left:0}
+.sbr{padding:18px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.sbr .bn{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;background:linear-gradient(135deg,var(--pg),var(--ac));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.scl{background:none;border:none;color:var(--mt);cursor:pointer}
+.nm{padding:10px 9px;flex:1}
+.nl{font-size:.66rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--mt);padding:7px 9px 3px;opacity:.7}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;cursor:pointer;color:var(--mt);font-size:.88rem;transition:.2s;margin-bottom:1px;border:none;background:none;width:100%;font-family:'Inter',sans-serif;text-align:left}
+.ni:hover{background:var(--card2);color:var(--tx)}
+.ni.on{background:rgba(124,58,237,.2);color:var(--pg);border-left:3px solid var(--pu);padding-left:8px}
+.ni i{width:17px;text-align:center}
+.sft{padding:13px 14px;border-top:1px solid var(--bd)}
+.am{flex:1;min-height:100vh;display:flex;flex-direction:column}
+.tb{position:sticky;top:0;background:rgba(13,0,26,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);padding:0 18px;height:58px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.tbl{display:flex;align-items:center;gap:12px}
+.mtog{background:none;border:1px solid var(--bd);color:var(--tx);width:35px;height:35px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.mtog:hover{background:var(--card2)}
+.ptit{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem}
+.abg{background:rgba(124,58,237,.18);border:1px solid var(--bd);border-radius:8px;padding:5px 11px;font-size:.78rem;color:var(--pg)}
+.so{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.so.on{display:block}
+.pc{padding:22px 18px;max-width:1080px;margin:0 auto;width:100%;display:none}
+.pc.on{display:block}
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+.sc{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:-25px;right:-25px;width:70px;height:70px;background:radial-gradient(circle,rgba(124,58,237,.15) 0%,transparent 70%)}
+.si{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;margin-bottom:10px}
+.sv{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:700;margin-bottom:3px}
+.sl{color:var(--mt);font-size:.78rem}
+/* CARDS */
+.scard{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.sch{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.sct{font-family:'Syne',sans-serif;font-weight:700;font-size:.97rem}
+.scb{padding:18px}
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:9px;border:none;cursor:pointer;font-weight:600;font-size:.85rem;transition:all .2s;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif}
+.btn-p{background:linear-gradient(135deg,var(--pu),#9333EA);color:#fff}
+.btn-p:hover{opacity:.85}
+.btn-d{background:rgba(239,68,68,.13);color:var(--er);border:1px solid rgba(239,68,68,.28)}
+.btn-d:hover{background:rgba(239,68,68,.22)}
+.btn-ok{background:rgba(34,197,94,.13);color:var(--ok);border:1px solid rgba(34,197,94,.28)}
+.btn-o{background:transparent;color:var(--mt);border:1px solid var(--bd)}
+.btn-o:hover{border-color:var(--pu);color:var(--tx)}
+.btn-wn{background:rgba(245,158,11,.13);color:var(--wn);border:1px solid rgba(245,158,11,.28)}
+.sm{padding:6px 11px;font-size:.78rem;border-radius:8px}
+/* FORM */
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:.8rem;color:var(--mt);margin-bottom:5px;font-weight:500}
+.fg input,.fg textarea,.fg select{width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;color:var(--tx);font-family:'Inter',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--pu)}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--mt)}
+.fg select option{background:var(--card2)}
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{background:var(--bg2);color:var(--mt);font-size:.72rem;text-transform:uppercase;letter-spacing:.8px;padding:9px 12px;text-align:left;font-weight:600}
+tbody tr{border-bottom:1px solid rgba(59,7,100,.35)}
+tbody tr:hover{background:rgba(42,0,74,.3)}
+tbody td{padding:11px 12px;vertical-align:middle}
+/* BADGE */
+.bdg{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:100px;font-size:.72rem;font-weight:600}
+.b-ok{background:rgba(34,197,94,.13);color:var(--ok);border:1px solid rgba(34,197,94,.22)}
+.b-er{background:rgba(239,68,68,.13);color:var(--er);border:1px solid rgba(239,68,68,.22)}
+.b-pu{background:rgba(124,58,237,.13);color:var(--pg);border:1px solid rgba(124,58,237,.22)}
+.b-wn{background:rgba(245,158,11,.13);color:var(--wn);border:1px solid rgba(245,158,11,.22)}
+/* MODAL */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}
+.mo.on{display:flex}
+.mb{background:var(--bg2);border:1px solid var(--bd);border-radius:18px;width:100%;max-width:500px;padding:26px 22px;max-height:90vh;overflow-y:auto}
+.mb h3{font-family:'Syne',sans-serif;font-weight:700;margin-bottom:18px;font-size:1.05rem}
+.mf{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
+/* SALDO CARD */
+.saldo-card{background:linear-gradient(135deg,#1a0530,#0d001a);border:1px solid var(--pu);border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.saldo-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(124,58,237,.2) 0%,transparent 70%)}
+.saldo-lbl{font-size:.75rem;color:var(--mt);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.saldo-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--tx)}
+.saldo-user{color:var(--mt);font-size:.82rem;margin-top:6px}
+/* PRODUCTS GRID dari premku */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.prod-item{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;position:relative}
+.prod-item img{width:100%;height:70px;object-fit:cover;border-radius:8px;margin-bottom:10px}
+.prod-item-name{font-weight:600;font-size:.88rem;margin-bottom:4px}
+.prod-item-price{color:var(--pg);font-size:.82rem;font-weight:600}
+.prod-item-stock{color:var(--mt);font-size:.75rem;margin-top:3px}
+/* MARGIN INPUT */
+.margin-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(59,7,100,.3)}
+.margin-row:last-child{border-bottom:none}
+.margin-name{flex:1;font-size:.88rem;font-weight:500}
+.margin-price{color:var(--mt);font-size:.78rem;min-width:90px}
+.margin-input{width:110px;padding:7px 10px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-size:.85rem;outline:none;font-family:'Inter',sans-serif}
+.margin-input:focus{border-color:var(--pu)}
+.margin-sell{color:var(--pg);font-size:.82rem;font-weight:600;min-width:90px;text-align:right}
+/* USER DETAIL */
+.udr{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid rgba(59,7,100,.35)}
+.udr:last-child{border-bottom:none}
+.udl{color:var(--mt);font-size:.8rem;min-width:110px}
+.udv{font-weight:500;font-size:.85rem;word-break:break-all}
+.av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--pu),var(--ac));display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--card2);border:1px solid var(--bd);border-radius:50px;padding:10px 20px;font-size:.85rem;z-index:999;transition:transform .3s;white-space:nowrap;box-shadow:0 8px 26px rgba(0,0,0,.4)}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--ok)}.toast.er{border-color:var(--er)}.toast.wn{border-color:var(--wn)}
+/* SPIN */
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* INFO BOX */
+.info-box{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:10px;padding:12px 14px;font-size:.83rem;color:var(--mt);line-height:1.7;margin-bottom:14px}
+.info-box strong{color:var(--pg)}
+@media(max-width:600px){.fr{grid-template-columns:1fr}.sg{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="L">
+  <div class="lc">
+    <div class="lic"><i class="fas fa-shield-halved"></i></div>
+    <h2>Admin Panel</h2>
+    <p>Masukkan password untuk masuk</p>
+    <div class="liw">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="lp" placeholder="Password admin" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="lbtn" onclick="doLogin()"><i class="fas fa-arrow-right-to-bracket"></i> Masuk</button>
+    <div id="lerr">Password salah. Coba lagi.</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="A">
+  <div class="so" id="so" onclick="closeSb()"></div>
+  <div class="al">
+    <aside class="asd" id="asd">
+      <div class="sbr">
+        <span class="bn" id="sbn">Admin Panel</span>
+        <button class="scl" onclick="closeSb()"><i class="fas fa-xmark"></i></button>
+      </div>
+      <nav class="nm">
+        <div class="nl">Main</div>
+        <button class="ni on" onclick="pg('dashboard',this)"><i class="fas fa-chart-pie"></i> Dashboard</button>
+        <button class="ni" onclick="pg('premku',this)"><i class="fas fa-plug"></i> Premku API</button>
+        <button class="ni" onclick="pg('products',this)"><i class="fas fa-box"></i> Produk & Margin</button>
+        <button class="ni" onclick="pg('transactions',this)"><i class="fas fa-receipt"></i> Transaksi</button>
+        <button class="ni" onclick="pg('users',this)"><i class="fas fa-users"></i> Pengguna</button>
+        <div class="nl" style="margin-top:8px">Konfigurasi</div>
+        <button class="ni" onclick="pg('settings',this)"><i class="fas fa-gear"></i> Pengaturan Toko</button>
+      </nav>
+      <div class="sft">
+        <button class="btn btn-o" style="width:100%;justify-content:center" onclick="doLogout()">
+          <i class="fas fa-right-from-bracket"></i> Keluar
+        </button>
+      </div>
+    </aside>
+
+    <main class="am">
+      <div class="tb">
+        <div class="tbl">
+          <button class="mtog" onclick="togSb()"><i class="fas fa-bars"></i></button>
+          <span class="ptit" id="ptit">Dashboard</span>
+        </div>
+        <span class="abg"><i class="fas fa-circle" style="color:var(--ok);font-size:.45rem"></i> Admin</span>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="pc on" id="p-dashboard">
+        <div class="sg">
+          <div class="sc"><div class="si" style="background:rgba(34,197,94,.18);color:var(--ok)"><i class="fas fa-wallet"></i></div><div class="sv" id="st-saldo">Rp 0</div><div class="sl">Saldo Premku</div></div>
+          <div class="sc"><div class="si" style="background:rgba(124,58,237,.18);color:var(--pg)"><i class="fas fa-box"></i></div><div class="sv" id="st-prod">0</div><div class="sl">Produk Aktif</div></div>
+          <div class="sc"><div class="si" style="background:rgba(245,158,11,.18);color:var(--wn)"><i class="fas fa-receipt"></i></div><div class="sv" id="st-tx">0</div><div class="sl">Total Order</div></div>
+          <div class="sc"><div class="si" style="background:rgba(232,121,249,.18);color:var(--ac)"><i class="fas fa-arrow-trend-up"></i></div><div class="sv" id="st-profit">Rp 0</div><div class="sl">Total Profit</div></div>
+        </div>
+        <div class="scard">
+          <div class="sch"><span class="sct">Order Terbaru</span></div>
+          <div class="scb"><div class="tw"><table>
+            <thead><tr><th>Invoice</th><th>Produk</th><th>Pembeli</th><th>Jual</th><th>Profit</th><th>Waktu</th></tr></thead>
+            <tbody id="dash-tx"><tr><td colspan="6" style="text-align:center;color:var(--mt);padding:28px">Belum ada transaksi</td></tr></tbody>
+          </table></div></div>
+        </div>
+      </div>
+
+      <!-- PREMKU API -->
+      <div class="pc" id="p-premku">
+        <!-- Saldo & Profil -->
+        <div class="saldo-card" id="saldo-card">
+          <div class="saldo-lbl">Saldo Premku.com</div>
+          <div class="saldo-val" id="pk-saldo">Rp —</div>
+          <div class="saldo-user" id="pk-user">Belum terhubung</div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-ok sm" onclick="checkProfile()"><i class="fas fa-rotate-right"></i> Refresh Saldo</button>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <strong><i class="fas fa-circle-info"></i> Cara Kerja API Premku</strong><br>
+          Simpan Secret Key dari dashboard premku.com di pengaturan. Produk, stok, dan order semua otomatis. Lo tinggal set margin & produk akan tampil di toko dengan harga yang sudah include margin.
+        </div>
+
+        <!-- Produk dari premku -->
+        <div class="scard">
+          <div class="sch">
+            <span class="sct"><i class="fas fa-plug" style="color:var(--pg)"></i> Produk dari Premku.com</span>
+            <button class="btn btn-p sm" onclick="syncProducts()"><i class="fas fa-arrows-rotate"></i> Sync Produk</button>
+          </div>
+          <div class="scb">
+            <div id="pk-prod-grid" style="color:var(--mt);text-align:center;padding:30px">
+              Klik "Sync Produk" untuk memuat produk dari premku.com
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS & MARGIN -->
+      <div class="pc" id="p-products">
+        <div class="scard">
+          <div class="sch">
+            <span class="sct">Produk & Pengaturan Margin</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-wn sm" onclick="syncProducts()"><i class="fas fa-arrows-rotate"></i> Sync dari Premku</button>
+              <button class="btn btn-p sm" onclick="saveAllMargins()"><i class="fas fa-save"></i> Simpan Semua</button>
+            </div>
+          </div>
+          <div class="scb">
+            <div class="fg" style="max-width:260px;margin-bottom:20px">
+              <label>Margin Default untuk Semua Produk (%)</label>
+              <div style="display:flex;gap:8px">
+                <input type="number" id="default-margin" placeholder="20" value="20" style="flex:1">
+                <button class="btn btn-p sm" onclick="applyDefaultMargin()"><i class="fas fa-wand-magic-sparkles"></i> Apply</button>
+              </div>
+            </div>
+            <div id="margin-list">
+              <div style="text-align:center;color:var(--mt);padding:30px">Sync produk dari premku dulu untuk atur margin per produk.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="pc" id="p-transactions">
+        <div class="scard">
+          <div class="sch">
+            <span class="sct">Semua Transaksi</span>
+            <button class="btn btn-o sm" onclick="exportTx()"><i class="fas fa-download"></i> Export</button>
+          </div>
+          <div class="scb"><div class="tw"><table>
+            <thead><tr><th>Invoice</th><th>Produk</th><th>Pembeli</th><th>WA</th><th>Jual</th><th>Modal</th><th>Profit</th><th>Akun</th><th>Waktu</th></tr></thead>
+            <tbody id="tx-tb"><tr><td colspan="9" style="text-align:center;color:var(--mt);padding:28px">Belum ada transaksi</td></tr></tbody>
+          </table></div></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="pc" id="p-users">
+        <div class="scard">
+          <div class="sch"><span class="sct">Data Pengguna</span></div>
+          <div class="scb"><div class="tw"><table>
+            <thead><tr><th>Pengguna</th><th>Kontak</th><th>Total Order</th><th>Total Belanja</th><th>Last Order</th><th>Aksi</th></tr></thead>
+            <tbody id="user-tb"><tr><td colspan="6" style="text-align:center;color:var(--mt);padding:28px">Belum ada pengguna</td></tr></tbody>
+          </table></div></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="pc" id="p-settings">
+        <div class="scard">
+          <div class="sch"><span class="sct"><i class="fas fa-plug" style="color:var(--pg)"></i> API Premku.com</span></div>
+          <div class="scb">
+            <div class="info-box">
+              <strong>Cara mendapatkan API Key:</strong><br>
+              Login ke <strong>premku.com/app/dashboard</strong> → lihat bagian <strong>API Credentials</strong> → klik <strong>Salin Key</strong>
+            </div>
+            <div class="fg">
+              <label>Secret Key Premku.com *</label>
+              <input type="password" id="s-apikey" placeholder="Masukkan Secret Key dari premku.com">
+            </div>
+            <button class="btn btn-ok sm" onclick="testApi()" style="margin-bottom:20px">
+              <i class="fas fa-plug"></i> Test Koneksi API
+            </button>
+            <div id="api-test-result" style="display:none;margin-bottom:20px"></div>
+          </div>
+        </div>
+
+        <div class="scard">
+          <div class="sch"><span class="sct"><i class="fas fa-store" style="color:var(--pg)"></i> Pengaturan Toko</span></div>
+          <div class="scb">
+            <div class="fr">
+              <div class="fg"><label>Nama Toko</label><input type="text" id="s-name" placeholder="PremStore"></div>
+              <div class="fg"><label>URL Logo (opsional)</label><input type="url" id="s-logo" placeholder="https://..."></div>
+            </div>
+            <div class="fr">
+              <div class="fg"><label>No. WhatsApp Admin</label><input type="text" id="s-wa" placeholder="628123456789"></div>
+              <div class="fg"><label>Nama Admin WA</label><input type="text" id="s-waname" placeholder="Admin PremStore"></div>
+            </div>
+            <div class="fg"><label>Informasi Website (tampil di sidebar toko)</label><textarea id="s-info" rows="3" placeholder="Deskripsi singkat toko Anda..."></textarea></div>
+          </div>
+        </div>
+
+        <div class="scard">
+          <div class="sch"><span class="sct"><i class="fas fa-lock" style="color:var(--pg)"></i> Keamanan</span></div>
+          <div class="scb">
+            <div class="fg" style="max-width:320px">
+              <label>Ganti Password Admin (kosongkan jika tidak ubah)</label>
+              <input type="password" id="s-pass" placeholder="Password baru">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-p" onclick="saveSettings()"><i class="fas fa-save"></i> Simpan Semua Pengaturan</button>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL USER DETAIL -->
+<div class="mo" id="m-user">
+  <div class="mb">
+    <h3>Detail Pengguna</h3>
+    <div id="user-detail"></div>
+    <div class="mf"><button class="btn btn-o sm" onclick="cMo('m-user')">Tutup</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, get, set, update, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const fc = {
+  apiKey:"AIzaSyBcqsN95IBr6w9Vrja62PyDQlEn_UhX-2g",
+  authDomain:"ipunggg-1f145.firebaseapp.com",
+  projectId:"ipunggg-1f145",
+  storageBucket:"ipunggg-1f145.firebasestorage.app",
+  messagingSenderId:"119645991982",
+  appId:"1:119645991982:web:01fa9ae650f6d97ccb1bbf",
+  databaseURL:"https://ipunggg-1f145-default-rtdb.firebaseio.com"
+};
+const app = initializeApp(fc);
+const db = getDatabase(app);
+window._db=db; window._ref=ref; window._get=get;
+window._set=set; window._update=update; window._push=push; window._remove=remove;
+
+window._loadAll = function(){
+  onValue(ref(db,'settings'), snap=>{
+    window._cfg=snap.val()||{};
+    applySettings(window._cfg);
+  });
+  onValue(ref(db,'transactions'), snap=>{
+    window._txs=snap.val()||{};
+    renderTx(); updateStats();
+  });
+  onValue(ref(db,'users'), snap=>{
+    window._users=snap.val()||{};
+    renderUsers(); updateStats();
+  });
+  // Auto load profil premku
+  setTimeout(()=>{ if(window._cfg&&window._cfg.premkuApiKey) checkProfile(); }, 1000);
+};
+</script>
+
+<script>
+let PASS = "ipungg";
+
+// ===== LOGIN =====
+function doLogin(){
+  const p=document.getElementById('lp').value;
+  const stored=(window._cfg&&window._cfg.adminPass)||PASS;
+  if(p===stored||p===PASS){
+    document.getElementById('L').style.display='none';
+    document.getElementById('A').style.display='block';
+    window._loadAll&&window._loadAll();
+  } else {
+    const e=document.getElementById('lerr');
+    e.style.display='block';
+    setTimeout(()=>e.style.display='none',3000);
+  }
+}
+function doLogout(){
+  document.getElementById('A').style.display='none';
+  document.getElementById('L').style.display='flex';
+  document.getElementById('lp').value='';
+}
+// Cek password dari Firebase saat load
+window.addEventListener('DOMContentLoaded',()=>{
+  const chk=setInterval(()=>{
+    if(window._get&&window._ref&&window._db){
+      window._get(window._ref(window._db,'settings/adminPass')).then(s=>{ if(s.val()) PASS=s.val(); }).catch(()=>{});
+      clearInterval(chk);
+    }
+  },1500);
+});
+
+// ===== SIDEBAR =====
+function togSb(){ document.getElementById('asd').classList.toggle('on'); document.getElementById('so').classList.toggle('on'); }
+function closeSb(){ document.getElementById('asd').classList.remove('on'); document.getElementById('so').classList.remove('on'); }
+
+// ===== PAGES =====
+const pgT={dashboard:'Dashboard',premku:'Premku API',products:'Produk & Margin',transactions:'Transaksi',users:'Pengguna',settings:'Pengaturan'};
+function pg(id,btn){
+  document.querySelectorAll('.pc').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  if(btn) btn.classList.add('on');
+  document.getElementById('ptit').textContent=pgT[id]||id;
+  closeSb();
+}
+
+// ===== SETTINGS =====
+function applySettings(s){
+  if(s.storeName){ document.getElementById('sbn').textContent=s.storeName+' Admin'; document.title=s.storeName+' Admin'; }
+  const f=id=>document.getElementById(id);
+  if(s.storeName) f('s-name').value=s.storeName;
+  if(s.logoUrl) f('s-logo').value=s.logoUrl;
+  if(s.waNumber) f('s-wa').value=s.waNumber;
+  if(s.waName) f('s-waname').value=s.waName;
+  if(s.websiteInfo) f('s-info').value=s.websiteInfo;
+  if(s.premkuApiKey) f('s-apikey').value=s.premkuApiKey;
+  if(s.defaultMargin) f('default-margin').value=s.defaultMargin;
+  if(s.adminPass) PASS=s.adminPass;
+}
+
+function saveSettings(){
+  const db=window._db,ref=window._ref,set=window._set;
+  if(!db){toast('Firebase belum terhubung','er');return;}
+  const np=document.getElementById('s-pass').value.trim();
+  const data={
+    storeName:document.getElementById('s-name').value.trim(),
+    logoUrl:document.getElementById('s-logo').value.trim(),
+    waNumber:document.getElementById('s-wa').value.trim(),
+    waName:document.getElementById('s-waname').value.trim(),
+    websiteInfo:document.getElementById('s-info').value.trim(),
+    premkuApiKey:document.getElementById('s-apikey').value.trim(),
+    defaultMargin:Number(document.getElementById('default-margin').value)||20,
+    manualPrices:window._manualPrices||{},
+  };
+  if(np){ data.adminPass=np; PASS=np; }
+  set(ref(db,'settings'),data).then(()=>{
+    toast('✅ Pengaturan disimpan','ok');
+    document.getElementById('s-pass').value='';
+  }).catch(e=>toast('Error: '+e.message,'er'));
+}
+
+// ===== TEST API PREMKU =====
+async function testApi(){
+  const key=document.getElementById('s-apikey').value.trim();
+  if(!key){toast('Masukkan API Key dulu','er');return;}
+  const res_el=document.getElementById('api-test-result');
+  res_el.style.display='block';
+  res_el.innerHTML=`<div style="color:var(--mt);font-size:.85rem"><span class="spin"></span> Menghubungi premku.com...</div>`;
+  try {
+    const res=await fetch('https://premku.com/api/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:key})});
+    const data=await res.json();
+    if(data.success){
+      res_el.innerHTML=`<div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:14px;font-size:.85rem">
+        <div style="color:var(--ok);font-weight:600;margin-bottom:8px"><i class="fas fa-check-circle"></i> Koneksi Berhasil!</div>
+        <div style="color:var(--mt)">Username: <strong style="color:var(--tx)">${data.data.username}</strong></div>
+        <div style="color:var(--mt)">Saldo: <strong style="color:var(--ok)">Rp ${Number(data.data.saldo||0).toLocaleString('id-ID')}</strong></div>
+        <div style="color:var(--mt)">WA: ${data.data.whatsapp||'-'}</div>
+      </div>`;
+    } else {
+      throw new Error(data.message||'API Key tidak valid');
+    }
+  } catch(e){
+    res_el.innerHTML=`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:14px;font-size:.85rem;color:var(--er)"><i class="fas fa-xmark-circle"></i> Gagal: ${e.message}</div>`;
+  }
+}
+
+// ===== CEK PROFIL / SALDO =====
+async function checkProfile(){
+  const cfg=window._cfg||{};
+  if(!cfg.premkuApiKey) return;
+  try {
+    const res=await fetch('https://premku.com/api/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:cfg.premkuApiKey})});
+    const data=await res.json();
+    if(data.success){
+      const d=data.data;
+      document.getElementById('pk-saldo').textContent='Rp '+Number(d.saldo||0).toLocaleString('id-ID');
+      document.getElementById('pk-user').textContent=`${d.username} · WA: ${d.whatsapp||'-'}`;
+      document.getElementById('st-saldo').textContent='Rp '+Number(d.saldo||0).toLocaleString('id-ID');
+    }
+  } catch(e){}
+}
+
+// ===== SYNC PRODUK dari PREMKU =====
+async function syncProducts(){
+  const cfg=window._cfg||{};
+  if(!cfg.premkuApiKey){toast('API Key belum diatur di Pengaturan','er');return;}
+  toast('⏳ Sync produk dari premku.com...','wn');
+  try {
+    const res=await fetch('https://premku.com/api/products',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:cfg.premkuApiKey})});
+    const data=await res.json();
+    if(!data.success) throw new Error(data.message||'Gagal sync');
+    window._premkuProducts=data.products;
+    // Cache ke Firebase
+    await window._set(window._ref(window._db,'products_cache'),{products:data.products,updatedAt:new Date().toISOString()});
+    renderPremkuProducts(data.products);
+    renderMarginList(data.products);
+    document.getElementById('st-prod').textContent=data.products.filter(p=>p.status==='available').length;
+    toast(`✅ ${data.products.length} produk berhasil disync!`,'ok');
+  } catch(e){
+    toast('❌ '+e.message,'er');
+    // Fallback ke cache
+    const snap=await window._get(window._ref(window._db,'products_cache'));
+    const cached=snap.val();
+    if(cached&&cached.products){
+      window._premkuProducts=cached.products;
+      renderPremkuProducts(cached.products);
+      renderMarginList(cached.products);
+      toast('⚠️ Menggunakan cache produk','wn');
+    }
+  }
+}
+
+function renderPremkuProducts(products){
+  const g=document.getElementById('pk-prod-grid');
+  if(!products.length){g.innerHTML='<div style="text-align:center;color:var(--mt);padding:30px">Tidak ada produk</div>';return;}
+  g.className='prod-grid';
+  g.innerHTML=products.map(p=>`
+    <div class="prod-item">
+      ${p.image?`<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">`:''}
+      <div class="prod-item-name">${p.name}</div>
+      <div class="prod-item-price">Rp ${Number(p.price||0).toLocaleString('id-ID')}</div>
+      <div class="prod-item-stock">
+        <span class="bdg ${p.status==='available'&&p.stock>0?'b-ok':'b-er'}">${p.status==='available'&&p.stock>0?`${p.stock} stok`:'Habis'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== MARGIN LIST =====
+window._manualPrices={};
+
+function renderMarginList(products){
+  const cfg=window._cfg||{};
+  const defaultMargin=Number(cfg.defaultMargin||20);
+  const manualPrices=cfg.manualPrices||{};
+  window._manualPrices={...manualPrices};
+  const el=document.getElementById('margin-list');
+  el.innerHTML=products.map(p=>{
+    const sell=manualPrices[p.id]||Math.ceil(p.price*(1+defaultMargin/100));
+    const profit=sell-p.price;
+    const pct=Math.round((profit/p.price)*100);
+    return `<div class="margin-row" id="mr-${p.id}">
+      <div class="margin-name">${p.name}</div>
+      <div class="margin-price">Modal: Rp ${Number(p.price).toLocaleString('id-ID')}</div>
+      <input type="number" class="margin-input" id="mi-${p.id}" value="${sell}" 
+        oninput="updateMarginDisplay(${p.id},${p.price},this.value)" placeholder="Harga jual">
+      <div class="margin-sell" id="ms-${p.id}">+${pct}% = Rp ${Number(sell).toLocaleString('id-ID')}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateMarginDisplay(id,modal,sellVal){
+  const sell=Number(sellVal)||0;
+  const profit=sell-modal;
+  const pct=modal?Math.round((profit/modal)*100):0;
+  document.getElementById(`ms-${id}`).textContent=`${pct>0?'+':''}${pct}% = Rp ${sell.toLocaleString('id-ID')}`;
+  window._manualPrices[id]=sell;
+}
+
+function applyDefaultMargin(){
+  const pct=Number(document.getElementById('default-margin').value)||20;
+  const prods=window._premkuProducts||[];
+  prods.forEach(p=>{
+    const sell=Math.ceil(p.price*(1+pct/100));
+    const inp=document.getElementById(`mi-${p.id}`);
+    if(inp){ inp.value=sell; updateMarginDisplay(p.id,p.price,sell); }
+  });
+  toast(`✅ Margin ${pct}% diterapkan ke semua produk`,'ok');
+}
+
+function saveAllMargins(){
+  const cfg=window._cfg||{};
+  cfg.manualPrices=window._manualPrices||{};
+  cfg.defaultMargin=Number(document.getElementById('default-margin').value)||20;
+  window._set(window._ref(window._db,'settings'),{...cfg}).then(()=>toast('✅ Margin disimpan','ok'));
+}
+
+// ===== TRANSACTIONS =====
+function renderTx(){
+  const txs=window._txs||{};
+  const tb=document.getElementById('tx-tb');
+  const dtb=document.getElementById('dash-tx');
+  const keys=Object.keys(txs).sort((a,b)=>b.localeCompare(a));
+  if(!keys.length){
+    tb.innerHTML=`<tr><td colspan="9" style="text-align:center;color:var(--mt);padding:28px">Belum ada transaksi</td></tr>`;
+    dtb.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--mt);padding:28px">Belum ada transaksi</td></tr>`;
+    return;
+  }
+  const rowFn=(k)=>{
+    const t=txs[k];
+    const dt=t.createdAt?new Date(t.createdAt).toLocaleString('id-ID',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+    const accs=t.accounts?t.accounts.map(a=>`${a.username||''}${a.password?`|${a.password}`:''}`).join(', '):'-';
+    const profit=(t.sellPrice||0)-(t.modalPrice||0);
+    return {t,dt,accs,profit};
+  };
+  tb.innerHTML=keys.map(k=>{
+    const {t,dt,accs,profit}=rowFn(k);
+    return `<tr>
+      <td style="font-family:monospace;color:var(--ok);font-size:.78rem">${t.invoice||k.slice(-8)}</td>
+      <td style="font-weight:500">${t.productName||'-'}</td>
+      <td>${t.buyerName||'-'}</td>
+      <td style="color:var(--mt)">${t.buyerWa||'-'}</td>
+      <td style="color:var(--pg);font-weight:600">Rp ${Number(t.sellPrice||0).toLocaleString('id-ID')}</td>
+      <td style="color:var(--mt)">Rp ${Number(t.modalPrice||0).toLocaleString('id-ID')}</td>
+      <td style="color:var(--ok)">Rp ${profit.toLocaleString('id-ID')}</td>
+      <td style="font-family:monospace;font-size:.75rem;color:var(--pg);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${accs}">${accs}</td>
+      <td style="color:var(--mt);font-size:.78rem">${dt}</td>
+    </tr>`;
+  }).join('');
+  dtb.innerHTML=keys.slice(0,5).map(k=>{
+    const {t,dt,profit}=rowFn(k);
+    return `<tr>
+      <td style="font-family:monospace;color:var(--ok);font-size:.78rem">${t.invoice||k.slice(-8)}</td>
+      <td style="font-weight:500">${t.productName||'-'}</td>
+      <td style="color:var(--mt)">${t.buyerName||'-'}</td>
+      <td style="color:var(--pg);font-weight:600">Rp ${Number(t.sellPrice||0).toLocaleString('id-ID')}</td>
+      <td style="color:var(--ok)">Rp ${profit.toLocaleString('id-ID')}</td>
+      <td style="color:var(--mt);font-size:.78rem">${dt}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportTx(){
+  const txs=window._txs||{};
+  const keys=Object.keys(txs);
+  if(!keys.length){toast('Belum ada transaksi','wn');return;}
+  const rows=[['Invoice','Produk','Pembeli','WA','Harga Jual','Modal','Profit','Akun','Waktu']];
+  keys.forEach(k=>{
+    const t=txs[k];
+    const accs=t.accounts?t.accounts.map(a=>`${a.username||''}${a.password?`|${a.password}`:''}`).join('; '):'-';
+    rows.push([t.invoice||k,t.productName||'-',t.buyerName||'-',t.buyerWa||'-',t.sellPrice||0,t.modalPrice||0,(t.sellPrice||0)-(t.modalPrice||0),accs,t.createdAt||'-']);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`transaksi-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('✅ CSV didownload','ok');
+}
+
+// ===== USERS =====
+function renderUsers(){
+  const users=window._users||{};
+  const tb=document.getElementById('user-tb');
+  const keys=Object.keys(users);
+  if(!keys.length){tb.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--mt);padding:28px">Belum ada pengguna</td></tr>`;return;}
+  tb.innerHTML=keys.map(k=>{
+    const u=users[k];
+    const txs=window._txs||{};
+    const userTxs=Object.values(txs).filter(t=>t.buyerWa===u.contact);
+    const total=userTxs.reduce((s,t)=>s+Number(t.sellPrice||0),0);
+    const orders=u.orders?Object.keys(u.orders).length:0;
+    const init=(u.name||'?').charAt(0).toUpperCase();
+    const dt=u.lastOrder?new Date(u.lastOrder).toLocaleDateString('id-ID'):'-';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:9px"><div class="av">${init}</div><span style="font-weight:600">${u.name||'-'}</span></div></td>
+      <td style="color:var(--mt)">${u.contact||'-'}</td>
+      <td><span class="bdg b-pu">${orders} order</span></td>
+      <td style="color:var(--ok);font-weight:600">Rp ${total.toLocaleString('id-ID')}</td>
+      <td style="color:var(--mt);font-size:.82rem">${dt}</td>
+      <td><button class="btn btn-o sm" onclick="viewUser('${k}')"><i class="fas fa-eye"></i> Detail</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function viewUser(id){
+  const u=window._users[id]||{};
+  const txs=window._txs||{};
+  const userTxs=Object.values(txs).filter(t=>t.buyerWa===u.contact);
+  const total=userTxs.reduce((s,t)=>s+Number(t.sellPrice||0),0);
+  const init=(u.name||'?').charAt(0).toUpperCase();
+  document.getElementById('user-detail').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+      <div class="av" style="width:50px;height:50px;font-size:1.2rem">${init}</div>
+      <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem">${u.name||'-'}</div>
+      <div style="color:var(--mt);font-size:.85rem">${u.contact||'-'}</div></div>
+    </div>
+    <div class="udr"><span class="udl">Status</span><span class="udv"><span class="bdg ${u.status==='active'?'b-ok':'b-er'}">${u.status==='active'?'Aktif':'Nonaktif'}</span></span></div>
+    <div class="udr"><span class="udl">Total Order</span><span class="udv" style="color:var(--pg)">${userTxs.length} order</span></div>
+    <div class="udr"><span class="udl">Total Belanja</span><span class="udv" style="color:var(--ok);font-weight:700">Rp ${total.toLocaleString('id-ID')}</span></div>
+    <div class="udr"><span class="udl">Last Order</span><span class="udv" style="color:var(--mt)">${u.lastOrder?new Date(u.lastOrder).toLocaleString('id-ID'):'-'}</span></div>
+    ${userTxs.length?`<div style="margin-top:14px;font-weight:700;font-size:.88rem;margin-bottom:8px">Riwayat Pembelian</div>
+    ${userTxs.slice(0,5).map(t=>`<div style="background:var(--card);border-radius:9px;padding:10px 13px;margin-bottom:6px;display:flex;justify-content:space-between;font-size:.82rem">
+      <div><div style="font-weight:600">${t.productName}</div><div style="color:var(--mt);font-size:.75rem">${t.createdAt?new Date(t.createdAt).toLocaleDateString('id-ID'):''}</div></div>
+      <div style="color:var(--pg);font-weight:700">Rp ${Number(t.sellPrice||0).toLocaleString('id-ID')}</div>
+    </div>`).join('')}`:''}
+  `;
+  oMo('m-user');
+}
+
+// ===== STATS =====
+function updateStats(){
+  const txs=window._txs||{};
+  const keys=Object.keys(txs);
+  document.getElementById('st-tx').textContent=keys.length;
+  const profit=Object.values(txs).reduce((s,t)=>s+((t.sellPrice||0)-(t.modalPrice||0)),0);
+  document.getElementById('st-profit').textContent='Rp '+profit.toLocaleString('id-ID');
+}
+
+// ===== MODAL =====
+function oMo(id){document.getElementById(id).classList.add('on');}
+function cMo(id){document.getElementById(id).classList.remove('on');}
+document.addEventListener('click',e=>{ if(e.target.classList.contains('mo')) e.target.classList.remove('on'); });
+
+// ===== TOAST =====
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast on '+(type==='ok'?'ok':type==='er'?'er':'wn');setTimeout(()=>t.className='toast',3200);}
+</script>
+</body>
+</html>
