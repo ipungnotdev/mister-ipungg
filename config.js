@@ -78,9 +78,9 @@ const CONFIG = {
 
   // ===== MUSIC =====
   music: {
-    src:    "https://n.uguu.se/vKnngZNo.mp3",      // ← URL file mp3, kosongkan jika tidak mau musik
+    src:    "https://d.uguu.se/vFOkKHOf.mp3",      // ← URL file mp3, kosongkan jika tidak mau musik
     loop:   true,
-    volume: 0.4,
+    volume: 0.5,
   },
 
 };
