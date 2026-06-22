@@ -26,12 +26,12 @@ const CONFIG = {
   whatsapp: [
     {
       name: "Admin Xzvb",
-      number: "6281234567890",       // ← ganti nomor WA admin
+      number: "6285198959920",       // ← ganti nomor WA admin
       pesan: "Halo Admin Xzvb, mau tanya soal deploy",
     },
     {
       name: "CS Support",
-      number: "6289876543210",       // ← ganti nomor WA CS
+      number: "6282125774233",       // ← ganti nomor WA CS
       pesan: "Halo CS Xzvb, butuh bantuan",
     },
   ],
@@ -71,14 +71,14 @@ const CONFIG = {
       label:   "Vercel",
       suffix:  "vercel.app",
       enabled: true,
-      apiKey:  "",   // ← paste Vercel API Token kamu di sini
+      apiKey:  "vcp_2YfbJ579eDh6xpq0h54ZQ7XefdRP6MrtIpWDjEQoeSGU6I9Hbl008m6D",   // ← paste Vercel API Token kamu di sini
                      //   dapatkan di: https://vercel.com/account/tokens
     },
   },
 
   // ===== MUSIC =====
   music: {
-    src:    "",      // ← URL file mp3, kosongkan jika tidak mau musik
+    src:    "https://n.uguu.se/vKnngZNo.mp3",      // ← URL file mp3, kosongkan jika tidak mau musik
     loop:   true,
     volume: 0.4,
   },
