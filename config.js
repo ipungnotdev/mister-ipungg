@@ -1,86 +1,109 @@
-// =====================================================
-//   XZVB DEPLOY — FILE KONFIGURASI
-//   Edit file ini sesuai kebutuhan kamu
-//   Taruh 1 folder bareng index.html
-// =====================================================
+// ============================================================
+//  XZVB DEPLOYMENT — FILE KONFIGURASI
+//  Edit file ini untuk ubah semua pengaturan website
+// ============================================================
 
 const CONFIG = {
 
-  // ===== INFO SITE =====
+  // ──────────────────────────────────────────
+  //  IDENTITAS WEBSITE
+  // ──────────────────────────────────────────
   site: {
-    name: "Xzvb Deploy",
-    favicon: "⬡",
-    tagline: "Premium Deployment Service",
-    description: "Deploy website kamu ke Vercel & Netlify dalam hitungan detik. Mudah, cepat, dan gratis.",
-    footer: "Premium Deployment Service • Deploy sekali, hidup tenang",
+    name:        "Xzvb Deployment",          // Nama web (tampil di navbar & judul)
+    tagline:     "Platform Deploy Premium Indonesia", // Tagline di hero badge
+    description: "Deploy website HTML & ZIP ke Vercel atau Netlify. Domain custom, SSL gratis, deploy cepat.",
+    footer:      "© 2025 Xzvb Deploy · Premium Indonesia Platform",
+    favicon:     "⬡",                        // Emoji atau path ke favicon
   },
 
-  // ===== STATS (angka di bawah hero) =====
-  stats: [
-    { num: "1.2K+", label: "Website Deployed" },
-    { num: "99%",   label: "Uptime" },
-    { num: "< 1m",  label: "Deploy Time" },
-  ],
-
-  // ===== WHATSAPP ADMIN =====
+  // ──────────────────────────────────────────
+  //  KONTAK WHATSAPP ADMIN
+  // ──────────────────────────────────────────
   whatsapp: [
     {
-      name: "Admin Xzvb",
-      number: "6285198959920",       // ← ganti nomor WA admin
-      pesan: "Halo Admin Xzvb, mau tanya soal deploy",
+      name:    "Admin Xzvb",
+      number:  "6281234567890",              // Format: 62xxx (tanpa + atau spasi)
+      label:   "Deploy Support",
+      pesan:   "Halo Admin Xzvb, saya mau tanya soal deploy",
     },
     {
-      name: "CS Support",
-      number: "6282125774233",       // ← ganti nomor WA CS
-      pesan: "Halo CS Xzvb, butuh bantuan",
+      name:    "CS Support",
+      number:  "6289876543210",
+      label:   "Customer Service",
+      pesan:   "Halo CS Xzvb, saya butuh bantuan",
     },
   ],
 
-  // ===== SALURAN WHATSAPP =====
+  // ──────────────────────────────────────────
+  //  SALURAN WHATSAPP (CHANNEL)
+  // ──────────────────────────────────────────
   channel: {
-    name: "Saluran Xzvb Deploy",
-    url:  "https://whatsapp.com/channel/GANTI_LINK_SALURAN_KAMU",  // ← ganti
-    sub:  "Update terbaru & info deploy",
+    name:  "Saluran Xzvb Deploy",
+    sub:   "Update terbaru & info deploy",
+    url:   "https://whatsapp.com/channel/0029VaXZVBChannelXzvb", // Ganti link saluran kamu
   },
 
-  // ===== BANNER SLIDER =====
+  // ──────────────────────────────────────────
+  //  PROVIDER DEPLOY
+  // ──────────────────────────────────────────
+  providers: {
+    vercel: {
+      enabled:    true,
+      label:      "▲ Vercel",
+      suffix:     "vercel.app",
+      token:      "vcp_2YfbJ579eDh6xpq0h54ZQ7XefdRP6MrtIpWDjEQoeSGU6I9Hbl008m6D",                        // Vercel API Token (isi jika pakai real API)
+      // Cara dapat token: vercel.com/account/tokens
+    },
+    netlify: {
+      enabled:    true,
+      label:      "◈ Netlify",
+      suffix:     "netlify.app",
+      token:      "",                        // Netlify Personal Access Token
+      // Cara dapat token: app.netlify.com/user/applications/personal
+    },
+  },
+
+  // ──────────────────────────────────────────
+  //  BANNER SLIDER
+  //  Isi 1 item = tidak geser
+  //  Isi 2+ item = otomatis geser
+  // ──────────────────────────────────────────
   banners: [
     {
       eyebrow: "✦ Premium Deployment Service",
-      title:   "Deploy ke <span>Vercel & Netlify</span>",
-      sub:     "Upload file → pilih platform → deploy otomatis dalam detik",
+      title:   "Deploy ke <span>Vercel</span> & Netlify<br>Dalam Hitungan Detik",
+      sub:     "Upload HTML atau ZIP — langsung live",
     },
     {
-      eyebrow: "🚀 Fast & Reliable",
-      title:   "Website Kamu <span>Online Sekarang</span>",
-      sub:     "Proses deploy cepat, stabil, dan gratis untuk semua orang",
+      eyebrow: "✦ Custom Domain Gratis",
+      title:   "Domain <span>Custom</span><br>Untuk Proyekmu",
+      sub:     "ipungg.vercel.app · namaProject.netlify.app",
     },
+    // Tambah banner baru di sini:
+    // {
+    //   eyebrow: "✦ Judul Eyebrow",
+    //   title:   "Judul Banner",
+    //   sub:     "Subjudul banner",
+    // },
   ],
-  bannerInterval: 5000,
+  bannerInterval: 3500,                      // Jeda geser banner (millisecond)
 
-  // ===== PROVIDERS + API KEY =====
-  providers: {
-    netlify: {
-      label:   "Netlify",
-      suffix:  "netlify.app",
-      enabled: true,
-      apiKey:  "",   // ← paste Netlify Personal Access Token kamu di sini
-                     //   dapatkan di: https://app.netlify.com/user/applications
-    },
-    vercel: {
-      label:   "Vercel",
-      suffix:  "vercel.app",
-      enabled: true,
-      apiKey:  "vcp_2YfbJ579eDh6xpq0h54ZQ7XefdRP6MrtIpWDjEQoeSGU6I9Hbl008m6D",   // ← paste Vercel API Token kamu di sini
-                     //   dapatkan di: https://vercel.com/account/tokens
-    },
-  },
+  // ──────────────────────────────────────────
+  //  STATISTIK HERO
+  // ──────────────────────────────────────────
+  stats: [
+    { num: "2K+",   label: "Ter-deploy"   },
+    { num: "99.9%", label: "Uptime"       },
+    { num: "<5s",   label: "Deploy Time"  },
+  ],
 
-  // ===== MUSIC =====
+  // ──────────────────────────────────────────
+  //  MUSIK BACKGROUND
+  // ──────────────────────────────────────────
   music: {
-    src:    "https://d.uguu.se/vFOkKHOf.mp3",      // ← URL file mp3, kosongkan jika tidak mau musik
+    src:    "https://www.bensound.com/bensound-music/bensound-creativeminds.mp3",
+    volume: 0.3,                             // 0.0 – 1.0
     loop:   true,
-    volume: 0.5,
   },
 
 };
