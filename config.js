@@ -51,7 +51,7 @@ const CONFIG = {
       enabled:    true,
       label:      "▲ Vercel",
       suffix:     "vercel.app",
-      token:      "vcp_2YfbJ579eDh6xpq0h54ZQ7XefdRP6MrtIpWDjEQoeSGU6I9Hbl008m6D",                        // Vercel API Token (isi jika pakai real API)
+      token:      "vcp_8OGbOQ8slLV8Ig81nm9ISwdo6s2bDa6TZih2mcY11nj65ncgjp12gN4j",                        // Vercel API Token (isi jika pakai real API)
       // Cara dapat token: vercel.com/account/tokens
     },
     netlify: {
