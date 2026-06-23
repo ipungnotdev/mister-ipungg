@@ -309,7 +309,7 @@ section{padding:2.5rem 1.25rem}
       "https://wa.me/" + w.number + "?text=" + encodeURIComponent(w.pesan);
   }
 
-   // STATS
+  // STATS
   const sr = document.getElementById('statsRow');
   C.stats.forEach(s => {
     sr.innerHTML += `<div class="scard"><div class="snum">${s.num}</div><div class="slabel">${s.label}</div></div>`;
@@ -438,46 +438,389 @@ uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('dra
 uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
 uz.addEventListener('drop', e => { e.preventDefault(); uz.classList.remove('drag'); });
 
-// DEPLOY
-const steps = [
-  [10,'Menginisialisasi project...'],
-  [25,'Menganalisis file...'],
-  [45,'Mengupload ke server...'],
-  [65,'Membangun project...'],
-  [82,'Mengkonfigurasi domain...'],
-  [95,'Finalisasi...'],
-  [100,'Deploy berhasil! 🎉']
-];
-function doDeploy() {
-  const prov = CONFIG.providers[window._prov];
-  const n = document.getElementById('dom').value.trim() || 'namaproject';
-  const url = 'https://' + n + '.' + prov.suffix;
-  const sb = document.getElementById('sb'), pw = document.getElementById('pw'), res = document.getElementById('res');
-  res.classList.remove('show');
-  sb.className = 'sbar show loading';
-  document.getElementById('sm').textContent = 'Memulai deployment...';
-  pw.classList.add('show');
-  document.getElementById('pf').style.width = '0%';
-  let i = 0;
-  function run() {
-    if (i >= steps.length) return;
-    const [p, m] = steps[i];
-    document.getElementById('pf').style.width = p + '%';
-    document.getElementById('pp').textContent = p + '%';
-    document.getElementById('ps').textContent = m;
-    document.getElementById('sm').textContent = m;
-    i++;
-    if (i < steps.length) setTimeout(run, 550 + Math.random() * 350);
-    else setTimeout(() => {
-      sb.className = 'sbar show ok';
-      document.getElementById('sm').textContent = '✅ Deploy sukses ke ' + url;
-      document.getElementById('ru').textContent = url;
-      document.getElementById('ob').href = url;
-      res.classList.add('show');
-    }, 400);
-  }
-  run();
+// =============================================
+//  DEPLOY — REAL API (Vercel & Netlify)
+// =============================================
+
+function setProgress(pct, msg) {
+  document.getElementById('pf').style.width = pct + '%';
+  document.getElementById('pp').textContent = pct + '%';
+  document.getElementById('ps').textContent = msg;
+  document.getElementById('sm').textContent = msg;
 }
+
+function setStatus(type, msg) {
+  const sb = document.getElementById('sb');
+  sb.className = 'sbar show ' + type;
+  document.getElementById('sp').style.display = type === 'loading' ? 'block' : 'none';
+  document.getElementById('sm').textContent = msg;
+}
+
+function showResult(url) {
+  document.getElementById('ru').textContent = url;
+  document.getElementById('ob').href = url;
+  document.getElementById('res').classList.add('show');
+}
+
+async function doDeploy() {
+  const provKey = window._prov;
+  const prov = CONFIG.providers[provKey];
+  const name = document.getElementById('dom').value.trim();
+  const file = document.getElementById('fi').files[0];
+
+  // ── Validasi input ──
+  if (!name) {
+    alert('⚠️ Isi nama domain dulu!'); return;
+  }
+  if (!/^[a-z0-9-]+$/.test(name)) {
+    alert('⚠️ Nama domain hanya boleh huruf kecil, angka, dan tanda -'); return;
+  }
+  if (!file) {
+    alert('⚠️ Pilih file HTML atau ZIP dulu!'); return;
+  }
+  if (!prov.token || prov.token.trim() === '') {
+    alert('⚠️ Token ' + provKey + ' belum diisi di config.js!'); return;
+  }
+
+  // ── Reset UI ──
+  document.getElementById('res').classList.remove('show');
+  document.getElementById('pw').classList.add('show');
+  document.getElementById('pf').style.width = '0%';
+  setStatus('loading', 'Memulai deployment...');
+
+  try {
+    if (provKey === 'vercel') {
+      await deployVercel(name, file, prov.token);
+    } else if (provKey === 'netlify') {
+      await deployNetlify(name, file, prov.token);
+    }
+  } catch (err) {
+    setStatus('err', '❌ Gagal: ' + err.message);
+    setProgress(0, 'Error');
+  }
+}
+
+// ── VERCEL ──
+async function deployVercel(name, file, token) {
+  setProgress(10, 'Membaca file...');
+
+  // Baca file jadi teks atau ArrayBuffer
+  const isZip = file.name.endsWith('.zip');
+  let files = [];
+
+  if (isZip) {
+    // Untuk ZIP: Vercel perlu file diekstrak — kita kirim ZIP as-is via file system upload
+    // Vercel API v13 deployments — kirim file satu per satu
+    // Untuk ZIP kita baca sebagai binary lalu hash
+    const buf = await file.arrayBuffer();
+    const hashBuf = await crypto.subtle.digest('SHA-1', buf);
+    const hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+    setProgress(25, 'Upload file ke Vercel...');
+
+    // Upload file
+    const upRes = await fetch('https://api.vercel.com/v2/files', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/octet-stream',
+        'x-vercel-digest': hash,
+        'Content-Length': buf.byteLength,
+      },
+      body: buf,
+    });
+    if (!upRes.ok && upRes.status !== 200) {
+      const e = await upRes.json().catch(() => ({}));
+      throw new Error(e.error?.message || 'Upload file gagal (' + upRes.status + ')');
+    }
+
+    files = [{ file: 'index.html', sha: hash, size: buf.byteLength }];
+
+    // Kalau ZIP sebenarnya perlu diekstrak — tapi Vercel tidak support ZIP langsung via API
+    // Solusi: wrap ZIP content sebagai single HTML deployment
+    // Untuk ZIP, kita beritahu user
+    throw new Error('Vercel API tidak mendukung ZIP langsung. Gunakan file HTML tunggal untuk Vercel, atau pilih Netlify untuk ZIP.');
+
+  } else {
+    // HTML tunggal
+    const text = await file.text();
+    const encoder = new TextEncoder();
+    const buf = encoder.encode(text);
+    const hashBuf = await crypto.subtle.digest('SHA-1', buf);
+    const hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+
+    setProgress(25, 'Upload file ke Vercel...');
+
+    // Upload file ke Vercel
+    const upRes = await fetch('https://api.vercel.com/v2/files', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'text/html',
+        'x-vercel-digest': hash,
+        'Content-Length': buf.byteLength,
+      },
+      body: buf,
+    });
+
+    // 200 = file sudah ada (cached), tetap lanjut
+    if (!upRes.ok && upRes.status !== 200) {
+      const e = await upRes.json().catch(() => ({}));
+      throw new Error(e.error?.message || 'Upload file gagal (' + upRes.status + ')');
+    }
+
+    files = [{ file: 'index.html', sha: hash, size: buf.byteLength }];
+  }
+
+  setProgress(55, 'Membuat deployment di Vercel...');
+
+  // Buat deployment
+  const deployRes = await fetch('https://api.vercel.com/v13/deployments', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name: name,
+      files: files,
+      projectSettings: { framework: null },
+      target: 'production',
+    }),
+  });
+
+  const deployData = await deployRes.json();
+  if (!deployRes.ok) {
+    throw new Error(deployData.error?.message || 'Deploy gagal (' + deployRes.status + ')');
+  }
+
+  setProgress(75, 'Menunggu build selesai...');
+
+  // Poll status sampai ready
+  const deployId = deployData.id;
+  let finalUrl = deployData.url ? 'https://' + deployData.url : null;
+  let tries = 0;
+
+  while (tries < 30) {
+    await sleep(3000);
+    tries++;
+    const checkRes = await fetch('https://api.vercel.com/v13/deployments/' + deployId, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const checkData = await checkRes.json();
+    const state = checkData.status || checkData.readyState;
+
+    if (state === 'READY') {
+      finalUrl = 'https://' + (checkData.url || name + '.vercel.app');
+      setProgress(100, 'Deploy berhasil! 🎉');
+      setStatus('ok', '✅ Deploy sukses!');
+      showResult(finalUrl);
+      return;
+    } else if (state === 'ERROR' || state === 'CANCELED') {
+      throw new Error('Build gagal di Vercel. Cek dashboard Vercel kamu.');
+    }
+
+    const pct = Math.min(75 + tries * 0.8, 95);
+    setProgress(pct, 'Build sedang berjalan... (' + tries + ')');
+  }
+
+  // Timeout tapi mungkin sudah jadi
+  if (finalUrl) {
+    setProgress(100, 'Selesai!');
+    setStatus('ok', '✅ Cek URL di bawah (mungkin masih building)');
+    showResult(finalUrl);
+  } else {
+    throw new Error('Timeout menunggu build. Cek dashboard Vercel.');
+  }
+}
+
+// ── NETLIFY ──
+async function deployNetlify(name, file, token) {
+  setProgress(10, 'Membaca file...');
+
+  const isZip = file.name.endsWith('.zip');
+  let body, contentType;
+
+  if (isZip) {
+    // Netlify mendukung ZIP langsung!
+    body = await file.arrayBuffer();
+    contentType = 'application/zip';
+  } else {
+    // HTML tunggal — bungkus dalam ZIP sederhana tidak mudah tanpa library
+    // Kita kirim sebagai raw body dengan content-type text/html
+    // Netlify File Digest API: perlu ZIP. Kita buat ZIP minimal dari HTML.
+    body = await file.arrayBuffer();
+    contentType = 'application/zip';
+    // Untuk HTML, kita buat ZIP manual
+    body = await makeZipFromHtml(await file.text());
+    contentType = 'application/zip';
+  }
+
+  setProgress(30, 'Membuat site di Netlify...');
+
+  // Cek apakah site dengan nama ini sudah ada, kalau tidak buat baru
+  let siteId = null;
+
+  // Cari site yang sudah ada
+  const listRes = await fetch('https://api.netlify.com/api/v1/sites?per_page=100', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  });
+  if (listRes.ok) {
+    const sites = await listRes.json();
+    const existing = sites.find(s => s.name === name);
+    if (existing) siteId = existing.id;
+  }
+
+  // Kalau belum ada, buat site baru
+  if (!siteId) {
+    const createRes = await fetch('https://api.netlify.com/api/v1/sites', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: name }),
+    });
+    const createData = await createRes.json();
+    if (!createRes.ok) {
+      throw new Error(createData.message || createData.errors?.join(', ') || 'Gagal buat site (' + createRes.status + ')');
+    }
+    siteId = createData.id;
+  }
+
+  setProgress(55, 'Upload & deploy ke Netlify...');
+
+  // Deploy dengan ZIP
+  const deployRes = await fetch('https://api.netlify.com/api/v1/sites/' + siteId + '/deploys', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': contentType,
+    },
+    body: body,
+  });
+
+  const deployData = await deployRes.json();
+  if (!deployRes.ok) {
+    throw new Error(deployData.message || deployData.errors?.join(', ') || 'Deploy gagal (' + deployRes.status + ')');
+  }
+
+  setProgress(75, 'Menunggu deploy selesai...');
+
+  const deployId = deployData.id;
+  let tries = 0;
+
+  while (tries < 30) {
+    await sleep(2500);
+    tries++;
+    const checkRes = await fetch('https://api.netlify.com/api/v1/deploys/' + deployId, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const checkData = await checkRes.json();
+
+    if (checkData.state === 'ready') {
+      const finalUrl = 'https://' + (checkData.ssl_url || checkData.url || name + '.netlify.app').replace('http://', '');
+      setProgress(100, 'Deploy berhasil! 🎉');
+      setStatus('ok', '✅ Deploy sukses!');
+      showResult(finalUrl.startsWith('https://') ? finalUrl : 'https://' + finalUrl);
+      return;
+    } else if (checkData.state === 'error') {
+      throw new Error('Build error di Netlify: ' + (checkData.error_message || 'Unknown error'));
+    }
+
+    const pct = Math.min(75 + tries, 95);
+    setProgress(pct, 'Deploy sedang berjalan... (' + tries + ')');
+  }
+
+  throw new Error('Timeout. Cek dashboard Netlify kamu.');
+}
+
+// ── HELPER: buat ZIP minimal dari string HTML ──
+async function makeZipFromHtml(htmlContent) {
+  // Buat ZIP sederhana tanpa library eksternal
+  // ZIP format: local file header + data + central directory + end of central dir
+  const enc = new TextEncoder();
+  const data = enc.encode(htmlContent);
+  const filename = enc.encode('index.html');
+  const now = new Date();
+  const dosDate = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+  const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+
+  // CRC-32
+  const crc = crc32(data);
+
+  // Local file header
+  const lfh = new Uint8Array([
+    0x50,0x4B,0x03,0x04, // signature
+    0x14,0x00,           // version needed
+    0x00,0x00,           // flags
+    0x00,0x00,           // compression (stored)
+    dosTime & 0xFF, (dosTime >> 8) & 0xFF,
+    dosDate & 0xFF, (dosDate >> 8) & 0xFF,
+    crc & 0xFF, (crc >> 8) & 0xFF, (crc >> 16) & 0xFF, (crc >> 24) & 0xFF,
+    data.length & 0xFF, (data.length >> 8) & 0xFF, (data.length >> 16) & 0xFF, (data.length >> 24) & 0xFF,
+    data.length & 0xFF, (data.length >> 8) & 0xFF, (data.length >> 16) & 0xFF, (data.length >> 24) & 0xFF,
+    filename.length & 0xFF, (filename.length >> 8) & 0xFF,
+    0x00,0x00,
+  ]);
+
+  const localOffset = 0;
+  const localSize = lfh.length + filename.length + data.length;
+
+  // Central directory
+  const cdr = new Uint8Array([
+    0x50,0x4B,0x01,0x02,
+    0x14,0x00,0x14,0x00,
+    0x00,0x00,0x00,0x00,
+    dosTime & 0xFF, (dosTime >> 8) & 0xFF,
+    dosDate & 0xFF, (dosDate >> 8) & 0xFF,
+    crc & 0xFF, (crc >> 8) & 0xFF, (crc >> 16) & 0xFF, (crc >> 24) & 0xFF,
+    data.length & 0xFF, (data.length >> 8) & 0xFF, (data.length >> 16) & 0xFF, (data.length >> 24) & 0xFF,
+    data.length & 0xFF, (data.length >> 8) & 0xFF, (data.length >> 16) & 0xFF, (data.length >> 24) & 0xFF,
+    filename.length & 0xFF, (filename.length >> 8) & 0xFF,
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    localOffset & 0xFF, (localOffset >> 8) & 0xFF, (localOffset >> 16) & 0xFF, (localOffset >> 24) & 0xFF,
+  ]);
+
+  // End of central dir
+  const eocd = new Uint8Array([
+    0x50,0x4B,0x05,0x06,
+    0x00,0x00,0x00,0x00,
+    0x01,0x00,0x01,0x00,
+    (cdr.length + filename.length) & 0xFF, ((cdr.length + filename.length) >> 8) & 0xFF,
+    ((cdr.length + filename.length) >> 16) & 0xFF, ((cdr.length + filename.length) >> 24) & 0xFF,
+    localSize & 0xFF, (localSize >> 8) & 0xFF, (localSize >> 16) & 0xFF, (localSize >> 24) & 0xFF,
+    0x00,0x00,
+  ]);
+
+  const zip = new Uint8Array(lfh.length + filename.length + data.length + cdr.length + filename.length + eocd.length);
+  let off = 0;
+  zip.set(lfh, off); off += lfh.length;
+  zip.set(filename, off); off += filename.length;
+  zip.set(data, off); off += data.length;
+  zip.set(cdr, off); off += cdr.length;
+  zip.set(filename, off); off += filename.length;
+  zip.set(eocd, off);
+
+  return zip.buffer;
+}
+
+function crc32(buf) {
+  let c = 0xFFFFFFFF;
+  const table = crc32.table || (crc32.table = (() => {
+    const t = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let v = i;
+      for (let j = 0; j < 8; j++) v = (v & 1) ? (0xEDB88320 ^ (v >>> 1)) : (v >>> 1);
+      t[i] = v;
+    }
+    return t;
+  })());
+  for (let i = 0; i < buf.length; i++) c = table[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function cpUrl() {
   navigator.clipboard.writeText(document.getElementById('ru').textContent).then(() => {
     const b = document.querySelector('.bcopy'); b.textContent = '✅ Disalin!';
