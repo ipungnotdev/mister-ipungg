@@ -197,7 +197,7 @@ section{padding:2.5rem 1.25rem}
     <p id="heroDesc"></p>
     <div class="hero-cta">
       <a href="#deploy" class="btn-solid">🚀 Mulai Deploy</a>
-      <a href="#" class="btn-outline" id="ctaWa"></a>
+      <a href="#" class="btn-outline" id="ctaWa">💬 Hubungi Admin</a>
     </div>
     <div class="stats" id="statsRow"></div>
   </div>
@@ -309,7 +309,7 @@ section{padding:2.5rem 1.25rem}
       "https://wa.me/" + w.number + "?text=" + encodeURIComponent(w.pesan);
   }
 
-  // STATS
+   // STATS
   const sr = document.getElementById('statsRow');
   C.stats.forEach(s => {
     sr.innerHTML += `<div class="scard"><div class="snum">${s.num}</div><div class="slabel">${s.label}</div></div>`;
@@ -439,165 +439,44 @@ uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
 uz.addEventListener('drop', e => { e.preventDefault(); uz.classList.remove('drag'); });
 
 // DEPLOY
-function setP(pct, label) {
-  document.getElementById('pf').style.width = pct + '%';
-  document.getElementById('pp').textContent = pct + '%';
-  document.getElementById('ps').textContent = label;
-  document.getElementById('sm').textContent = label;
-}
-function setSB(type, msg) {
-  document.getElementById('sb').className = 'sbar show ' + type;
-  document.getElementById('sm').textContent = msg;
-}
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-async function doDeploy() {
+const steps = [
+  [10,'Menginisialisasi project...'],
+  [25,'Menganalisis file...'],
+  [45,'Mengupload ke server...'],
+  [65,'Membangun project...'],
+  [82,'Mengkonfigurasi domain...'],
+  [95,'Finalisasi...'],
+  [100,'Deploy berhasil! 🎉']
+];
+function doDeploy() {
   const prov = CONFIG.providers[window._prov];
-  const token = prov.apiKey || '';
-  const n = document.getElementById('dom').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-') || 'namaproject';
-  const file = document.getElementById('fi').files[0];
-
-  const sb = document.getElementById('sb');
-  const pw = document.getElementById('pw');
-  const res = document.getElementById('res');
-
-  if (!token) { alert('⚠️ API Key ' + prov.label + ' belum diisi di config.js!'); return; }
-  if (!file) { alert('⚠️ Pilih file terlebih dahulu!'); return; }
-
+  const n = document.getElementById('dom').value.trim() || 'namaproject';
+  const url = 'https://' + n + '.' + prov.suffix;
+  const sb = document.getElementById('sb'), pw = document.getElementById('pw'), res = document.getElementById('res');
   res.classList.remove('show');
   sb.className = 'sbar show loading';
+  document.getElementById('sm').textContent = 'Memulai deployment...';
   pw.classList.add('show');
-  setP(0, 'Memulai deployment...');
-
-  try {
-    let finalUrl = '';
-    if (window._prov === 'netlify') {
-      finalUrl = await deployNetlify(token, n, file);
-    } else if (window._prov === 'vercel') {
-      finalUrl = await deployVercel(token, n, file);
-    }
-    setP(100, 'Deploy berhasil! 🎉');
-    setSB('ok', '✅ Deploy sukses ke ' + finalUrl);
-    document.getElementById('ru').textContent = finalUrl;
-    document.getElementById('ob').href = finalUrl;
-    res.classList.add('show');
-  } catch(err) {
-    setP(100, 'Deploy gagal!');
-    setSB('err', '❌ ' + (err.message || 'Deploy gagal. Cek API key & koneksi.'));
+  document.getElementById('pf').style.width = '0%';
+  let i = 0;
+  function run() {
+    if (i >= steps.length) return;
+    const [p, m] = steps[i];
+    document.getElementById('pf').style.width = p + '%';
+    document.getElementById('pp').textContent = p + '%';
+    document.getElementById('ps').textContent = m;
+    document.getElementById('sm').textContent = m;
+    i++;
+    if (i < steps.length) setTimeout(run, 550 + Math.random() * 350);
+    else setTimeout(() => {
+      sb.className = 'sbar show ok';
+      document.getElementById('sm').textContent = '✅ Deploy sukses ke ' + url;
+      document.getElementById('ru').textContent = url;
+      document.getElementById('ob').href = url;
+      res.classList.add('show');
+    }, 400);
   }
-}
-
-async function deployNetlify(token, siteName, file) {
-  setP(15, 'Membuat site di Netlify...');
-  const siteRes = await fetch('https://api.netlify.com/api/v1/sites', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify(siteName ? { name: siteName } : {})
-  });
-  if (!siteRes.ok) { const e = await siteRes.json().catch(() => ({})); throw new Error(e.message || 'Gagal buat site Netlify (cek API key)'); }
-  const site = await siteRes.json();
-
-  setP(40, 'Mengupload file...');
-  let body, contentType;
-  if (file.name.endsWith('.zip')) {
-    body = await file.arrayBuffer();
-    contentType = 'application/zip';
-  } else {
-    // wrap html jadi zip pakai JSZip
-    await loadJSZip();
-    const zip = new JSZip();
-    zip.file('index.html', file);
-    body = await zip.generateAsync({ type: 'arraybuffer' });
-    contentType = 'application/zip';
-  }
-  const depRes = await fetch('https://api.netlify.com/api/v1/sites/' + site.id + '/deploys', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': contentType },
-    body: body
-  });
-  if (!depRes.ok) { const e = await depRes.json().catch(() => ({})); throw new Error(e.message || 'Gagal upload ke Netlify'); }
-  const dep = await depRes.json();
-
-  setP(70, 'Menunggu deploy selesai...');
-  const finalUrl = await pollNetlify(token, site.id, dep.id);
-  setP(95, 'Finalisasi...');
-  return finalUrl || dep.ssl_url || dep.deploy_url || ('https://' + site.name + '.netlify.app');
-}
-
-async function pollNetlify(token, siteId, deployId) {
-  for (let i = 0; i < 20; i++) {
-    await sleep(2500);
-    try {
-      const r = await fetch('https://api.netlify.com/api/v1/sites/' + siteId + '/deploys/' + deployId, { headers: { 'Authorization': 'Bearer ' + token } });
-      const d = await r.json();
-      if (d.state === 'ready' || d.state === 'uploaded') return d.ssl_url || d.url;
-      if (d.state === 'error') throw new Error('Netlify build error: ' + (d.error_message || ''));
-    } catch(e) { if (e.message.includes('error')) throw e; }
-  }
-  return null;
-}
-
-async function deployVercel(token, projectName, file) {
-  setP(15, 'Memuat library...');
-  await loadJSZip();
-
-  setP(25, 'Membaca file...');
-  let files = [];
-  if (file.name.endsWith('.zip')) {
-    const zip = await JSZip.loadAsync(file);
-    const promises = [];
-    zip.forEach((path, f) => { if (!f.dir) promises.push(f.async('base64').then(d => files.push({ file: path, data: d, encoding: 'base64' }))); });
-    await Promise.all(promises);
-  } else {
-    const data = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.readAsDataURL(file); });
-    files.push({ file: 'index.html', data: data, encoding: 'base64' });
-  }
-
-  setP(40, 'Membuat project di Vercel...');
-  const pName = projectName || ('xzvb-' + Date.now());
-  const projRes = await fetch('https://api.vercel.com/v9/projects', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: pName, framework: null })
-  });
-  if (!projRes.ok && projRes.status !== 409) { const e = await projRes.json().catch(() => ({})); throw new Error((e.error && e.error.message) || 'Gagal buat project Vercel (cek API key)'); }
-
-  setP(60, 'Mengupload ke Vercel...');
-  const depRes = await fetch('https://api.vercel.com/v13/deployments', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: pName, files: files, projectSettings: { framework: null }, target: 'production' })
-  });
-  if (!depRes.ok) { const e = await depRes.json().catch(() => ({})); throw new Error((e.error && e.error.message) || 'Gagal deploy ke Vercel'); }
-  const dep = await depRes.json();
-
-  setP(80, 'Menunggu build selesai...');
-  const finalUrl = await pollVercel(token, dep.id || dep.uid);
-  setP(95, 'Finalisasi...');
-  return finalUrl || ('https://' + (dep.url || pName + '.vercel.app'));
-}
-
-async function pollVercel(token, deployId) {
-  for (let i = 0; i < 20; i++) {
-    await sleep(3000);
-    try {
-      const r = await fetch('https://api.vercel.com/v13/deployments/' + deployId, { headers: { 'Authorization': 'Bearer ' + token } });
-      const d = await r.json();
-      if (d.readyState === 'READY') return 'https://' + (d.url || deployId);
-      if (d.readyState === 'ERROR') throw new Error('Vercel build error');
-    } catch(e) { if (e.message.includes('error')) throw e; }
-  }
-  return null;
-}
-
-function loadJSZip() {
-  if (window.JSZip) return Promise.resolve();
-  return new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-    s.onload = res; s.onerror = () => rej(new Error('Gagal load JSZip'));
-    document.head.appendChild(s);
-  });
+  run();
 }
 function cpUrl() {
   navigator.clipboard.writeText(document.getElementById('ru').textContent).then(() => {
