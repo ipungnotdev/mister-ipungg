@@ -7,12 +7,14 @@
 // ---- Konfigurasi Firebase (Realtime Database + Auth) ----
 // Ambil dari Firebase Console > Project Settings > General > Your apps
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBWS8pP9qWvB--ozO60tGJkPuOQqC_JQo4",
-  authDomain: "abbas-4fed6.firebaseapp.com",
-  databaseURL: "https://abbas-4fed6-default-rtdb.firebaseio.com",
-  storageBucket: "abbas-4fed6.firebasestorage.app",
-  messagingSenderId: "709195792466",
-  appId: "1:709195792466:web:47108bc87df021641fdf8b"
+apiKey: "AIzaSyBqIiVyX_HB9yadmIcmOksSh2UVNZYwwNM",
+  authDomain: "tepung-20685.firebaseapp.com",
+  databaseURL: "https://tepung-20685-default-rtdb.firebaseio.com"
+  projectId: "tepung-20685",
+  storageBucket: "tepung-20685.firebasestorage.app",
+  messagingSenderId: "512090715534",
+  appId: "1:512090715534:web:cfa65bb2ecdbaa72b4a0df",
+  measurementId: "G-H1HZLYYZ4R"
 };
 
 // ---- API Key RumahOTP (default) ----
