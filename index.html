@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ipunggOtp — Nomor Virtual OTP Instan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="config.js"></script>
+<style>
+  :root{
+    --bg:#0a0d13;
+    --bg-elev:#10141d;
+    --card:#141926;
+    --card-hi:#1a2130;
+    --border:#242b3a;
+    --border-hi:#323b4f;
+    --text:#eef1f6;
+    --text-dim:#8d97ab;
+    --text-faint:#5c6579;
+    --accent:#34e0a1;
+    --accent-dim:#1f8f6b;
+    --violet:#7c6cf0;
+    --amber:#ffb238;
+    --danger:#ff5d72;
+    --radius:16px;
+    --radius-sm:10px;
+    --font-display:'Space Grotesk',system-ui,sans-serif;
+    --font-body:'Inter',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(124,108,240,0.08), transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(52,224,161,0.07), transparent 45%);
+  }
+  ::selection{background:var(--accent);color:#04140f;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  .hidden{display:none !important;}
+  .mono{font-family:var(--font-mono);}
+  .container{max-width:1180px;margin:0 auto;padding:0 24px;}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,13,19,0.82);
+    backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1180px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:-0.01em;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(135deg,var(--accent),var(--violet));
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-mono);font-size:13px;font-weight:700;color:#04140f;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset, 0 6px 18px -6px rgba(52,224,161,0.5);
+    overflow:hidden;flex-shrink:0;
+  }
+  .brand-mark img{width:100%;height:100%;object-fit:cover;}
+  .nav-links{display:flex;align-items:center;gap:28px;font-size:14.5px;color:var(--text-dim);}
+  .nav-links a:hover{color:var(--text);}
+  .nav-actions{display:flex;align-items:center;gap:12px;}
+  .nav-user-wrap{position:relative;}
+  .nav-user-chip{
+    display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text-dim);
+    padding:6px 12px 6px 6px;border:1px solid var(--border);border-radius:100px;
+    cursor:pointer;background:transparent;font-family:inherit;
+  }
+  .nav-user-chip .dot{width:24px;height:24px;border-radius:50%;background:var(--card-hi);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);border:1px solid var(--border-hi);}
+  .user-menu{
+    position:absolute;top:calc(100% + 8px);right:0;background:var(--card);border:1px solid var(--border-hi);
+    border-radius:12px;padding:6px;min-width:190px;box-shadow:0 20px 45px -12px rgba(0,0,0,0.55);z-index:80;
+  }
+  .user-menu a{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;font-size:13.5px;color:var(--text-dim);}
+  .user-menu a:hover{background:var(--card-hi);color:var(--text);}
+  .user-menu .divider{height:1px;background:var(--border);margin:4px 2px;}
+
+  /* floating CS button */
+  .cs-float{
+    position:fixed;bottom:24px;left:24px;z-index:150;
+    display:flex;align-items:center;gap:9px;
+    background:#25D366;color:#04140f;font-weight:700;font-size:13.5px;
+    padding:12px 18px 12px 14px;border-radius:100px;
+    box-shadow:0 14px 32px -8px rgba(37,211,102,0.55);
+    animation:csPulse 2.4s infinite;
+  }
+  .cs-float .cs-ic{font-size:18px;}
+  @keyframes csPulse{0%,100%{box-shadow:0 14px 32px -8px rgba(37,211,102,0.55);}50%{box-shadow:0 14px 32px -8px rgba(37,211,102,0.85);}}
+  @media(max-width:920px){ .cs-float span.cs-label{display:none;} .cs-float{padding:14px;} }
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 20px;border-radius:11px;border:1px solid transparent;
+    font-size:14.5px;font-weight:600;transition:transform .15s ease, opacity .15s ease, background .15s ease;
+    white-space:nowrap;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--accent);color:#04140f;}
+  .btn-primary:hover{opacity:0.9;}
+  .btn-ghost{background:transparent;color:var(--text);border-color:var(--border-hi);}
+  .btn-ghost:hover{background:var(--card);}
+  .btn-violet{background:var(--violet);color:#fff;}
+  .btn-violet:hover{opacity:0.9;}
+  .btn-danger{background:rgba(255,93,114,0.12);color:var(--danger);border-color:rgba(255,93,114,0.3);}
+  .btn-sm{padding:8px 14px;font-size:13px;border-radius:9px;}
+  .btn-block{width:100%;}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:88px 0 60px;position:relative;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:center;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em;
+    color:var(--accent);background:rgba(52,224,161,0.08);
+    border:1px solid rgba(52,224,161,0.25);padding:6px 12px;border-radius:100px;margin-bottom:22px;
+  }
+  .eyebrow .pulse{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 0 rgba(52,224,161,0.7);animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,224,161,0.55);}70%{box-shadow:0 0 0 8px rgba(52,224,161,0);}100%{box-shadow:0 0 0 0 rgba(52,224,161,0);}}
+  h1.hero-title{
+    font-family:var(--font-display);font-weight:700;font-size:52px;line-height:1.06;letter-spacing:-0.02em;
+    margin-bottom:20px;
+  }
+  h1.hero-title .accent-word{color:var(--accent);}
+  .hero-sub{color:var(--text-dim);font-size:17px;max-width:460px;margin-bottom:30px;}
+  .hero-ctas{display:flex;gap:12px;margin-bottom:34px;flex-wrap:wrap;}
+  .hero-stats{display:flex;gap:28px;flex-wrap:wrap;}
+  .hero-stat b{display:block;font-family:var(--font-display);font-size:22px;}
+  .hero-stat span{font-size:12.5px;color:var(--text-faint);}
+
+  /* hero banner image carousel */
+  .hero-banner-wrap{display:flex;justify-content:center;align-items:center;width:100%;}
+  .hero-banner-carousel{
+    position:relative;width:100%;aspect-ratio:16/9;border-radius:22px;overflow:hidden;
+    border:1px solid var(--border-hi);box-shadow:0 30px 70px -20px rgba(0,0,0,0.6);background:var(--card);
+  }
+  .hero-banner-carousel img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity .7s ease;
+  }
+  .hero-banner-carousel img.active{opacity:1;}
+  .hero-carousel-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
+  .hero-carousel-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);transition:background .2s ease, width .2s ease;}
+  .hero-carousel-dots span.active{background:#fff;width:16px;border-radius:4px;}
+  .hero-banner-placeholder{
+    width:100%;aspect-ratio:16/9;border:1.5px dashed var(--border-hi);border-radius:22px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    background:var(--card);color:var(--text-faint);text-align:center;padding:30px;
+  }
+  .hero-banner-placeholder .ic{font-size:34px;}
+  .hero-banner-placeholder b{color:var(--text-dim);font-size:15px;}
+  .hero-banner-placeholder span{font-size:12.5px;max-width:260px;}
+
+  /* ---------- SECTIONS ---------- */
+  section.block{padding:64px 0;}
+  .section-head{max-width:600px;margin-bottom:40px;}
+  .section-tag{font-family:var(--font-mono);font-size:12px;color:var(--violet);letter-spacing:0.06em;margin-bottom:10px;}
+  h2.section-title{font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-0.01em;margin-bottom:10px;}
+  .section-desc{color:var(--text-dim);font-size:15.5px;}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .step-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:26px;}
+  .step-num{font-family:var(--font-mono);color:var(--text-faint);font-size:12px;margin-bottom:14px;}
+  .step-card h3{font-family:var(--font-display);font-size:18px;margin-bottom:8px;}
+  .step-card p{color:var(--text-dim);font-size:14px;}
+
+  .service-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;}
+  .service-chip{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:16px 10px;text-align:center;font-size:12.5px;color:var(--text-dim);
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+  }
+  .service-chip img{width:26px;height:26px;border-radius:6px;object-fit:cover;}
+  .service-chip .ph{width:26px;height:26px;border-radius:6px;background:var(--card-hi);}
+
+  .price-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+  .price-table th{text-align:left;font-size:12px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.04em;padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;}
+  .price-table td{padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;}
+  .price-table tr:last-child td{border-bottom:none;}
+  .flag{width:20px;height:14px;border-radius:2px;object-fit:cover;margin-right:8px;vertical-align:middle;}
+
+  .cta-banner{
+    background:linear-gradient(120deg,rgba(52,224,161,0.12),rgba(124,108,240,0.12));
+    border:1px solid var(--border-hi);border-radius:20px;padding:44px;
+    display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  }
+  .cta-banner h3{font-family:var(--font-display);font-size:24px;margin-bottom:6px;}
+  .cta-banner p{color:var(--text-dim);font-size:14.5px;}
+
+  footer{border-top:1px solid var(--border);padding:36px 0;color:var(--text-faint);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+
+  /* ---------- AUTH VIEWS ---------- */
+  .auth-shell{min-height:calc(100vh - 73px);display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .auth-col{width:100%;max-width:420px;}
+  .promo-banner{
+    background:linear-gradient(120deg,#1b2a24,#1a1e30);
+    border:1px solid rgba(52,224,161,0.35);
+    border-radius:16px;padding:18px 20px;margin-bottom:22px;
+    display:flex;align-items:center;gap:14px;
+    position:relative;overflow:hidden;
+  }
+  .promo-banner::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 100% 0%, rgba(52,224,161,0.18), transparent 60%);
+  }
+  .promo-icon{
+    width:40px;height:40px;border-radius:10px;background:rgba(52,224,161,0.15);
+    display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;position:relative;z-index:1;
+  }
+  .promo-text b{display:block;font-size:14.5px;margin-bottom:2px;position:relative;z-index:1;}
+  .promo-text span{font-size:12.5px;color:var(--text-dim);position:relative;z-index:1;}
+  .auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;}
+  .auth-card h2{font-family:var(--font-display);font-size:24px;margin-bottom:6px;}
+  .auth-card .sub{color:var(--text-dim);font-size:13.5px;margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;color:var(--text-dim);margin-bottom:7px;font-weight:500;}
+  .field input,.field select{
+    width:100%;background:var(--bg-elev);border:1px solid var(--border-hi);color:var(--text);
+    padding:11px 13px;border-radius:10px;font-size:14.5px;font-family:inherit;
+    transition:border-color .15s ease;
+  }
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+  .form-foot{margin-top:18px;text-align:center;font-size:13.5px;color:var(--text-dim);}
+  .form-foot a{color:var(--accent);font-weight:600;}
+  .form-msg{font-size:13px;padding:10px 12px;border-radius:9px;margin-bottom:16px;display:none;}
+  .form-msg.error{background:rgba(255,93,114,0.1);color:var(--danger);border:1px solid rgba(255,93,114,0.3);display:block;}
+  .form-msg.success{background:rgba(52,224,161,0.1);color:var(--accent);border:1px solid rgba(52,224,161,0.3);display:block;}
+  .or-divider{display:flex;align-items:center;gap:10px;margin:16px 0;}
+  .or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+  .or-divider span{font-size:12px;color:var(--text-faint);}
+
+  /* ---------- DASHBOARD ---------- */
+  .dash{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 73px);}
+  .sidebar{border-right:1px solid var(--border);padding:24px 14px;background:var(--bg-elev);}
+  .side-balance{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:20px;}
+  .side-balance span{font-size:11.5px;color:var(--text-faint);}
+  .side-balance b{display:block;font-family:var(--font-mono);font-size:19px;color:var(--accent);margin-top:3px;}
+  .side-nav{display:flex;flex-direction:column;gap:3px;}
+  .side-link{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;
+    font-size:14px;color:var(--text-dim);font-weight:500;
+  }
+  .side-link .ic{width:18px;text-align:center;}
+  .side-link:hover{background:var(--card);color:var(--text);}
+  .side-link.active{background:var(--card-hi);color:var(--text);border:1px solid var(--border-hi);}
+  .dash-main{padding:32px 36px;max-width:980px;}
+  .dash-head{margin-bottom:26px;}
+  .dash-head h1{font-family:var(--font-display);font-size:25px;}
+  .dash-head p{color:var(--text-dim);font-size:14px;margin-top:4px;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+  .card h3{font-family:var(--font-display);font-size:16px;margin-bottom:16px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .row{display:flex;gap:14px;flex-wrap:wrap;}
+
+  .order-result{
+    border:1px dashed var(--border-hi);border-radius:12px;padding:18px;margin-top:16px;background:var(--bg-elev);
+  }
+  .order-num{font-family:var(--font-mono);font-size:22px;font-weight:600;color:var(--accent);letter-spacing:0.02em;}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:4px 10px;border-radius:100px;font-weight:600;}
+  .badge.pending{background:rgba(255,178,56,0.12);color:var(--amber);}
+  .badge.completed{background:rgba(52,224,161,0.12);color:var(--accent);}
+  .badge.canceled{background:rgba(255,93,114,0.12);color:var(--danger);}
+  .badge.received{background:rgba(124,108,240,0.14);color:var(--violet);}
+  .badge.expiring{background:rgba(255,178,56,0.12);color:var(--amber);}
+
+  table.simple{width:100%;border-collapse:collapse;}
+  table.simple th{text-align:left;font-size:11.5px;color:var(--text-faint);text-transform:uppercase;padding:10px 8px;border-bottom:1px solid var(--border);}
+  table.simple td{padding:12px 8px;border-bottom:1px solid var(--border);font-size:13.5px;}
+  table.simple tr:last-child td{border-bottom:none;}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--text-faint);}
+  .empty .ic{font-size:30px;margin-bottom:10px;}
+
+  .toast{
+    position:fixed;bottom:24px;right:24px;background:var(--card-hi);border:1px solid var(--border-hi);
+    padding:13px 18px;border-radius:12px;font-size:13.5px;z-index:200;box-shadow:0 15px 40px -10px rgba(0,0,0,0.5);
+    display:flex;align-items:center;gap:10px;animation:rise .25s ease both;
+  }
+  .qr-box{text-align:center;padding:16px;background:var(--bg-elev);border-radius:12px;border:1px solid var(--border);}
+  .qr-box img{width:180px;height:180px;border-radius:10px;margin-bottom:10px;background:#fff;padding:6px;}
+
+  /* step indicator */
+  .buy-stepper{display:flex;align-items:center;margin-bottom:24px;}
+  .buy-step{display:flex;align-items:center;gap:10px;color:var(--text-faint);}
+  .buy-step .num{
+    width:30px;height:30px;border-radius:50%;background:var(--card-hi);border:1px solid var(--border-hi);
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:var(--font-mono);
+    color:var(--text-faint);transition:all .2s ease;flex-shrink:0;
+  }
+  .buy-step .lbl{font-size:13.5px;font-weight:600;white-space:nowrap;}
+  .buy-step.active .num{background:var(--accent);border-color:var(--accent);color:#04140f;}
+  .buy-step.active .lbl{color:var(--text);}
+  .buy-step.done .num{background:rgba(52,224,161,0.15);border-color:var(--accent);color:var(--accent);}
+  .buy-step.done .lbl{color:var(--text-dim);}
+  .buy-step-line{flex:1;height:1px;background:var(--border-hi);margin:0 14px;min-width:20px;}
+
+  /* buy number step wizard */
+  .search-input{
+    width:100%;background:var(--bg-elev);border:1px solid var(--border-hi);color:var(--text);
+    padding:11px 13px;border-radius:10px;font-size:13.5px;font-family:inherit;margin-bottom:12px;
+  }
+  .search-input:focus{outline:none;border-color:var(--accent);}
+  .service-search-grid{
+    max-height:340px;overflow-y:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:2px 4px 2px 2px;
+  }
+  .service-pick{
+    position:relative;background:var(--bg-elev);border:1px solid var(--border);border-radius:14px;padding:16px 8px 14px;
+    text-align:center;font-size:11.5px;font-weight:600;color:var(--text-dim);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:9px;
+    transition:border-color .15s ease, background .15s ease, transform .15s ease; line-height:1.25;
+  }
+  .service-pick:hover{border-color:var(--border-hi);transform:translateY(-2px);}
+  .service-pick.selected{border-color:var(--accent);background:rgba(52,224,161,0.08);color:var(--text);}
+  .service-pick .logo-wrap{
+    width:44px;height:44px;border-radius:12px;background:var(--card-hi);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .service-pick img{width:100%;height:100%;object-fit:cover;}
+  .service-pick .ph{width:100%;height:100%;background:linear-gradient(135deg,var(--accent),var(--violet));opacity:0.25;}
+  .service-pick .check{
+    position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;
+    background:var(--accent);color:#04140f;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:800;
+  }
+  .selected-chip{
+    display:inline-flex;align-items:center;gap:8px;background:rgba(52,224,161,0.1);
+    border:1px solid rgba(52,224,161,0.3);color:var(--accent);padding:6px 12px;border-radius:100px;font-size:13px;font-weight:600;
+  }
+  .country-list{max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:14px;background:var(--bg-elev);}
+  .country-row{
+    display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
+    border-bottom:1px solid var(--border);cursor:pointer;font-size:13.5px;
+    border-left:3px solid transparent;transition:background .15s ease;
+  }
+  .country-row:last-child{border-bottom:none;}
+  .country-row:hover{background:var(--card);}
+  .country-row.selected{background:rgba(52,224,161,0.08);border-left-color:var(--accent);}
+  .country-row .left{display:flex;align-items:center;gap:12px;}
+  .country-row .flag{width:26px;height:19px;border-radius:4px;object-fit:cover;box-shadow:0 0 0 1px var(--border);}
+  .country-row .name{font-weight:600;}
+  .country-row .price{font-family:var(--font-mono);color:var(--accent);font-weight:700;font-size:14.5px;}
+  .country-row .stock{font-size:11px;color:var(--text-faint);display:block;margin-top:2px;}
+
+  /* order summary (step 3 - pay) */
+  .order-summary-card{
+    background:linear-gradient(135deg,rgba(52,224,161,0.06),rgba(124,108,240,0.06));
+    border:1px solid var(--border-hi);border-radius:16px;padding:20px;margin-bottom:18px;
+  }
+  .order-summary-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--border);}
+  .order-summary-row:last-of-type{border-bottom:none;}
+  .order-summary-row .icon-box{
+    width:38px;height:38px;border-radius:10px;background:var(--card-hi);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;
+  }
+  .order-summary-row .icon-box img{width:100%;height:100%;object-fit:cover;}
+  .order-summary-row .meta span{display:block;font-size:11px;color:var(--text-faint);}
+  .order-summary-row .meta b{font-size:14px;}
+  .order-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:14px;margin-top:4px;border-top:1px solid var(--border-hi);}
+  .order-total-row b{font-family:var(--font-mono);font-size:22px;color:var(--accent);}
+
+  @media(max-width:920px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero-banner-wrap{order:-1;}
+    .steps{grid-template-columns:1fr;}
+    .service-grid{grid-template-columns:repeat(3,1fr);}
+    .dash{grid-template-columns:1fr;}
+    .sidebar{display:flex;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:14px;}
+    .side-balance{display:none;}
+    .side-nav{flex-direction:row;}
+    h1.hero-title{font-size:36px;}
+    .nav-links{display:none;}
+    .grid2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<a href="#" id="csFloat" class="cs-float hidden" target="_blank" rel="noopener">
+  <span class="cs-ic">💬</span><span class="cs-label">Hubungi CS</span>
+</a>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="brand-mark" id="brandMark">iO</span><span id="brandName">ipunggOtp</span></div>
+    <div class="nav-links">
+      <a href="#" onclick="showView('landing');return false;">Beranda</a>
+      <a href="#how">Cara Kerja</a>
+      <a href="#pricing">Harga</a>
+    </div>
+    <div class="nav-actions" id="navActions"></div>
+  </div>
+</nav>
+
+<!-- ============ LANDING ============ -->
+<div id="view-landing" class="view">
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow"><span class="pulse"></span> LIVE · 85+ negara tersambung</div>
+        <h1 class="hero-title">Nomor virtual OTP,<br>kode masuk dalam <span class="accent-word">hitungan detik</span>.</h1>
+        <p class="hero-sub">ipunggOtp menyediakan nomor virtual untuk verifikasi WhatsApp, Telegram, dan 1000+ aplikasi lain. Sekali pesan, langsung dapat nomor — tanpa nunggu, tanpa ribet.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-primary" onclick="showView('register')">Daftar &amp; Klaim Bonus →</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('pricing').scrollIntoView()">Lihat Harga</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><b id="statServices">1.700+</b><span>Layanan digital</span></div>
+          <div class="hero-stat"><b>85+</b><span>Negara aktif</span></div>
+          <div class="hero-stat"><b>&lt;5 detik</b><span>Rata-rata kirim OTP</span></div>
+        </div>
+      </div>
+      <div class="hero-banner-wrap">
+        <div id="heroCarousel" class="hero-banner-carousel hidden"></div>
+        <div id="heroBannerPlaceholder" class="hero-banner-placeholder">
+          <div class="ic">🖼️</div>
+          <b>Banner belum diatur</b>
+          <span>Admin belum menambahkan gambar banner di Pengaturan.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="how">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-tag">// CARA_KERJA</div>
+        <h2 class="section-title">Tiga langkah, langsung jalan</h2>
+        <p class="section-desc">Tidak perlu kartu SIM fisik, tidak perlu registrasi provider. Semua lewat dashboard.</p>
+      </div>
+      <div class="steps">
+        <div class="step-card"><div class="step-num">01</div><h3>Pilih layanan &amp; negara</h3><p>Cari aplikasi yang mau diverifikasi — WhatsApp, Telegram, dan ratusan lainnya — lalu pilih negara nomornya.</p></div>
+        <div class="step-card"><div class="step-num">02</div><h3>Bayar dari saldo</h3><p>Saldo langsung terpotong sesuai harga, nomor aktif langsung terbit untuk kamu pakai.</p></div>
+        <div class="step-card"><div class="step-num">03</div><h3>Terima kode OTP</h3><p>Masukkan nomor di aplikasi tujuan, kode verifikasi masuk otomatis ke dashboard ipunggOtp.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-tag">// LAYANAN_POPULER</div>
+        <h2 class="section-title">Didukung ribuan aplikasi</h2>
+        <p class="section-desc">Data layanan diambil langsung dari server penyedia.</p>
+      </div>
+      <div class="service-grid" id="serviceGrid"></div>
+    </div>
+  </section>
+
+  <section class="block" id="pricing">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-tag">// CONTOH_HARGA</div>
+        <h2 class="section-title">Harga nomor WhatsApp per negara</h2>
+        <p class="section-desc">Harga berubah mengikuti stok &amp; server penyedia secara real-time.</p>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="price-table" id="pricingTable">
+          <thead><tr><th>Negara</th><th>Stok</th><th>Harga</th><th></th></tr></thead>
+          <tbody id="pricingBody"><tr><td colspan="4" style="color:var(--text-faint)">Hubungkan API key lewat dashboard admin untuk menampilkan harga live.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container">
+      <div class="cta-banner">
+        <div>
+          <h3>Siap pakai nomor pertamamu?</h3>
+          <p>Daftar sekarang, dashboard langsung aktif dan siap dipakai beli nomor.</p>
+        </div>
+        <button class="btn btn-primary" onclick="showView('register')">Buat Akun Gratis</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="container">
+    <span id="footerBrand">© 2026 ipunggOtp. Ditenagai oleh API RumahOTP.</span>
+    <span>Gunakan hanya untuk keperluan sah &amp; testing.</span>
+  </footer>
+</div>
+
+<!-- ============ REGISTER ============ -->
+<div id="view-register" class="view hidden">
+  <div class="auth-shell">
+    <div class="auth-col">
+      <div class="promo-banner" id="promoBanner">
+        <div class="promo-icon">🎁</div>
+        <div class="promo-text"><b id="promoTitle">Bonus saldo Rp5.000 untuk member baru!</b><span id="promoSub">Daftar sekarang dan langsung coba beli nomor pertamamu.</span></div>
+      </div>
+      <div class="auth-card">
+        <h2>Buat akun</h2>
+        <div class="sub">Gratis, langsung aktif tanpa verifikasi manual.</div>
+        <div class="form-msg" id="regMsg"></div>
+        <div class="field"><label>Nama Lengkap</label><input id="regName" placeholder="cth. Budi Santoso" autocomplete="off"></div>
+        <div class="field"><label>Username</label><input id="regUsername" placeholder="cth. budi_otp" autocomplete="off"></div>
+        <div class="field"><label>Email</label><input id="regEmail" type="email" placeholder="nama@email.com"></div>
+        <div class="field"><label>Nomor WhatsApp</label><input id="regPhone" placeholder="08xxxxxxxxxx"></div>
+        <div class="field"><label>Password</label><input id="regPassword" type="password" placeholder="Minimal 6 karakter"></div>
+        <button class="btn btn-primary btn-block" onclick="handleRegister()">Daftar Sekarang</button>
+        <div class="or-divider"><span>atau</span></div>
+        <button class="btn btn-ghost btn-block" onclick="loginWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.6 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l6-6C34.5 5.1 29.5 3 24 3 16.1 3 9.2 7.5 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.4 0 10.3-2.1 14-5.5l-6.5-5.5C29.4 35.9 26.9 37 24 37c-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.1 40.4 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.6-2.7 4.8-4.9 6.3l6.5 5.5C39.9 37.4 44 31.5 44 24c0-1.4-.1-2.7-.4-3.5z"/></svg>
+          Daftar dengan Google
+        </button>
+        <div class="form-foot">Sudah punya akun? <a href="#" onclick="showView('login');return false;">Masuk di sini</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FORGOT PASSWORD ============ -->
+<div id="view-forgot" class="view hidden">
+  <div class="auth-shell">
+    <div class="auth-col">
+      <div class="auth-card">
+        <h2>Reset Password</h2>
+        <div class="sub">Cocokkan data akunmu untuk membuat password baru. Tidak ada kode dikirim — verifikasi lewat data yang cocok.</div>
+        <div class="form-msg" id="forgotMsg"></div>
+
+        <div id="forgotStep1">
+          <div class="field"><label>Username</label><input id="fgUsername" placeholder="Username akunmu"></div>
+          <div class="field"><label>Email atau Nomor WhatsApp Terdaftar</label><input id="fgContact" placeholder="Email atau nomor WA saat daftar"></div>
+          <button class="btn btn-primary btn-block" onclick="verifyForgotIdentity()">Verifikasi</button>
+        </div>
+
+        <div id="forgotStep2" class="hidden">
+          <div class="field"><label>Password Baru</label><input id="fgNewPass" type="password" placeholder="Minimal 6 karakter"></div>
+          <div class="field"><label>Konfirmasi Password Baru</label><input id="fgConfirmPass" type="password" placeholder="Ulangi password baru"></div>
+          <button class="btn btn-primary btn-block" onclick="submitForgotReset()">Simpan Password Baru</button>
+        </div>
+
+        <div class="form-foot">Ingat password? <a href="#" onclick="showView('login');return false;">Masuk di sini</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LOGIN ============ -->
+<div id="view-login" class="view hidden">
+  <div class="auth-shell">
+    <div class="auth-col">
+      <div class="auth-card">
+        <h2>Masuk</h2>
+        <div class="sub">Masuk ke dashboard ipunggOtp kamu.</div>
+        <div class="form-msg" id="loginMsg"></div>
+        <div class="field"><label>Username</label><input id="loginUsername" placeholder="Username"></div>
+        <div class="field"><label>Password</label><input id="loginPassword" type="password" placeholder="Password"></div>
+        <div style="text-align:right;margin-bottom:16px;margin-top:-8px;"><a href="#" style="font-size:12.5px;color:var(--text-dim);" onclick="showView('forgot');return false;">Lupa password?</a></div>
+        <button class="btn btn-primary btn-block" onclick="handleLogin()">Masuk</button>
+        <div class="or-divider"><span>atau</span></div>
+        <button class="btn btn-ghost btn-block" onclick="loginWithGoogle()">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.6 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.4-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l6-6C34.5 5.1 29.5 3 24 3 16.1 3 9.2 7.5 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.4 0 10.3-2.1 14-5.5l-6.5-5.5C29.4 35.9 26.9 37 24 37c-5.2 0-9.6-3.3-11.3-8l-6.6 5.1C9.1 40.4 16 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1 2.6-2.7 4.8-4.9 6.3l6.5 5.5C39.9 37.4 44 31.5 44 24c0-1.4-.1-2.7-.4-3.5z"/></svg>
+          Masuk dengan Google
+        </button>
+        <div class="form-foot">Belum punya akun? <a href="#" onclick="showView('register');return false;">Daftar gratis</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ USER DASHBOARD ============ -->
+<div id="view-dashboard" class="view hidden">
+  <div class="dash">
+    <aside class="sidebar">
+      <div class="side-balance"><span>SALDO KAMU</span><b id="sbBalance">Rp0</b></div>
+      <nav class="side-nav">
+        <a class="side-link" data-tab="buy" onclick="setDashTab('buy')"><span class="ic">📱</span> Beli Nomor</a>
+        <a class="side-link" data-tab="history" onclick="setDashTab('history')"><span class="ic">🕘</span> Riwayat Pesanan</a>
+        <a class="side-link" data-tab="topup" onclick="setDashTab('topup')"><span class="ic">💳</span> Top Up Saldo</a>
+        <a class="side-link" data-tab="profile" onclick="setDashTab('profile')"><span class="ic">👤</span> Profil</a>
+        <a class="side-link" onclick="logout()" style="margin-top:10px;color:var(--danger);"><span class="ic">⎋</span> Keluar</a>
+      </nav>
+    </aside>
+    <main class="dash-main">
+      <!-- BUY TAB -->
+      <div id="tab-buy" class="dash-tab">
+        <div class="dash-head"><h1>Beli Nomor OTP</h1><p>Pilih aplikasi, negara, lalu bayar — nomor langsung aktif.</p></div>
+
+        <div class="buy-stepper">
+          <div class="buy-step active" id="stepper1"><span class="num">1</span><span class="lbl">Pilih Aplikasi</span></div>
+          <div class="buy-step-line"></div>
+          <div class="buy-step" id="stepper2"><span class="num">2</span><span class="lbl">Pilih Negara</span></div>
+          <div class="buy-step-line"></div>
+          <div class="buy-step" id="stepper3"><span class="num">3</span><span class="lbl">Bayar</span></div>
+        </div>
+
+        <div class="card">
+          <h3>1. Pilih Aplikasi</h3>
+          <input class="search-input" id="buyServiceSearch" placeholder="Cari aplikasi, cth. WhatsApp, Telegram...">
+          <div class="service-search-grid" id="buyServiceGrid"><div class="empty" style="grid-column:1/-1;padding:20px;">Memuat layanan...</div></div>
+        </div>
+
+        <div class="card hidden" id="step2Card">
+          <h3>2. Pilih Negara</h3>
+          <div id="selectedServiceChip" style="margin-bottom:10px;"></div>
+          <input class="search-input" id="buyCountrySearch" placeholder="Cari negara...">
+          <div class="country-list" id="buyCountryList"></div>
+        </div>
+
+        <div class="card hidden" id="step3Card">
+          <h3>3. Konfirmasi &amp; Bayar</h3>
+          <div class="order-summary-card" id="orderSummaryBox"></div>
+          <div class="field"><label>Operator</label><select id="buyOperator"></select></div>
+          <button class="btn btn-primary btn-block" id="buyBtn" onclick="createOrderFlow()">💳 Bayar &amp; Pesan Nomor</button>
+          <div id="orderResultBox"></div>
+        </div>
+      </div>
+      <!-- HISTORY TAB -->
+      <div id="tab-history" class="dash-tab hidden">
+        <div class="dash-head"><h1>Riwayat Pesanan</h1><p>Semua nomor yang pernah kamu beli.</p></div>
+        <div class="card"><div id="historyList"></div></div>
+      </div>
+      <!-- TOPUP TAB -->
+      <div id="tab-topup" class="dash-tab hidden">
+        <div class="dash-head"><h1>Top Up Saldo</h1><p>Isi saldo lewat QRIS untuk beli nomor.</p></div>
+        <div class="card">
+          <h3>Nominal Top Up</h3>
+          <div class="row" style="margin-bottom:14px;">
+            <button class="btn btn-ghost btn-sm" onclick="setTopupAmount(3000)">Rp3.000</button>
+            <button class="btn btn-ghost btn-sm" onclick="setTopupAmount(10000)">Rp10.000</button>
+            <button class="btn btn-ghost btn-sm" onclick="setTopupAmount(25000)">Rp25.000</button>
+            <button class="btn btn-ghost btn-sm" onclick="setTopupAmount(50000)">Rp50.000</button>
+            <button class="btn btn-ghost btn-sm" onclick="setTopupAmount(100000)">Rp100.000</button>
+          </div>
+          <div class="field"><label>Atau nominal lain</label><input id="topupAmount" type="number" placeholder="Minimal 3000"></div>
+          <button class="btn btn-primary" onclick="createTopup()">Buat QRIS</button>
+          <div id="topupResultBox"></div>
+          <p style="margin-top:14px;font-size:12.5px;color:var(--text-faint)">Kendala pembayaran? Hubungi admin di WhatsApp <span id="topupAdminWa">—</span>.</p>
+        </div>
+      </div>
+      <!-- PROFILE TAB -->
+      <div id="tab-profile" class="dash-tab hidden">
+        <div class="dash-head"><h1>Profil &amp; Pengaturan</h1><p>Kelola informasi dan keamanan akun kamu.</p></div>
+        <div class="card">
+          <h3>Informasi Akun</h3>
+          <table class="simple">
+            <tr><td style="color:var(--text-faint)">Username</td><td id="profUsername" class="mono"></td></tr>
+            <tr><td style="color:var(--text-faint)">Email</td><td id="profEmail"></td></tr>
+            <tr><td style="color:var(--text-faint)">WhatsApp</td><td id="profPhone"></td></tr>
+            <tr><td style="color:var(--text-faint)">Bergabung sejak</td><td id="profJoined"></td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3>Ubah Nama</h3>
+          <div class="form-msg" id="nameMsg"></div>
+          <div class="field"><label>Nama Lengkap</label><input id="editName" placeholder="Nama lengkap kamu"></div>
+          <button class="btn btn-violet" onclick="saveUserName()">Simpan Nama</button>
+        </div>
+        <div class="card">
+          <h3>Ubah Password</h3>
+          <div class="form-msg" id="userPwMsg"></div>
+          <div class="field"><label>Password Saat Ini</label><input id="userPwCurrent" type="password" placeholder="Password sekarang"></div>
+          <div class="field"><label>Password Baru</label><input id="userPwNew" type="password" placeholder="Minimal 6 karakter"></div>
+          <div class="field"><label>Konfirmasi Password Baru</label><input id="userPwConfirm" type="password" placeholder="Ulangi password baru"></div>
+          <button class="btn btn-violet" onclick="changeUserPassword()">Ubah Password</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ ADMIN DASHBOARD ============ -->
+<div id="view-admin" class="view hidden">
+  <div class="dash">
+    <aside class="sidebar">
+      <div class="side-balance"><span>ROLE</span><b style="color:var(--violet);font-size:15px;">ADMINISTRATOR</b></div>
+      <nav class="side-nav">
+        <a class="side-link" data-tab="overview" onclick="setAdminTab('overview')"><span class="ic">📊</span> Ringkasan</a>
+        <a class="side-link" data-tab="settings" onclick="setAdminTab('settings')"><span class="ic">⚙️</span> Pengaturan</a>
+        <a class="side-link" onclick="logout()" style="margin-top:10px;color:var(--danger);"><span class="ic">⎋</span> Keluar</a>
+      </nav>
+    </aside>
+    <main class="dash-main">
+      <div id="admintab-overview" class="dash-tab">
+        <div class="dash-head"><h1>Ringkasan</h1><p>Statistik cepat platform kamu.</p></div>
+        <div class="row">
+          <div class="card" style="flex:1;min-width:180px;"><h3 style="margin-bottom:6px;">Total User</h3><div class="mono" style="font-size:28px;color:var(--accent);" id="statUsers">0</div></div>
+          <div class="card" style="flex:1;min-width:180px;"><h3 style="margin-bottom:6px;">Total Pesanan</h3><div class="mono" style="font-size:28px;color:var(--violet);" id="statOrders">0</div></div>
+          <div class="card" style="flex:1;min-width:180px;"><h3 style="margin-bottom:6px;">Status API Key</h3><div id="statApi" style="font-size:15px;margin-top:4px;">—</div></div>
+        </div>
+      </div>
+      <div id="admintab-settings" class="dash-tab hidden">
+        <div class="dash-head"><h1>Pengaturan Website</h1><p>Konfigurasi ini berlaku untuk seluruh pengguna ipunggOtp.</p></div>
+        <div class="form-msg" id="settingsMsg"></div>
+        <div class="card">
+          <h3>Identitas Website</h3>
+          <div class="field"><label>Nama Website</label><input id="setSiteName" placeholder="ipunggOtp"></div>
+          <div class="field"><label>URL Logo (gambar/foto)</label><input id="setLogoImage" placeholder="https://contoh.com/logo.png"></div>
+          <p style="font-size:12px;color:var(--text-faint);margin-top:-8px;margin-bottom:14px;">Upload logo ke layanan hosting gambar (imgur, ibb.co, dsb) lalu tempel link-nya di sini. Kosongkan untuk pakai logo teks.</p>
+          <div class="field"><label>Logo Teks (cadangan jika URL kosong, maks 3 karakter)</label><input id="setLogoText" placeholder="iO" maxlength="3"></div>
+          <div class="field"><label>Nomor WhatsApp Admin</label><input id="setAdminWa" placeholder="628xxxxxxxxxx"></div>
+        </div>
+        <div class="card">
+          <h3>Banner Hero (Beranda) <span style="color:var(--danger);font-size:12px;">*minimal 1 link</span></h3>
+          <div class="field"><label>Link Gambar Banner 1 (wajib)</label><input id="setHeroImage1" placeholder="https://contoh.com/banner-1.jpg"></div>
+          <div class="field"><label>Link Gambar Banner 2 (opsional)</label><input id="setHeroImage2" placeholder="https://contoh.com/banner-2.jpg"></div>
+          <div class="field"><label>Link Gambar Banner 3 (opsional)</label><input id="setHeroImage3" placeholder="https://contoh.com/banner-3.jpg"></div>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:-8px;">Pakai rasio gambar <span class="mono">16:9</span> biar pas, tidak terpotong kotak. Isi 2-3 link supaya banner otomatis geser bergantian di beranda. Upload dulu ke imgur/ibb.co lalu tempel link-nya.</p>
+        </div>
+        <div class="card">
+          <h3>Koneksi API RumahOTP</h3>
+          <div class="field"><label>API Key</label><input id="setApiKey" placeholder="Tempel API key dari rumahotp.io" class="mono"></div>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:-8px;margin-bottom:14px;">Dapatkan API key di <span class="mono">rumahotp.io → Profile → Developer</span>. Kunci disimpan dan dipakai untuk semua transaksi user.</p>
+          <div class="grid2">
+            <div class="field"><label>Tipe Markup Harga Jual</label>
+              <select id="setMarkupType" onchange="updateMarkupLabel()">
+                <option value="fixed">Nominal Tetap (Rp)</option>
+                <option value="percent">Persentase (%)</option>
+              </select>
+            </div>
+            <div class="field"><label id="markupValueLabel">Tambahan Harga (Rp)</label><input id="setMarkupValue" type="number" placeholder="cth. 100"></div>
+          </div>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:-8px;">Contoh: modal <span class="mono">Rp1.000</span> + markup nominal <span class="mono">Rp100</span> = harga jual <span class="mono">Rp1.100</span>. Atau pakai persentase kalau mau margin proporsional ke semua harga.</p>
+        </div>
+        <div class="card">
+          <h3>Banner Sebelum Registrasi</h3>
+          <div class="field"><label>Aktifkan banner</label>
+            <select id="setBannerActive"><option value="1">Aktif</option><option value="0">Nonaktif</option></select>
+          </div>
+          <div class="field"><label>Judul Banner</label><input id="setBannerTitle" placeholder="Bonus saldo Rp5.000 untuk member baru!"></div>
+          <div class="field"><label>Sub Banner</label><input id="setBannerSub" placeholder="Daftar sekarang dan langsung coba beli nomor pertamamu."></div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">Simpan Pengaturan</button>
+
+        <div class="card" style="margin-top:28px;">
+          <h3>Ubah Password Admin</h3>
+          <div class="form-msg" id="pwMsg"></div>
+          <div class="field"><label>Password Saat Ini</label><input id="pwCurrent" type="password" placeholder="Password admin sekarang"></div>
+          <div class="field"><label>Password Baru</label><input id="pwNew" type="password" placeholder="Minimal 6 karakter"></div>
+          <div class="field"><label>Konfirmasi Password Baru</label><input id="pwConfirm" type="password" placeholder="Ulangi password baru"></div>
+          <button class="btn btn-violet" onclick="changeAdminPassword()">Ubah Password</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ======================= STATE ======================= */
+const API_BASE = 'https://www.rumahotp.io/api';
+let session = null; // {username, role}
+let settings = { site_name:'ipunggOtp', logo_text:'iO', logo_image:'', hero_images:[], api_key:(typeof RUMAHOTP_API_KEY_DEFAULT!=='undefined'?RUMAHOTP_API_KEY_DEFAULT:''), admin_wa:'', markup_type:'fixed', markup_value:100, banner_active:true, banner_title:'Bonus saldo Rp5.000 untuk member baru!', banner_sub:'Daftar sekarang dan langsung coba beli nomor pertamamu.' };
+let servicesCache = [];
+let currentOrderPoll = null;
+
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD_DEFAULT = 'admin123';
+
+/* ======================= FIREBASE ======================= */
+let fbDb = null;
+let fbAuth = null;
+function initFirebase(){
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbDb = firebase.database();
+    fbAuth = firebase.auth();
+  }catch(e){ console.error('Firebase init gagal', e); }
+}
+
+function keyToPath(key){
+  const idx = key.indexOf(':');
+  if(idx > -1) return key.slice(0,idx) + '/' + sanitizePathSegment(key.slice(idx+1));
+  return key;
+}
+function sanitizePathSegment(s){ return String(s).replace(/[.#$\[\]\/\s]/g, '_'); }
+
+/* ======================= STORAGE HELPERS (Firebase-backed) ======================= */
+async function storeGet(key, shared){
+  try{
+    const snap = await fbDb.ref(keyToPath(key)).once('value');
+    const val = snap.val();
+    return (val === null || val === undefined) ? null : val;
+  }catch(e){ console.error('db get fail', e); return null; }
+}
+async function storeSet(key, value, shared){
+  try{ await fbDb.ref(keyToPath(key)).set(value); return true; }
+  catch(e){ console.error('db set fail', e); return false; }
+}
+async function storeList(prefix, shared){
+  try{
+    const path = prefix.endsWith(':') ? prefix.slice(0,-1) : keyToPath(prefix);
+    const snap = await fbDb.ref(path).once('value');
+    const val = snap.val();
+    if(!val) return [];
+    return Object.keys(val).map(k => path + ':' + k);
+  }catch(e){ console.error('db list fail', e); return []; }
+}
+
+/* ======================= PASSWORD HASHING (SHA-256) ======================= */
+async function hashPassword(pw){
+  const enc = new TextEncoder().encode(pw);
+  const buf = await crypto.subtle.digest('SHA-256', enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ======================= INIT ======================= */
+async function init(){
+  initFirebase();
+  const s = await storeGet('settings', true);
+  if(s){
+    settings = Object.assign(settings, s);
+    if(!settings.api_key && typeof RUMAHOTP_API_KEY_DEFAULT!=='undefined') settings.api_key = RUMAHOTP_API_KEY_DEFAULT;
+  }
+  else { await storeSet('settings', settings, true); }
+  applySettingsToUI();
+  renderNav();
+  loadServicesForLanding();
+  showView('landing');
+}
+
+function applySettingsToUI(){
+  const mark = document.getElementById('brandMark');
+  if(settings.logo_image){
+    mark.innerHTML = `<img src="${settings.logo_image}" onerror="this.parentElement.textContent=(settings.logo_text||'iO')">`;
+  } else {
+    mark.textContent = settings.logo_text || 'iO';
+  }
+  document.getElementById('brandName').textContent = settings.site_name || 'ipunggOtp';
+  document.title = (settings.site_name || 'ipunggOtp') + ' — Nomor Virtual OTP Instan';
+  document.getElementById('footerBrand').textContent = '© 2026 ' + (settings.site_name||'ipunggOtp') + '. Ditenagai oleh API RumahOTP.';
+  document.getElementById('promoTitle').textContent = settings.banner_title;
+  document.getElementById('promoSub').textContent = settings.banner_sub;
+  document.getElementById('promoBanner').style.display = settings.banner_active ? 'flex' : 'none';
+  applyHeroBanner();
+  updateCsButton();
+}
+
+/* ======================= NAV / VIEW SWITCH ======================= */
+function renderNav(){
+  const box = document.getElementById('navActions');
+  if(session){
+    const homeView = session.role==='admin' ? 'admin' : 'dashboard';
+    box.innerHTML = `
+      <div class="nav-user-wrap">
+        <button class="nav-user-chip" onclick="toggleUserMenu(event)"><span class="dot">${session.username[0].toUpperCase()}</span>${session.username} ▾</button>
+        <div class="user-menu hidden" id="userMenu">
+          <a href="#" onclick="closeUserMenu();showView('${homeView}');return false;">📊 Dashboard</a>
+          ${session.role==='user' ? `<a href="#" onclick="closeUserMenu();showView('dashboard');setDashTab('profile');return false;">⚙️ Pengaturan Profil</a>` : `<a href="#" onclick="closeUserMenu();showView('admin');setAdminTab('settings');return false;">⚙️ Pengaturan Website</a>`}
+          <div class="divider"></div>
+          <a href="#" onclick="closeUserMenu();logout();return false;" style="color:var(--danger);">⎋ Keluar</a>
+        </div>
+      </div>
+    `;
+  } else {
+    box.innerHTML = `
+      <button class="btn btn-ghost btn-sm" onclick="showView('login')">Masuk</button>
+      <button class="btn btn-primary btn-sm" onclick="showView('register')">Daftar</button>
+    `;
+  }
+}
+function toggleUserMenu(e){
+  e.stopPropagation();
+  document.getElementById('userMenu').classList.toggle('hidden');
+}
+function closeUserMenu(){
+  const m = document.getElementById('userMenu');
+  if(m) m.classList.add('hidden');
+}
+document.addEventListener('click', closeUserMenu);
+
+function updateCsButton(){
+  const cs = document.getElementById('csFloat');
+  if(settings.admin_wa){
+    const num = settings.admin_wa.replace(/[^0-9]/g,'');
+    cs.href = `https://wa.me/${num}?text=${encodeURIComponent('Halo CS '+(settings.site_name||'ipunggOtp')+', saya butuh bantuan.')}`;
+    cs.classList.remove('hidden');
+  } else {
+    cs.classList.add('hidden');
+  }
+}
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));
+  document.getElementById('view-'+name).classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'instant'});
+  if(name==='dashboard') loadDashboard();
+  if(name==='admin') loadAdmin();
+}
+
+/* ======================= TOAST ======================= */
+function toast(msg, icon){
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span>${icon||'✓'}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3200);
+}
+function fmtRupiah(n){ return 'Rp' + Math.round(n).toLocaleString('id-ID'); }
+
+/* ======================= AUTH ======================= */
+async function handleRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const username = document.getElementById('regUsername').value.trim().toLowerCase();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const msg = document.getElementById('regMsg');
+  msg.className = 'form-msg';
+
+  if(!name || !username || !email || !phone || !password){ msg.textContent='Semua field wajib diisi.'; msg.className='form-msg error'; return; }
+  if(password.length < 6){ msg.textContent='Password minimal 6 karakter.'; msg.className='form-msg error'; return; }
+  if(username === ADMIN_USERNAME){ msg.textContent='Username tidak tersedia.'; msg.className='form-msg error'; return; }
+
+  const existing = await storeGet('users:'+username, true);
+  if(existing){ msg.textContent='Username sudah dipakai.'; msg.className='form-msg error'; return; }
+
+  const user = { name, username, email, phone, password: await hashPassword(password), saldo:5000, created_at: Date.now() };
+  await storeSet('users:'+username, user, true);
+  await storeSet('orders:'+username, [], true);
+  msg.textContent='Akun berhasil dibuat! Mengalihkan...'; msg.className='form-msg success';
+  session = { username, role:'user' };
+  renderNav();
+  setTimeout(()=>showView('dashboard'), 700);
+}
+
+async function handleLogin(){
+  const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('loginMsg');
+  msg.className='form-msg';
+  const enteredHash = await hashPassword(password);
+
+  if(username === ADMIN_USERNAME){
+    const adminPassHash = settings.admin_password || await hashPassword(ADMIN_PASSWORD_DEFAULT);
+    if(enteredHash === adminPassHash){
+      session = { username:'admin', role:'admin' };
+      renderNav();
+      showView('admin');
+      return;
+    } else {
+      msg.textContent='Password admin salah.'; msg.className='form-msg error'; return;
+    }
+  }
+
+  const user = await storeGet('users:'+username, true);
+  if(!user || user.password !== enteredHash){ msg.textContent='Username atau password salah.'; msg.className='form-msg error'; return; }
+  session = { username, role:'user' };
+  renderNav();
+  showView('dashboard');
+}
+
+let forgotUser = null;
+async function verifyForgotIdentity(){
+  const username = document.getElementById('fgUsername').value.trim().toLowerCase();
+  const contact = document.getElementById('fgContact').value.trim().toLowerCase();
+  const msg = document.getElementById('forgotMsg');
+  msg.className = 'form-msg';
+
+  if(!username || !contact){ msg.textContent='Isi username dan email/nomor WA.'; msg.className='form-msg error'; return; }
+  if(username === ADMIN_USERNAME){ msg.textContent='Reset password admin lewat menu Ubah Password Admin di dashboard.'; msg.className='form-msg error'; return; }
+
+  const user = await storeGet('users:'+username, true);
+  if(!user){ msg.textContent='Username tidak ditemukan.'; msg.className='form-msg error'; return; }
+
+  const emailMatch = user.email && user.email.toLowerCase() === contact;
+  const phoneMatch = user.phone && user.phone.replace(/[^0-9]/g,'') === contact.replace(/[^0-9]/g,'') && contact.replace(/[^0-9]/g,'').length > 5;
+  if(!emailMatch && !phoneMatch){ msg.textContent='Email/nomor WA tidak cocok dengan data akun.'; msg.className='form-msg error'; return; }
+
+  forgotUser = user;
+  msg.textContent='Data cocok! Silakan buat password baru.'; msg.className='form-msg success';
+  document.getElementById('forgotStep1').classList.add('hidden');
+  document.getElementById('forgotStep2').classList.remove('hidden');
+}
+
+async function submitForgotReset(){
+  const next = document.getElementById('fgNewPass').value;
+  const confirm = document.getElementById('fgConfirmPass').value;
+  const msg = document.getElementById('forgotMsg');
+  msg.className = 'form-msg';
+
+  if(next.length < 6){ msg.textContent='Password baru minimal 6 karakter.'; msg.className='form-msg error'; return; }
+  if(next !== confirm){ msg.textContent='Konfirmasi password tidak cocok.'; msg.className='form-msg error'; return; }
+
+  forgotUser.password = await hashPassword(next);
+  const ok = await storeSet('users:'+forgotUser.username, forgotUser, true);
+  if(ok){
+    msg.textContent='Password berhasil direset! Mengalihkan ke halaman masuk...'; msg.className='form-msg success';
+    setTimeout(()=>{
+      forgotUser = null;
+      document.getElementById('fgUsername').value='';
+      document.getElementById('fgContact').value='';
+      document.getElementById('fgNewPass').value='';
+      document.getElementById('fgConfirmPass').value='';
+      document.getElementById('forgotStep1').classList.remove('hidden');
+      document.getElementById('forgotStep2').classList.add('hidden');
+      showView('login');
+    }, 1200);
+  } else {
+    msg.textContent='Gagal menyimpan password baru.'; msg.className='form-msg error';
+  }
+}
+
+async function loginWithGoogle(){
+  try{
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await fbAuth.signInWithPopup(provider);
+    const gUser = result.user;
+    if(!gUser.email){ toast('Akun Google tidak punya email.','⚠️'); return; }
+
+    let username = sanitizePathSegment(gUser.email.split('@')[0]).toLowerCase();
+    let user = await storeGet('users:'+username, true);
+
+    if(!user){
+      user = {
+        name: gUser.displayName || username,
+        username, email: gUser.email, phone:'',
+        password: null, auth_provider:'google', photo: gUser.photoURL || '',
+        saldo:5000, created_at: Date.now()
+      };
+      await storeSet('users:'+username, user, true);
+      await storeSet('orders:'+username, [], true);
+      toast('Akun Google berhasil dibuat & masuk!','🎉');
+    } else {
+      toast('Berhasil masuk dengan Google','✓');
+    }
+
+    session = { username, role:'user' };
+    renderNav();
+    showView('dashboard');
+  }catch(e){
+    if(e.code === 'auth/popup-closed-by-user') return;
+    toast('Gagal masuk dengan Google: '+e.message, '⚠️');
+  }
+}
+
+function logout(){
+  session = null;
+  renderNav();
+  showView('landing');
+}
+
+/* ======================= API WRAPPER ======================= */
+async function apiGet(path, params){
+  if(!settings.api_key){ throw new Error('API key belum diatur oleh admin.'); }
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  const res = await fetch(API_BASE + path + qs, {
+    method:'GET',
+    headers:{ 'x-apikey': settings.api_key, 'Accept':'application/json' }
+  });
+  const json = await res.json();
+  if(!json.success){ throw new Error((json.error && json.error.message) || 'Permintaan API gagal.'); }
+  return json.data;
+}
+
+/* ======================= LANDING: services preview ======================= */
+async function loadServicesForLanding(){
+  const grid = document.getElementById('serviceGrid');
+  if(!settings.api_key){
+    grid.innerHTML = Array.from({length:12}).map(()=>`<div class="service-chip"><div class="ph"></div>Segera</div>`).join('');
+    return;
+  }
+  try{
+    const data = await apiGet('/v2/services');
+    servicesCache = data;
+    document.getElementById('statServices').textContent = data.length + '+';
+    grid.innerHTML = data.slice(0,12).map(s=>`
+      <div class="service-chip"><img src="${s.service_img}" onerror="this.style.display='none'">${s.service_name}</div>
+    `).join('');
+    loadPricingPreview(data);
+  }catch(e){
+    grid.innerHTML = `<div style="grid-column:1/-1;color:var(--text-faint);font-size:13px;">Belum bisa memuat layanan live (${e.message}).</div>`;
+  }
+}
+
+async function loadPricingPreview(services){
+  const wa = services.find(s=>/whatsapp/i.test(s.service_name)) || services[0];
+  if(!wa) return;
+  try{
+    const data = await apiGet('/v2/countries', { service_id: wa.service_code });
+    const body = document.getElementById('pricingBody');
+    body.innerHTML = data.slice(0,6).map(c=>{
+      const best = (c.pricelist||[]).slice().sort((a,b)=>a.price-b.price)[0];
+      const price = best ? applyMarkup(best.price) : c.rate;
+      return `<tr>
+        <td><img class="flag" src="${c.img}" onerror="this.style.display='none'"> ${c.name}</td>
+        <td>${c.stock_total ?? '-'}</td>
+        <td class="mono">${fmtRupiah(price)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="showView('${session?'dashboard':'register'}')">Pesan</button></td>
+      </tr>`;
+    }).join('');
+  }catch(e){ /* silent on landing */ }
+}
+
+function applyMarkup(price){
+  price = Number(price)||0;
+  if(settings.markup_type === 'percent'){
+    const pct = Number(settings.markup_value)||0;
+    return price + (price * pct/100);
+  }
+  const nominal = Number(settings.markup_value)||0;
+  return price + nominal;
+}
+
+/* ======================= Hero banner carousel ======================= */
+let heroCarouselTimer = null;
+let heroCarouselIndex = 0;
+
+function applyHeroBanner(){
+  const wrap = document.getElementById('heroCarousel');
+  const placeholder = document.getElementById('heroBannerPlaceholder');
+  const images = (settings.hero_images || []).filter(Boolean);
+
+  if(heroCarouselTimer){ clearInterval(heroCarouselTimer); heroCarouselTimer = null; }
+
+  if(!images.length){
+    wrap.classList.add('hidden');
+    placeholder.classList.remove('hidden');
+    return;
+  }
+
+  placeholder.classList.add('hidden');
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = images.map((src,i)=>`<img src="${src}" class="${i===0?'active':''}" onerror="this.style.display='none'">`).join('')
+    + (images.length>1 ? `<div class="hero-carousel-dots">${images.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>` : '');
+
+  heroCarouselIndex = 0;
+  if(images.length > 1){
+    heroCarouselTimer = setInterval(()=>{
+      const imgs = wrap.querySelectorAll('img');
+      const dots = wrap.querySelectorAll('.hero-carousel-dots span');
+      imgs[heroCarouselIndex].classList.remove('active');
+      if(dots[heroCarouselIndex]) dots[heroCarouselIndex].classList.remove('active');
+      heroCarouselIndex = (heroCarouselIndex + 1) % imgs.length;
+      imgs[heroCarouselIndex].classList.add('active');
+      if(dots[heroCarouselIndex]) dots[heroCarouselIndex].classList.add('active');
+    }, 3500);
+  }
+}
+
+/* ======================= USER DASHBOARD ======================= */
+let currentUser = null;
+async function loadDashboard(){
+  currentUser = await storeGet('users:'+session.username, true);
+  document.getElementById('sbBalance').textContent = fmtRupiah(currentUser.saldo);
+  document.getElementById('profUsername').textContent = currentUser.username;
+  document.getElementById('profEmail').textContent = currentUser.email;
+  document.getElementById('profPhone').textContent = currentUser.phone;
+  document.getElementById('profJoined').textContent = new Date(currentUser.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('editName').value = currentUser.name || '';
+  document.getElementById('topupAdminWa').textContent = settings.admin_wa || '-';
+  setDashTab('buy');
+  populateBuyServices();
+  loadHistory();
+}
+
+async function saveUserName(){
+  const name = document.getElementById('editName').value.trim();
+  const msg = document.getElementById('nameMsg');
+  msg.className = 'form-msg';
+  if(!name){ msg.textContent = 'Nama tidak boleh kosong.'; msg.className = 'form-msg error'; return; }
+  currentUser.name = name;
+  const ok = await storeSet('users:'+session.username, currentUser, true);
+  if(ok){ msg.textContent = 'Nama berhasil diperbarui.'; msg.className = 'form-msg success'; }
+  else { msg.textContent = 'Gagal menyimpan nama.'; msg.className = 'form-msg error'; }
+  setTimeout(()=>{ msg.className='form-msg'; }, 2500);
+}
+
+async function changeUserPassword(){
+  const current = document.getElementById('userPwCurrent').value;
+  const next = document.getElementById('userPwNew').value;
+  const confirm = document.getElementById('userPwConfirm').value;
+  const msg = document.getElementById('userPwMsg');
+  msg.className = 'form-msg';
+
+  const currentHash = await hashPassword(current);
+  if(currentHash !== currentUser.password){ msg.textContent = 'Password saat ini salah.'; msg.className = 'form-msg error'; return; }
+  if(next.length < 6){ msg.textContent = 'Password baru minimal 6 karakter.'; msg.className = 'form-msg error'; return; }
+  if(next !== confirm){ msg.textContent = 'Konfirmasi password tidak cocok.'; msg.className = 'form-msg error'; return; }
+
+  currentUser.password = await hashPassword(next);
+  const ok = await storeSet('users:'+session.username, currentUser, true);
+  if(ok){
+    msg.textContent = 'Password berhasil diubah.'; msg.className = 'form-msg success';
+    document.getElementById('userPwCurrent').value = '';
+    document.getElementById('userPwNew').value = '';
+    document.getElementById('userPwConfirm').value = '';
+  } else {
+    msg.textContent = 'Gagal menyimpan password.'; msg.className = 'form-msg error';
+  }
+  setTimeout(()=>{ msg.className='form-msg'; }, 2500);
+}
+
+function setDashTab(tab){
+  document.querySelectorAll('#view-dashboard .side-link[data-tab]').forEach(l=>l.classList.toggle('active', l.dataset.tab===tab));
+  document.querySelectorAll('.dash-tab').forEach(t=>t.classList.add('hidden'));
+  document.getElementById('tab-'+tab).classList.remove('hidden');
+}
+
+let buySelectedService = null; // {code, name}
+let buySelectedCountry = null; // {number_id, name, provider_id, price, img}
+let buyCountriesCache = [];
+
+async function populateBuyServices(){
+  const grid = document.getElementById('buyServiceGrid');
+  document.getElementById('step2Card').classList.add('hidden');
+  document.getElementById('step3Card').classList.add('hidden');
+  buySelectedService = null; buySelectedCountry = null;
+  setBuyStepper(1);
+  if(!settings.api_key){ grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">API key belum diatur admin.</div>'; return; }
+  try{
+    const data = servicesCache.length ? servicesCache : await apiGet('/v2/services');
+    servicesCache = data;
+    renderServiceGrid(data);
+  }catch(e){ grid.innerHTML = `<div class="empty" style="grid-column:1/-1;">Gagal memuat layanan (${e.message})</div>`; }
+}
+
+function setBuyStepper(step){
+  for(let i=1;i<=3;i++){
+    const el = document.getElementById('stepper'+i);
+    el.classList.remove('active','done');
+    if(i < step) el.classList.add('done');
+    else if(i === step) el.classList.add('active');
+  }
+}
+
+function renderServiceGrid(list){
+  const grid = document.getElementById('buyServiceGrid');
+  if(!list.length){ grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">Tidak ditemukan.</div>'; return; }
+  grid.innerHTML = list.map(s=>`
+    <div class="service-pick ${buySelectedService && buySelectedService.code==s.service_code ? 'selected':''}" onclick="selectService(${s.service_code}, '${s.service_name.replace(/'/g,"\\'")}')">
+      ${buySelectedService && buySelectedService.code==s.service_code ? '<span class="check">✓</span>' : ''}
+      <div class="logo-wrap"><img src="${s.service_img}" onerror="this.outerHTML='<div class=&quot;ph&quot;></div>'"></div>
+      <span>${s.service_name}</span>
+    </div>
+  `).join('');
+}
+
+document.getElementById('buyServiceSearch')?.addEventListener('input', (e)=>{
+  const q = e.target.value.toLowerCase();
+  renderServiceGrid(servicesCache.filter(s=>s.service_name.toLowerCase().includes(q)));
+});
+
+async function selectService(code, name){
+  const svc = servicesCache.find(s=>s.service_code===code);
+  buySelectedService = { code, name, img: svc ? svc.service_img : '' };
+  buySelectedCountry = null;
+  renderServiceGrid(servicesCache);
+  setBuyStepper(2);
+  document.getElementById('selectedServiceChip').innerHTML = `<span class="selected-chip"><img src="${buySelectedService.img}" style="width:16px;height:16px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'"> ${name}</span>`;
+  document.getElementById('step2Card').classList.remove('hidden');
+  document.getElementById('step3Card').classList.add('hidden');
+  document.getElementById('buyCountryList').innerHTML = '<div class="empty">Memuat negara...</div>';
+  document.getElementById('step2Card').scrollIntoView({behavior:'smooth', block:'nearest'});
+  try{
+    const data = await apiGet('/v2/countries', { service_id: code });
+    buyCountriesCache = data;
+    renderCountryList(data);
+  }catch(e){ document.getElementById('buyCountryList').innerHTML = `<div class="empty">Gagal memuat negara (${e.message})</div>`; }
+}
+
+function renderCountryList(list){
+  const box = document.getElementById('buyCountryList');
+  if(!list.length){ box.innerHTML = '<div class="empty">Tidak ditemukan.</div>'; return; }
+  box.innerHTML = list.map(c=>{
+    const best = (c.pricelist||[]).slice().sort((a,b)=>a.price-b.price)[0];
+    const price = best ? applyMarkup(best.price) : null;
+    const isSel = buySelectedCountry && buySelectedCountry.number_id === c.number_id;
+    return `<div class="country-row ${isSel?'selected':''}" onclick='selectCountry(${JSON.stringify({number_id:c.number_id, name:c.name, provider_id:best?best.provider_id:'', price:best?best.price:0, img:c.img, stock:c.stock_total}).replace(/'/g,"&apos;")})'>
+      <div class="left"><img class="flag" src="${c.img}" onerror="this.style.display='none'"><div><div>${c.name}</div><span class="stock">Stok: ${c.stock_total ?? '-'}</span></div></div>
+      <div class="price">${price!==null?fmtRupiah(price):'-'}</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('buyCountrySearch')?.addEventListener('input', (e)=>{
+  const q = e.target.value.toLowerCase();
+  renderCountryList(buyCountriesCache.filter(c=>c.name.toLowerCase().includes(q)));
+});
+
+async function selectCountry(country){
+  buySelectedCountry = country;
+  renderCountryList(buyCountriesCache);
+  setBuyStepper(3);
+  document.getElementById('step3Card').classList.remove('hidden');
+  document.getElementById('orderResultBox').innerHTML = '';
+  const sellPrice = applyMarkup(country.price);
+  document.getElementById('orderSummaryBox').innerHTML = `
+    <div class="order-summary-row">
+      <div class="icon-box"><img src="${buySelectedService.img}" onerror="this.style.display='none'"></div>
+      <div class="meta"><span>Aplikasi</span><b>${buySelectedService.name}</b></div>
+    </div>
+    <div class="order-summary-row">
+      <div class="icon-box"><img src="${country.img}" onerror="this.style.display='none'"></div>
+      <div class="meta"><span>Negara</span><b>${country.name}</b></div>
+    </div>
+    <div class="order-total-row">
+      <span style="color:var(--text-dim);font-size:13.5px;">Total Bayar</span>
+      <b>${fmtRupiah(sellPrice)}</b>
+    </div>
+  `;
+  const opSel = document.getElementById('buyOperator');
+  opSel.innerHTML = '<option value="">Memuat operator...</option>';
+  document.getElementById('step3Card').scrollIntoView({behavior:'smooth', block:'nearest'});
+  try{
+    const data = await apiGet('/v2/operators', { country: country.name, provider_id: country.provider_id });
+    opSel.innerHTML = data.map(o=>`<option value="${o.id}">${o.name}</option>`).join('');
+  }catch(err){ opSel.innerHTML = '<option value="">Gagal memuat operator</option>'; toast(err.message,'⚠️'); }
+}
+
+async function createOrderFlow(){
+  const opSel = document.getElementById('buyOperator');
+  if(!buySelectedCountry || !opSel.value){ toast('Lengkapi pilihan layanan, negara, dan operator.','⚠️'); return; }
+
+  const sellPrice = applyMarkup(buySelectedCountry.price);
+  currentUser = await storeGet('users:'+session.username, true);
+  if(currentUser.saldo < sellPrice){
+    toast('Saldo tidak cukup. Silakan top up dulu.','⚠️');
+    return;
+  }
+
+  const btn = document.getElementById('buyBtn');
+  btn.disabled = true; btn.textContent = 'Memproses...';
+  try{
+    const data = await apiGet('/v2/orders', { number_id: buySelectedCountry.number_id, provider_id: buySelectedCountry.provider_id, operator_id: opSel.value });
+    currentUser.saldo -= sellPrice;
+    await storeSet('users:'+session.username, currentUser, true);
+    document.getElementById('sbBalance').textContent = fmtRupiah(currentUser.saldo);
+
+    const orders = (await storeGet('orders:'+session.username, true)) || [];
+    orders.unshift({ order_id:data.order_id, phone_number:data.phone_number, service:data.service, country:data.country, price:sellPrice, status:'pending', created_at:Date.now(), otp_code:null });
+    await storeSet('orders:'+session.username, orders, true);
+
+    renderOrderResult(data);
+    loadHistory();
+    toast('Nomor berhasil dipesan!','🎉');
+  }catch(e){ toast(e.message,'⚠️'); }
+  btn.disabled = false; btn.textContent = '💳 Bayar & Pesan Nomor';
+}
+
+function renderOrderResult(data){
+  const box = document.getElementById('orderResultBox');
+  box.innerHTML = `
+    <div class="order-result">
+      <div style="font-size:12px;color:var(--text-faint);margin-bottom:4px;">${data.service} · ${data.country}</div>
+      <div class="order-num">${data.phone_number}</div>
+      <div style="margin-top:10px;"><span class="badge pending" id="orderStatusBadge">menunggu OTP</span></div>
+      <div class="row" style="margin-top:16px;">
+        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${data.phone_number}');toast('Nomor disalin')">Salin Nomor</button>
+        <button class="btn btn-primary btn-sm" onclick="checkOtp('${data.order_id}')">Cek Kode OTP</button>
+        <button class="btn btn-danger btn-sm" onclick="cancelOrder('${data.order_id}')">Batalkan</button>
+      </div>
+      <div id="otpDisplay" style="margin-top:14px;"></div>
+      <div style="font-size:11.5px;color:var(--text-faint);margin-top:10px;">ID Pesanan: <span class="mono">${data.order_id}</span></div>
+    </div>
+  `;
+  if(currentOrderPoll) clearInterval(currentOrderPoll);
+  currentOrderPoll = setInterval(()=>checkOtp(data.order_id, true), 6000);
+}
+
+async function checkOtp(orderId, silent){
+  try{
+    const data = await apiGet('/v1/orders/get_status', { order_id: orderId });
+    const badge = document.getElementById('orderStatusBadge');
+    if(badge) badge.className = 'badge ' + data.status; if(badge) badge.textContent = data.status;
+    const otpBox = document.getElementById('otpDisplay');
+    if(data.otp_code && otpBox){
+      otpBox.innerHTML = `<div class="sms-bubble" style="margin:0;"><div class="from"><span>Kode Masuk</span></div><div class="otp-code">${data.otp_code}</div><div style="font-size:12px;color:var(--text-dim);margin-top:6px;">${(data.otp_msg||'').replace(/</g,'&lt;')}</div></div>`;
+      if(currentOrderPoll){ clearInterval(currentOrderPoll); currentOrderPoll = null; }
+      updateOrderInHistory(orderId, {status:data.status, otp_code:data.otp_code});
+      if(!silent) toast('Kode OTP diterima!','📩');
+    } else if(!silent){
+      toast('Belum ada kode masuk, coba beberapa saat lagi.','⏳');
+    }
+  }catch(e){ if(!silent) toast(e.message,'⚠️'); }
+}
+
+async function cancelOrder(orderId){
+  try{
+    await apiGet('/v1/orders/set_status', { order_id: orderId, status:'cancel' });
+    toast('Pesanan dibatalkan.','✓');
+    if(currentOrderPoll){ clearInterval(currentOrderPoll); currentOrderPoll=null; }
+    updateOrderInHistory(orderId, {status:'canceled'});
+    document.getElementById('orderResultBox').innerHTML = '';
+    loadHistory();
+  }catch(e){ toast(e.message,'⚠️'); }
+}
+
+async function updateOrderInHistory(orderId, patch){
+  const orders = (await storeGet('orders:'+session.username, true)) || [];
+  const idx = orders.findIndex(o=>o.order_id===orderId);
+  if(idx>-1){ orders[idx] = Object.assign(orders[idx], patch); await storeSet('orders:'+session.username, orders, true); }
+}
+
+async function loadHistory(){
+  const orders = (await storeGet('orders:'+session.username, true)) || [];
+  const box = document.getElementById('historyList');
+  if(!orders.length){ box.innerHTML = `<div class="empty"><div class="ic">📭</div>Belum ada pesanan.</div>`; return; }
+  box.innerHTML = `<table class="simple"><thead><tr><th>Layanan</th><th>Nomor</th><th>Harga</th><th>Status</th><th>Tanggal</th></tr></thead><tbody>
+    ${orders.map(o=>`<tr>
+      <td>${o.service} · ${o.country}</td>
+      <td class="mono">${o.phone_number}</td>
+      <td>${fmtRupiah(o.price)}</td>
+      <td><span class="badge ${o.status}">${o.status}</span></td>
+      <td style="color:var(--text-faint);font-size:12.5px;">${new Date(o.created_at).toLocaleString('id-ID')}</td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+/* ======================= TOP UP ======================= */
+function setTopupAmount(v){ document.getElementById('topupAmount').value = v; }
+async function createTopup(){
+  const amount = Number(document.getElementById('topupAmount').value);
+  if(!amount || amount < 3000){ toast('Minimal top up Rp3.000','⚠️'); return; }
+  try{
+    const data = await apiGet('/v2/deposit/create', { amount, payment_id:'qris' });
+    document.getElementById('topupResultBox').innerHTML = `
+      <div class="qr-box" style="margin-top:16px;">
+        <img src="${data.qr_image}" alt="QRIS">
+        <div style="font-size:13px;color:var(--text-dim);">Total bayar</div>
+        <div class="mono" style="font-size:20px;color:var(--accent);margin-bottom:10px;">${fmtRupiah(data.total)}</div>
+        <button class="btn btn-primary btn-sm" onclick="checkTopupStatus('${data.id}', ${amount})">Saya Sudah Bayar / Cek Status</button>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:8px;">ID: <span class="mono">${data.id}</span></div>
+      </div>`;
+  }catch(e){ toast(e.message,'⚠️'); }
+}
+async function checkTopupStatus(depositId, amount){
+  try{
+    const data = await apiGet('/v2/deposit/get_status', { deposit_id: depositId });
+    if(data.status === 'success'){
+      currentUser = await storeGet('users:'+session.username, true);
+      currentUser.saldo += (data.diterima || amount);
+      await storeSet('users:'+session.username, currentUser, true);
+      document.getElementById('sbBalance').textContent = fmtRupiah(currentUser.saldo);
+      toast('Top up berhasil! Saldo bertambah.','🎉');
+      document.getElementById('topupResultBox').innerHTML = '';
+    } else {
+      toast('Status: ' + data.status + '. Coba cek lagi setelah bayar.','⏳');
+    }
+  }catch(e){ toast(e.message,'⚠️'); }
+}
+
+/* ======================= ADMIN DASHBOARD ======================= */
+async function loadAdmin(){
+  document.getElementById('setSiteName').value = settings.site_name || '';
+  document.getElementById('setLogoImage').value = settings.logo_image || '';
+  document.getElementById('setLogoText').value = settings.logo_text || 'iO';
+  document.getElementById('setHeroImage1').value = (settings.hero_images && settings.hero_images[0]) || '';
+  document.getElementById('setHeroImage2').value = (settings.hero_images && settings.hero_images[1]) || '';
+  document.getElementById('setHeroImage3').value = (settings.hero_images && settings.hero_images[2]) || '';
+  document.getElementById('setAdminWa').value = settings.admin_wa || '';
+  document.getElementById('setApiKey').value = settings.api_key || '';
+  document.getElementById('setMarkupType').value = settings.markup_type || 'fixed';
+  document.getElementById('setMarkupValue').value = settings.markup_value ?? 0;
+  updateMarkupLabel();
+  document.getElementById('setBannerActive').value = settings.banner_active ? '1':'0';
+  document.getElementById('setBannerTitle').value = settings.banner_title || '';
+  document.getElementById('setBannerSub').value = settings.banner_sub || '';
+  setAdminTab('overview');
+
+  const userKeys = await storeList('users:', true);
+  document.getElementById('statUsers').textContent = userKeys.length;
+  let totalOrders = 0;
+  for(const k of userKeys){
+    const uname = k.replace('users:','');
+    const orders = await storeGet('orders:'+uname, true);
+    totalOrders += (orders||[]).length;
+  }
+  document.getElementById('statOrders').textContent = totalOrders;
+  document.getElementById('statApi').innerHTML = settings.api_key ? '<span style="color:var(--accent);">● Terhubung</span>' : '<span style="color:var(--danger);">● Belum diatur</span>';
+}
+
+function setAdminTab(tab){
+  document.querySelectorAll('#view-admin .side-link[data-tab]').forEach(l=>l.classList.toggle('active', l.dataset.tab===tab));
+  document.querySelectorAll('#view-admin .dash-tab').forEach(t=>t.classList.add('hidden'));
+  document.getElementById('admintab-'+tab).classList.remove('hidden');
+}
+
+function updateMarkupLabel(){
+  const type = document.getElementById('setMarkupType').value;
+  const label = document.getElementById('markupValueLabel');
+  const input = document.getElementById('setMarkupValue');
+  if(type === 'percent'){ label.textContent = 'Markup (%)'; input.placeholder = 'cth. 15'; }
+  else { label.textContent = 'Tambahan Harga (Rp)'; input.placeholder = 'cth. 100'; }
+}
+
+async function saveSettings(){
+  const heroImages = [
+    document.getElementById('setHeroImage1').value.trim(),
+    document.getElementById('setHeroImage2').value.trim(),
+    document.getElementById('setHeroImage3').value.trim()
+  ].filter(Boolean);
+  const msg = document.getElementById('settingsMsg');
+  if(!heroImages.length){
+    msg.textContent = 'Minimal isi 1 link Gambar Banner.'; msg.className = 'form-msg error';
+    document.getElementById('setHeroImage1').focus();
+    return;
+  }
+  settings.hero_images = heroImages;
+  settings.site_name = document.getElementById('setSiteName').value.trim() || 'ipunggOtp';
+  settings.logo_image = document.getElementById('setLogoImage').value.trim();
+  settings.logo_text = document.getElementById('setLogoText').value.trim() || 'iO';
+  settings.admin_wa = document.getElementById('setAdminWa').value.trim();
+  settings.api_key = document.getElementById('setApiKey').value.trim();
+  settings.markup_type = document.getElementById('setMarkupType').value;
+  settings.markup_value = Number(document.getElementById('setMarkupValue').value) || 0;
+  settings.banner_active = document.getElementById('setBannerActive').value === '1';
+  settings.banner_title = document.getElementById('setBannerTitle').value.trim();
+  settings.banner_sub = document.getElementById('setBannerSub').value.trim();
+
+  const ok = await storeSet('settings', settings, true);
+  if(ok){
+    msg.textContent = 'Pengaturan tersimpan.'; msg.className = 'form-msg success';
+    applySettingsToUI();
+    servicesCache = [];
+    loadServicesForLanding();
+  } else {
+    msg.textContent = 'Gagal menyimpan pengaturan.'; msg.className = 'form-msg error';
+  }
+  setTimeout(()=>{ msg.className='form-msg'; }, 2500);
+}
+
+/* ======================= CHANGE ADMIN PASSWORD ======================= */
+async function changeAdminPassword(){
+  const current = document.getElementById('pwCurrent').value;
+  const next = document.getElementById('pwNew').value;
+  const confirm = document.getElementById('pwConfirm').value;
+  const msg = document.getElementById('pwMsg');
+  msg.className = 'form-msg';
+
+  const activePassHash = settings.admin_password || await hashPassword(ADMIN_PASSWORD_DEFAULT);
+  const currentHash = await hashPassword(current);
+  if(currentHash !== activePassHash){ msg.textContent = 'Password saat ini salah.'; msg.className = 'form-msg error'; return; }
+  if(next.length < 6){ msg.textContent = 'Password baru minimal 6 karakter.'; msg.className = 'form-msg error'; return; }
+  if(next !== confirm){ msg.textContent = 'Konfirmasi password tidak cocok.'; msg.className = 'form-msg error'; return; }
+
+  settings.admin_password = await hashPassword(next);
+  const ok = await storeSet('settings', settings, true);
+  if(ok){
+    msg.textContent = 'Password admin berhasil diubah.'; msg.className = 'form-msg success';
+    document.getElementById('pwCurrent').value = '';
+    document.getElementById('pwNew').value = '';
+    document.getElementById('pwConfirm').value = '';
+  } else {
+    msg.textContent = 'Gagal menyimpan password baru.'; msg.className = 'form-msg error';
+  }
+  setTimeout(()=>{ msg.className='form-msg'; }, 2500);
+}
+
+/* ======================= START ======================= */
+init();
+</script>
+</body>
+</html>
