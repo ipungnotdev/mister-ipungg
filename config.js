@@ -7,9 +7,9 @@
 // ---- Konfigurasi Firebase (Realtime Database + Auth) ----
 // Ambil dari Firebase Console > Project Settings > General > Your apps
 const FIREBASE_CONFIG = {
-apiKey: "AIzaSyBqIiVyX_HB9yadmIcmOksSh2UVNZYwwNM",
+  apiKey: "AIzaSyBqIiVyX_HB9yadmIcmOksSh2UVNZYwwNM",
   authDomain: "tepung-20685.firebaseapp.com",
-  databaseURL: "https://tepung-20685-default-rtdb.firebaseio.com"
+  databaseURL: "https://tepung-20685-default-rtdb.firebaseio.com",
   projectId: "tepung-20685",
   storageBucket: "tepung-20685.firebasestorage.app",
   messagingSenderId: "512090715534",
